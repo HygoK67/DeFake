@@ -1,0 +1,129 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0" version="26.1.1">
+  <diagram name="第 1 页" id="ERiLpGkjzwKFtfQKWqeJ">
+    <mxGraphModel dx="1058" dy="1770" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="a3GwU5d1KqVN-KroiY__-2" value="管理员是否登陆？" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="200" y="110" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-4" value="管理员登陆" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="210" y="260" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-6" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="380" as="sourcePoint" />
+            <mxPoint x="400" y="20" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-7" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="a3GwU5d1KqVN-KroiY__-2" target="a3GwU5d1KqVN-KroiY__-4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="390" y="230" as="sourcePoint" />
+            <mxPoint x="440" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-8" value="否" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="a3GwU5d1KqVN-KroiY__-7">
+          <mxGeometry x="-0.175" y="1" relative="1" as="geometry">
+            <mxPoint x="9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-9" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="20" as="sourcePoint" />
+            <mxPoint x="500" y="20" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-10" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="a3GwU5d1KqVN-KroiY__-2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="300" as="sourcePoint" />
+            <mxPoint x="400" y="145" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-11" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="110" as="sourcePoint" />
+            <mxPoint x="500" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-12" value="进入实体管理界面" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="500" y="-10" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-13" value="进入数据统计界面" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="500" y="170" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-14" value="进入实体检索&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;界面&lt;/span&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="500" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-15" value="进入日志查看界面" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="500" y="260" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-16" value="进入权限管理界面" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="500" y="350" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-17" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="199.47" as="sourcePoint" />
+            <mxPoint x="500" y="199.47" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-18" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="290" as="sourcePoint" />
+            <mxPoint x="500" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-19" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="380" as="sourcePoint" />
+            <mxPoint x="500" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-20" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="620" y="19.41" as="sourcePoint" />
+            <mxPoint x="690" y="20" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-21" value="对于各种实体进行增删改查" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="690" y="-10" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-23" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="620" y="109.41" as="sourcePoint" />
+            <mxPoint x="690" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-24" value="使用各种关键信息（关键词、时间）等对实体进行检索" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="690" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-26" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="620" y="199.41" as="sourcePoint" />
+            <mxPoint x="690" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-27" value="查看用户相关统计数据" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="690" y="170" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-28" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="620" y="289.40999999999997" as="sourcePoint" />
+            <mxPoint x="690" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-29" value="查看用户相关操作记录" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="690" y="260" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-30" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="620" y="379.40999999999997" as="sourcePoint" />
+            <mxPoint x="690" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a3GwU5d1KqVN-KroiY__-31" value="修改、查看用户权限" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="690" y="350" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
