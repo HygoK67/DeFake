@@ -1,0 +1,8 @@
+# application.yml
+server:
+  port: 8080
+spring:
+  application:
+    name: defake-logi-backend
+  datasource:
+    url: jdbc:mysql://192.168.1.120:3306/mydb
