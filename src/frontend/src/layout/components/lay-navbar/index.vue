@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useNav } from "@/layout/hooks/useNav";
+import { useRouter } from "vue-router";
 import LaySearch from "../lay-search/index.vue";
 import LayNotice from "../lay-notice/index.vue";
 import LayNavMix from "../lay-sidebar/NavMix.vue";
@@ -8,7 +9,14 @@ import LaySidebarBreadCrumb from "../lay-sidebar/components/SidebarBreadCrumb.vu
 import LaySidebarTopCollapse from "../lay-sidebar/components/SidebarTopCollapse.vue";
 
 import LogoutCircleRLine from "@iconify-icons/ri/logout-circle-r-line";
+import User from "@iconify-icons/ri/user-3-fill";
 import Setting from "@iconify-icons/ri/settings-3-line";
+
+const router = useRouter();
+
+const routeToInfo = () => {
+  router.push("/user-info");
+};
 
 const {
   layout,
@@ -25,17 +33,10 @@ const {
 
 <template>
   <div class="navbar bg-[#fff] shadow-sm shadow-[rgba(0,21,41,0.08)]">
-    <LaySidebarTopCollapse
-      v-if="device === 'mobile'"
-      class="hamburger-container"
-      :is-active="pureApp.sidebar.opened"
-      @toggleClick="toggleSideBar"
-    />
+    <LaySidebarTopCollapse v-if="device === 'mobile'" class="hamburger-container" :is-active="pureApp.sidebar.opened"
+      @toggleClick="toggleSideBar" />
 
-    <LaySidebarBreadCrumb
-      v-if="layout !== 'mix' && device !== 'mobile'"
-      class="breadcrumb-container"
-    />
+    <LaySidebarBreadCrumb v-if="layout !== 'mix' && device !== 'mobile'" class="breadcrumb-container" />
 
     <LayNavMix v-if="layout === 'mix'" />
 
@@ -46,7 +47,7 @@ const {
       <LaySidebarFullScreen id="full-screen" />
       <!-- 消息通知 -->
       <LayNotice id="header-notice" />
-      <!-- 退出登录 -->
+      <!-- 头像下拉栏 -->
       <el-dropdown trigger="click">
         <span class="el-dropdown-link navbar-bg-hover select-none">
           <img :src="userAvatar" :style="avatarsStyle" />
@@ -54,21 +55,18 @@ const {
         </span>
         <template #dropdown>
           <el-dropdown-menu class="logout">
+            <el-dropdown-item @click="routeToInfo">
+              <IconifyIconOffline :icon="User" style="margin: 5px" />
+              个人信息
+            </el-dropdown-item>
             <el-dropdown-item @click="logout">
-              <IconifyIconOffline
-                :icon="LogoutCircleRLine"
-                style="margin: 5px"
-              />
+              <IconifyIconOffline :icon="LogoutCircleRLine" style="margin: 5px" />
               退出系统
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <span
-        class="set-icon navbar-bg-hover"
-        title="打开系统配置"
-        @click="onPanel"
-      >
+      <span class="set-icon navbar-bg-hover" title="打开系统配置" @click="onPanel">
         <IconifyIconOffline :icon="Setting" />
       </span>
     </div>
