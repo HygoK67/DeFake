@@ -16,9 +16,6 @@ CREATE TABLE users (                       -- 用户表
     
     -- 业务扩展字段
     role ENUM('user', 'admin') DEFAULT 'user', -- 用户身份: 普通用户(包含组织管理员) 或者 root 用户
-    group_id BIGINT NULL,                      -- 用户属于的组织
-
-    foreign key (group_id) references groups(id)
 
 );
 
@@ -52,6 +49,16 @@ CREATE TABLE groups (                      -- 组织表
     foreign key (group_leader_id) references users(user_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 条目创建时间
     updated_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- 条目更新时间
+);
+
+CREATE TABLE user_to_group (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    group_id BIGINT NOT NULL,
+    UNIQUE (user_id, group_id),
+    foreign key (user_id) references users(id),
+    foreign key (group_id) references groups(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE notification_templates (       -- 通知模板表
