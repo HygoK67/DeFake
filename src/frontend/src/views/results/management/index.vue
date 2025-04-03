@@ -100,7 +100,9 @@ const batchOperation = (operation: string) => {
         <el-table-column prop="uploadTime" label="上传时间" width="160" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
-            <el-tag :type="scope.row.status === '已完成' ? 'success' : 'warning'">
+            <el-tag
+              :type="scope.row.status === '已完成' ? 'success' : 'warning'"
+            >
               {{ scope.row.status }}
             </el-tag>
           </template>
@@ -108,17 +110,20 @@ const batchOperation = (operation: string) => {
         <el-table-column prop="score" label="检测结果" width="120" />
         <el-table-column label="操作" width="220">
           <template #default="scope">
-            <el-button size="small" @click="viewDetail(scope.row.id)">查看详情</el-button>
-            <el-button 
-              size="small" 
-              type="primary" 
+            <el-button size="small" @click="viewDetail(scope.row.id)"
+              >查看详情</el-button
+            >
+            <el-button
+              size="small"
+              type="primary"
               :disabled="scope.row.status !== '已完成'"
               @click="exportReport"
-            >导出报告</el-button>
+              >导出报告</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
-      
+
       <div class="pagination-container">
         <el-pagination
           background
@@ -136,25 +141,25 @@ const batchOperation = (operation: string) => {
 .result-management-container {
   padding: 20px;
   height: 100%;
-  
+
   .function-bar {
     margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 15px;
-    
+
     .extra-functions {
       margin-left: auto;
     }
   }
-  
+
   .content-area {
     background-color: #fff;
     border-radius: 4px;
     padding: 20px;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
   }
-  
+
   .pagination-container {
     margin-top: 20px;
     display: flex;

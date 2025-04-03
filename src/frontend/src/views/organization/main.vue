@@ -29,7 +29,7 @@ const personalOrganizations = ref([
     name: "FGH会议2025年度投稿",
     organization: "FGH出版社",
     status: "申请中"
-  },
+  }
 ]);
 
 // 活跃组织数据
@@ -120,7 +120,7 @@ const classifyOrganizations = () => {
           <el-icon><search /></el-icon>
         </template>
       </el-input>
-      
+
       <div class="search-actions">
         <el-button type="primary" @click="searchOrganizations">搜索</el-button>
         <el-button @click="filterOrganizations">筛选</el-button>
@@ -135,11 +135,11 @@ const classifyOrganizations = () => {
         <div class="section-header">
           <h3>个人活动</h3>
         </div>
-        
+
         <div class="organization-cards">
-          <el-card 
-            v-for="org in personalOrganizations" 
-            :key="org.id" 
+          <el-card
+            v-for="org in personalOrganizations"
+            :key="org.id"
             class="org-card"
             shadow="hover"
             @click="viewOrganizationDetail(org.id)"
@@ -147,46 +147,49 @@ const classifyOrganizations = () => {
             <div class="org-card-content">
               <h4 class="org-name">{{ org.name }}</h4>
               <p class="org-detail">所属组织: {{ org.organization }}</p>
-              
+
               <div class="org-action">
-                <el-button 
-                  v-if="org.status === '已加入'" 
-                  type="success" 
-                  size="small" 
+                <el-button
+                  v-if="org.status === '已加入'"
+                  type="success"
+                  size="small"
                   disabled
-                >已加入</el-button>
-                <el-button 
-                  v-else-if="org.status === '申请中'" 
-                  type="info" 
-                  size="small" 
+                  >已加入</el-button
+                >
+                <el-button
+                  v-else-if="org.status === '申请中'"
+                  type="info"
+                  size="small"
                   disabled
-                >申请中</el-button>
-                <el-button 
+                  >申请中</el-button
+                >
+                <el-button
                   v-else
-                  type="primary" 
+                  type="primary"
                   size="small"
                   @click.stop="handleJoinRequest(org.id)"
-                >申请加入</el-button>
+                  >申请加入</el-button
+                >
               </div>
             </div>
           </el-card>
         </div>
-        
+
         <div class="view-more">
           <router-link to="/organization/list/personal">查看更多 ></router-link>
         </div>
       </div>
-      
+
       <!-- Active活动 -->
       <div class="organization-section">
         <div class="section-header">
           <h3>Active活动</h3>
         </div>
-        
+
         <div class="organization-cards">
-          <el-card 
-            v-for="org in activeOrganizations" 
-            :key="org.id" 
+          <el-card
+            v-for="org in activeOrganizations"
+            :key="org.id"
             class="org-card"
             shadow="hover"
             @click="viewOrganizationDetail(org.id)"
@@ -194,31 +197,34 @@ const classifyOrganizations = () => {
             <div class="org-card-content">
               <h4 class="org-name">{{ org.name }}</h4>
               <p class="org-detail">所属组织: {{ org.organization }}</p>
-              
+
               <div class="org-action">
-                <el-button 
-                  v-if="org.status === '已加入'" 
-                  type="success" 
-                  size="small" 
+                <el-button
+                  v-if="org.status === '已加入'"
+                  type="success"
+                  size="small"
                   disabled
-                >已加入</el-button>
-                <el-button 
-                  v-else-if="org.status === '申请中'" 
-                  type="info" 
-                  size="small" 
+                  >已加入</el-button
+                >
+                <el-button
+                  v-else-if="org.status === '申请中'"
+                  type="info"
+                  size="small"
                   disabled
-                >申请中</el-button>
-                <el-button 
+                  >申请中</el-button
+                >
+                <el-button
                   v-else
-                  type="primary" 
+                  type="primary"
                   size="small"
                   @click.stop="handleJoinRequest(org.id)"
-                >申请加入</el-button>
+                  >申请加入</el-button
+                >
               </div>
             </div>
           </el-card>
         </div>
-        
+
         <div class="view-more">
           <router-link to="/organization/list/active">查看更多 ></router-link>
         </div>
@@ -230,10 +236,10 @@ const classifyOrganizations = () => {
 <style lang="scss" scoped>
 .organization-management-container {
   padding: 20px;
-  
+
   .page-header {
     margin-bottom: 20px;
-    
+
     .page-title {
       font-size: 20px;
       font-weight: bold;
@@ -241,73 +247,73 @@ const classifyOrganizations = () => {
       margin: 0;
     }
   }
-  
+
   .search-container {
     display: flex;
     gap: 15px;
     margin-bottom: 25px;
-    
+
     .search-input {
       flex: 1;
     }
-    
+
     .search-actions {
       display: flex;
       gap: 10px;
     }
   }
-  
+
   .organization-lists {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 25px;
-    
+
     @media (max-width: 992px) {
       grid-template-columns: 1fr;
     }
-    
+
     .organization-section {
       background-color: #fff;
       border-radius: 8px;
       padding: 20px;
       box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-      
+
       .section-header {
         margin-bottom: 15px;
-        
+
         h3 {
           font-size: 18px;
           margin: 0;
           font-weight: bold;
         }
       }
-      
+
       .organization-cards {
         display: flex;
         flex-direction: column;
         gap: 15px;
-        
+
         .org-card {
           cursor: pointer;
           transition: transform 0.2s;
-          
+
           &:hover {
             transform: translateY(-3px);
           }
-          
+
           .org-card-content {
             .org-name {
               font-weight: bold;
               margin: 0 0 8px 0;
               font-size: 16px;
             }
-            
+
             .org-detail {
               color: #606266;
               margin: 0 0 15px 0;
               font-size: 14px;
             }
-            
+
             .org-action {
               display: flex;
               justify-content: flex-end;
@@ -315,16 +321,16 @@ const classifyOrganizations = () => {
           }
         }
       }
-      
+
       .view-more {
         margin-top: 15px;
         text-align: center;
-        
+
         a {
-          color: #409EFF;
+          color: #409eff;
           text-decoration: none;
           font-size: 14px;
-          
+
           &:hover {
             text-decoration: underline;
           }

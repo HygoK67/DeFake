@@ -54,19 +54,19 @@ const provideFeedback = () => {
   <div class="result-detail-container">
     <!-- 头部导航 -->
     <div class="detail-header">
-      <el-page-header @back="goBack" title="返回列表">
+      <el-page-header title="返回列表" @back="goBack">
         <template #content>
           <span class="header-title">检测报告详情</span>
         </template>
       </el-page-header>
-      
+
       <div class="header-actions">
         <el-button type="primary" @click="exportReport">导出报告</el-button>
         <el-button type="primary" @click="sortImages">图像排序</el-button>
         <el-button type="primary" @click="provideFeedback">结果反馈</el-button>
       </div>
     </div>
-    
+
     <!-- 内容区域 -->
     <div class="detail-content">
       <el-tabs v-model="activeTab">
@@ -74,7 +74,7 @@ const provideFeedback = () => {
           <div class="report-summary">
             <div class="summary-card">
               <div class="book-icon">
-                <img src="@/assets/svg/book-open.svg" alt="Report">
+                <img src="@/assets/svg/book-open.svg" alt="Report" />
               </div>
               <div class="summary-info">
                 <h3>{{ reportData.fileName }}</h3>
@@ -96,7 +96,11 @@ const provideFeedback = () => {
                 </div>
                 <div class="info-row">
                   <span class="info-label">检测状态:</span>
-                  <el-tag :type="reportData.status === '已完成' ? 'success' : 'warning'">
+                  <el-tag
+                    :type="
+                      reportData.status === '已完成' ? 'success' : 'warning'
+                    "
+                  >
                     {{ reportData.status }}
                   </el-tag>
                 </div>
@@ -110,22 +114,34 @@ const provideFeedback = () => {
                 </div>
                 <div class="info-row">
                   <span class="info-label">疑似页数:</span>
-                  <span class="suspicious">{{ reportData.suspiciousPages }}</span>
+                  <span class="suspicious">{{
+                    reportData.suspiciousPages
+                  }}</span>
                 </div>
               </div>
             </div>
           </div>
-          
+
           <!-- 检测结果详情表格 -->
           <div class="result-details">
             <h3>检测结果详情</h3>
-            <el-table :data="reportData.analysisResults" border style="width: 100%">
+            <el-table
+              :data="reportData.analysisResults"
+              border
+              style="width: 100%"
+            >
               <el-table-column prop="page" label="页码" width="100" />
               <el-table-column prop="similarity" label="相似度 (%)" width="150">
                 <template #default="scope">
-                  <el-progress 
-                    :percentage="scope.row.similarity" 
-                    :color="scope.row.similarity > 60 ? '#F56C6C' : scope.row.similarity > 40 ? '#E6A23C' : '#67C23A'" 
+                  <el-progress
+                    :percentage="scope.row.similarity"
+                    :color="
+                      scope.row.similarity > 60
+                        ? '#F56C6C'
+                        : scope.row.similarity > 40
+                          ? '#E6A23C'
+                          : '#67C23A'
+                    "
                   />
                 </template>
               </el-table-column>
@@ -139,21 +155,21 @@ const provideFeedback = () => {
             </el-table>
           </div>
         </el-tab-pane>
-        
+
         <el-tab-pane label="图像分析" name="images">
           <div class="image-analysis">
             <h3>图像分析结果</h3>
             <p>此处显示图像分析的详细内容...</p>
-            
+
             <!-- 可以添加图像分析的相关内容 -->
           </div>
         </el-tab-pane>
-        
+
         <el-tab-pane label="反馈历史" name="feedback">
           <div class="feedback-history">
             <h3>反馈历史记录</h3>
             <p>此处显示用户的反馈历史...</p>
-            
+
             <!-- 可以添加反馈历史的相关内容 -->
           </div>
         </el-tab-pane>
@@ -165,39 +181,39 @@ const provideFeedback = () => {
 <style lang="scss" scoped>
 .result-detail-container {
   padding: 20px;
-  
+
   .detail-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    
+
     .header-title {
       font-size: 18px;
       font-weight: bold;
     }
-    
+
     .header-actions {
       display: flex;
       gap: 10px;
     }
   }
-  
+
   .detail-content {
     background-color: #fff;
     border-radius: 4px;
     padding: 20px;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-    
+
     .report-summary {
       margin-bottom: 30px;
-      
+
       .summary-card {
         display: flex;
         background-color: #f5f7fa;
         border-radius: 8px;
         padding: 20px;
-        
+
         .book-icon {
           display: flex;
           align-items: center;
@@ -205,54 +221,55 @@ const provideFeedback = () => {
           width: 150px;
           height: 150px;
           margin-right: 30px;
-          
+
           img {
             width: 100px;
             height: 100px;
           }
         }
-        
+
         .summary-info {
           flex: 1;
-          
+
           h3 {
             margin-top: 0;
             margin-bottom: 15px;
             font-size: 18px;
           }
-          
+
           .info-row {
             margin-bottom: 8px;
             display: flex;
             align-items: center;
-            
+
             .info-label {
               width: 80px;
               color: #606266;
             }
-            
+
             .score {
               font-weight: bold;
-              color: #409EFF;
+              color: #409eff;
               font-size: 16px;
             }
-            
+
             .suspicious {
-              color: #F56C6C;
+              color: #f56c6c;
               font-weight: bold;
             }
           }
         }
       }
     }
-    
+
     .result-details {
       h3 {
         margin-bottom: 15px;
       }
     }
-    
-    .image-analysis, .feedback-history {
+
+    .image-analysis,
+    .feedback-history {
       h3 {
         margin-bottom: 15px;
       }

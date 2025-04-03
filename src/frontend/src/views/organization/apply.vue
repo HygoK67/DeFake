@@ -46,7 +46,7 @@ const formRef = ref(null);
 // 获取组织信息
 onMounted(() => {
   loading.value = true;
-  
+
   // 模拟API请求
   setTimeout(() => {
     // 模拟数据
@@ -63,7 +63,7 @@ onMounted(() => {
       organization.organization = `测试组织${organizationId.value}`;
       organization.description = "这是一个测试组织描述";
     }
-    
+
     loading.value = false;
   }, 800);
 });
@@ -71,21 +71,21 @@ onMounted(() => {
 // 提交申请
 const submitApplication = async () => {
   if (!formRef.value) return;
-  
+
   await formRef.value.validate((valid, fields) => {
     if (valid) {
       loading.value = true;
-      
+
       // 模拟API提交
       setTimeout(() => {
         loading.value = false;
-        
+
         // 显示成功消息
         ElMessage({
           message: "申请已提交，请等待审核",
           type: "success"
         });
-        
+
         // 返回组织列表
         router.push("/organization/main");
       }, 1000);
@@ -111,20 +111,20 @@ const goBack = () => {
           </el-page-header>
         </div>
       </template>
-      
+
       <!-- 组织信息 -->
       <div class="organization-info">
         <h3>{{ organization.name }}</h3>
         <p class="org-detail">所属组织: {{ organization.organization }}</p>
         <p class="org-description">{{ organization.description }}</p>
-        
+
         <el-divider>申请信息</el-divider>
       </div>
-      
+
       <!-- 申请表单 -->
-      <el-form 
+      <el-form
         ref="formRef"
-        :model="applyForm" 
+        :model="applyForm"
         :rules="rules"
         label-width="100px"
         label-position="top"
@@ -136,45 +136,59 @@ const goBack = () => {
               <el-input v-model="applyForm.name" placeholder="请输入姓名" />
             </el-form-item>
           </el-col>
-          
+
           <el-col :span="12">
             <el-form-item label="邮箱" prop="email">
               <el-input v-model="applyForm.email" placeholder="请输入邮箱" />
             </el-form-item>
           </el-col>
         </el-row>
-        
+
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="联系电话" prop="phone">
-              <el-input v-model="applyForm.phone" placeholder="请输入联系电话" />
+              <el-input
+                v-model="applyForm.phone"
+                placeholder="请输入联系电话"
+              />
             </el-form-item>
           </el-col>
-          
+
           <el-col :span="12">
             <el-form-item label="所属机构" prop="institution">
-              <el-input v-model="applyForm.institution" placeholder="请输入所属机构" />
+              <el-input
+                v-model="applyForm.institution"
+                placeholder="请输入所属机构"
+              />
             </el-form-item>
           </el-col>
         </el-row>
-        
+
         <el-form-item label="职位" prop="position">
-          <el-input v-model="applyForm.position" placeholder="请输入职位（可选）" />
-        </el-form-item>
-        
-        <el-form-item label="申请理由" prop="reason">
-          <el-input 
-            v-model="applyForm.reason" 
-            type="textarea" 
-            :rows="4"
-            placeholder="请描述您申请加入该组织的理由" 
+          <el-input
+            v-model="applyForm.position"
+            placeholder="请输入职位（可选）"
           />
         </el-form-item>
-        
+
+        <el-form-item label="申请理由" prop="reason">
+          <el-input
+            v-model="applyForm.reason"
+            type="textarea"
+            :rows="4"
+            placeholder="请描述您申请加入该组织的理由"
+          />
+        </el-form-item>
+
         <el-form-item>
           <div class="form-actions">
             <el-button @click="goBack">取消</el-button>
-            <el-button type="primary" @click="submitApplication" :loading="loading">提交申请</el-button>
+            <el-button
+              type="primary"
+              :loading="loading"
+              @click="submitApplication"
+              >提交申请</el-button
+            >
           </div>
         </el-form-item>
       </el-form>
@@ -187,40 +201,40 @@ const goBack = () => {
   padding: 20px;
   max-width: 900px;
   margin: 0 auto;
-  
+
   .card-header {
     display: flex;
     align-items: center;
-    
+
     .page-title {
       font-size: 18px;
       font-weight: bold;
     }
   }
-  
+
   .organization-info {
     margin-bottom: 20px;
-    
+
     h3 {
       margin: 0 0 10px 0;
       font-size: 18px;
       color: #303133;
     }
-    
+
     .org-detail {
       color: #606266;
       margin: 0 0 10px 0;
     }
-    
+
     .org-description {
       color: #606266;
       line-height: 1.5;
     }
   }
-  
+
   .apply-form {
     margin-top: 20px;
-    
+
     .form-actions {
       display: flex;
       justify-content: flex-end;

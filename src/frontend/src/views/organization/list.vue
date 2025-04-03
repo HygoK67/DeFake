@@ -14,7 +14,7 @@ const listType = ref(route.params.type);
 
 // 计算标题
 const pageTitle = computed(() => {
-  return listType.value === 'personal' ? '个人活动' : 'Active活动';
+  return listType.value === "personal" ? "个人活动" : "Active活动";
 });
 
 // 组织列表
@@ -23,10 +23,10 @@ const organizations = ref([]);
 // 获取组织列表
 onMounted(() => {
   loading.value = true;
-  
+
   // 模拟API请求
   setTimeout(() => {
-    if (listType.value === 'personal') {
+    if (listType.value === "personal") {
       // 个人活动列表
       organizations.value = [
         {
@@ -164,7 +164,7 @@ const searchOrganizations = () => {
         </template>
       </el-page-header>
     </div>
-    
+
     <!-- 搜索栏 -->
     <div class="search-container">
       <el-input
@@ -176,16 +176,20 @@ const searchOrganizations = () => {
           <el-icon><search /></el-icon>
         </template>
       </el-input>
-      
+
       <el-button type="primary" @click="searchOrganizations">搜索</el-button>
     </div>
-    
+
     <!-- 组织列表 -->
-    <el-card shadow="hover" v-loading="loading">
+    <el-card v-loading="loading" shadow="hover">
       <el-table :data="organizations" style="width: 100%">
         <el-table-column prop="name" label="活动名称" min-width="200">
           <template #default="scope">
-            <a href="javascript:;" @click="viewOrganizationDetail(scope.row.id)" class="org-link">
+            <a
+              href="javascript:;"
+              class="org-link"
+              @click="viewOrganizationDetail(scope.row.id)"
+            >
               {{ scope.row.name }}
             </a>
           </template>
@@ -207,21 +211,23 @@ const searchOrganizations = () => {
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="scope">
-            <el-button 
-              size="small" 
+            <el-button
+              size="small"
               @click="viewOrganizationDetail(scope.row.id)"
-            >查看详情</el-button>
-            
-            <el-button 
+              >查看详情</el-button
+            >
+
+            <el-button
               v-if="scope.row.status === '未加入'"
-              size="small" 
+              size="small"
               type="primary"
               @click="handleJoinRequest(scope.row.id)"
-            >申请加入</el-button>
+              >申请加入</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
-      
+
       <!-- 分页 -->
       <div class="pagination">
         <el-pagination
@@ -239,36 +245,36 @@ const searchOrganizations = () => {
 <style lang="scss" scoped>
 .organization-list-container {
   padding: 20px;
-  
+
   .page-header {
     margin-bottom: 20px;
-    
+
     .page-title {
       font-size: 18px;
       font-weight: bold;
     }
   }
-  
+
   .search-container {
     display: flex;
     gap: 15px;
     margin-bottom: 20px;
-    
+
     .search-input {
       width: 400px;
     }
   }
-  
+
   .pagination {
     margin-top: 20px;
     display: flex;
     justify-content: center;
   }
-  
+
   .org-link {
-    color: #409EFF;
+    color: #409eff;
     text-decoration: none;
-    
+
     &:hover {
       text-decoration: underline;
     }

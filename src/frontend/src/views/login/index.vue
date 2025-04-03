@@ -86,8 +86,13 @@ onBeforeUnmount(() => {
     <img :src="bg" class="wave" />
     <div class="flex-c absolute right-5 top-3">
       <!-- 主题 -->
-      <el-switch v-model="dataTheme" inline-prompt :active-icon="dayIcon" :inactive-icon="darkIcon"
-        @change="dataThemeChange" />
+      <el-switch
+        v-model="dataTheme"
+        inline-prompt
+        :active-icon="dayIcon"
+        :inactive-icon="darkIcon"
+        @change="dataThemeChange"
+      />
     </div>
     <div class="login-container">
       <div class="img">
@@ -109,35 +114,63 @@ onBeforeUnmount(() => {
             <h2 class="outline-none">{{ title }}</h2>
           </Motion>
 
-          <el-form ref="ruleFormRef" :model="ruleForm" :rules="loginRules" size="large">
+          <el-form
+            ref="ruleFormRef"
+            :model="ruleForm"
+            :rules="loginRules"
+            size="large"
+          >
             <Motion :delay="100">
-              <el-form-item :rules="[
-                {
-                  required: true,
-                  message: '请输入账号',
-                  trigger: 'blur'
-                }
-              ]" prop="username">
-                <el-input v-model="ruleForm.username" clearable placeholder="账号" :prefix-icon="useRenderIcon(User)" />
+              <el-form-item
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入账号',
+                    trigger: 'blur'
+                  }
+                ]"
+                prop="username"
+              >
+                <el-input
+                  v-model="ruleForm.username"
+                  clearable
+                  placeholder="账号"
+                  :prefix-icon="useRenderIcon(User)"
+                />
               </el-form-item>
             </Motion>
 
             <Motion :delay="150">
               <el-form-item prop="password">
-                <el-input v-model="ruleForm.password" clearable show-password placeholder="密码"
-                  :prefix-icon="useRenderIcon(Lock)" />
+                <el-input
+                  v-model="ruleForm.password"
+                  clearable
+                  show-password
+                  placeholder="密码"
+                  :prefix-icon="useRenderIcon(Lock)"
+                />
               </el-form-item>
             </Motion>
 
             <Motion :delay="250">
-              <el-button class="w-full mt-4" size="default" type="primary" :loading="loading"
-                @click="onLogin(ruleFormRef)">
+              <el-button
+                class="w-full mt-4"
+                size="default"
+                type="primary"
+                :loading="loading"
+                @click="onLogin(ruleFormRef)"
+              >
                 登录
               </el-button>
             </Motion>
 
             <Motion :delay="300">
-              <el-button class="w-full mt-3" size="default" type="default" @click="onRegister">
+              <el-button
+                class="w-full mt-3"
+                size="default"
+                type="default"
+                @click="onRegister"
+              >
                 注册
               </el-button>
             </Motion>

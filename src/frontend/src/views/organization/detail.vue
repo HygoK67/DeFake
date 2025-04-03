@@ -18,7 +18,7 @@ const organization = reactive({
   organization: "",
   manager: "",
   submissionStartDate: "",
-  submissionEndDate: "",
+  submissionEndDate: ""
 });
 
 // 组织状态
@@ -27,7 +27,7 @@ const memberStatus = ref("未加入"); // "已加入", "已提交"
 // 获取组织详情
 onMounted(() => {
   loading.value = true;
-  
+
   // 模拟API请求
   setTimeout(() => {
     // 根据ID加载不同的数据
@@ -54,7 +54,7 @@ onMounted(() => {
       organization.submissionEndDate = "2024-06-30";
       memberStatus.value = "未加入";
     }
-    
+
     loading.value = false;
   }, 800);
 });
@@ -73,7 +73,7 @@ const submitReport = () => {
           <span class="page-title">{{ organization.name }}</span>
         </div>
       </template>
-      
+
       <div class="detail-content">
         <!-- 基本信息 -->
         <div class="info-section">
@@ -91,7 +91,7 @@ const submitReport = () => {
             <span>{{ organization.manager }}</span>
           </div>
         </div>
-        
+
         <div class="info-section">
           <h3>投稿信息</h3>
           <div class="info-item">
@@ -107,13 +107,10 @@ const submitReport = () => {
             <el-tag type="success">{{ memberStatus }}</el-tag>
           </div>
         </div>
-        
+
         <!-- 操作按钮 -->
         <div class="action-buttons">
-          <el-button 
-            type="primary" 
-            @click="submitReport"
-          >提交报告</el-button>
+          <el-button type="primary" @click="submitReport">提交报告</el-button>
         </div>
       </div>
     </el-card>
@@ -125,18 +122,18 @@ const submitReport = () => {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
-  
+
   .card-header {
     .page-title {
       font-size: 18px;
       font-weight: bold;
     }
   }
-  
+
   .detail-content {
     .info-section {
       margin-bottom: 25px;
-      
+
       h3 {
         margin: 0 0 15px 0;
         font-size: 18px;
@@ -145,24 +142,24 @@ const submitReport = () => {
         padding-bottom: 10px;
         border-bottom: 1px solid #ebeef5;
       }
-      
+
       .info-item {
         margin-bottom: 12px;
         display: flex;
-        
+
         .label {
           color: #606266;
           width: 120px;
           font-weight: 500;
         }
-        
+
         .deadline {
           color: #f56c6c;
           font-weight: 500;
         }
       }
     }
-    
+
     .action-buttons {
       display: flex;
       gap: 15px;

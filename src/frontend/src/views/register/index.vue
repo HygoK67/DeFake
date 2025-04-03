@@ -78,42 +78,78 @@ const returnToLogin = () => {
 <template>
   <div class="register-container">
     <div class="register-box">
-      <el-form :model="registerForm" :rules="rules" ref="registerFormRef" size="large">
+      <el-form
+        ref="registerFormRef"
+        :model="registerForm"
+        :rules="rules"
+        size="large"
+      >
         <Motion :delay="100">
           <el-form-item prop="username">
-            <el-input v-model="registerForm.username" placeholder="请输入用户名" clearable
-              :prefix-icon="useRenderIcon(User)" />
+            <el-input
+              v-model="registerForm.username"
+              placeholder="请输入用户名"
+              clearable
+              :prefix-icon="useRenderIcon(User)"
+            />
           </el-form-item>
         </Motion>
 
         <Motion :delay="150">
           <el-form-item prop="phone">
-            <el-input v-model="registerForm.phone" placeholder="请输入手机号" clearable :prefix-icon="useRenderIcon(Phone)" />
+            <el-input
+              v-model="registerForm.phone"
+              placeholder="请输入手机号"
+              clearable
+              :prefix-icon="useRenderIcon(Phone)"
+            />
           </el-form-item>
         </Motion>
 
         <Motion :delay="200">
           <el-form-item prop="password">
-            <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" clearable
-              :prefix-icon="useRenderIcon(Lock)" />
+            <el-input
+              v-model="registerForm.password"
+              type="password"
+              placeholder="请输入密码"
+              clearable
+              :prefix-icon="useRenderIcon(Lock)"
+            />
           </el-form-item>
         </Motion>
 
         <Motion :delay="250">
           <el-form-item prop="confirmPassword">
-            <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码" clearable
-              :prefix-icon="useRenderIcon(Lock)" />
+            <el-input
+              v-model="registerForm.confirmPassword"
+              type="password"
+              placeholder="请再次输入密码"
+              clearable
+              :prefix-icon="useRenderIcon(Lock)"
+            />
           </el-form-item>
         </Motion>
 
         <Motion :delay="300">
-          <el-button class="w-full mt-3" size="default" type="primary" :loading="loading" @click="onRegister">
+          <el-button
+            class="w-full mt-3"
+            size="default"
+            type="primary"
+            :loading="loading"
+            @click="onRegister"
+          >
             注册
           </el-button>
         </Motion>
 
         <Motion :delay="350">
-          <el-button class="w-full mt-3" size="default" type="default" :loading="loading2" @click="returnToLogin">
+          <el-button
+            class="w-full mt-3"
+            size="default"
+            type="default"
+            :loading="loading2"
+            @click="returnToLogin"
+          >
             返回
           </el-button>
         </Motion>
