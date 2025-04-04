@@ -1,22 +1,35 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, computed } from "vue";
+import { FileWithMetadata, Metadata } from "@/types/document";
+import { uploadFiles } from "@/api/document";
 
 defineOptions({
   name: "ForensicsDetection"
 });
 
 // 支持的文件类型
-const supportedFormats = [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".doc", ".docx", ".pdf"];
+const supportedFormats = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".bmp",
+  ".tiff",
+  ".webp",
+  ".doc",
+  ".docx",
+  ".pdf"
+];
 
 // 文件上传状态
-const fileList = ref<File[]>([]);
+const fileList = ref<FileWithMetadata[]>([]);
 const dragging = ref(false);
 const uploading = ref(false);
 const uploadProgress = ref(0);
-const selectedFile = ref<File | null>(null);
+const selectedFile = ref<FileWithMetadata | null>(null);
+const validationError = ref<string | null>(null);
 
-// 元数据表单
-const metadata = reactive({
+// 当前编辑的元数据
+const currentMetadata = reactive<Metadata>({
   title: "",
   author: "",
   institution: "",
@@ -24,6 +37,8 @@ const metadata = reactive({
   keywords: "",
   description: ""
 });
+
+const metadataStorage = ref<WeakMap<File, Metadata>>(new WeakMap());
 
 // 处理文件拖放
 const handleDragOver = (e: DragEvent) => {
@@ -56,9 +71,20 @@ const handleFileChange = (e: Event) => {
 // 处理文件
 const handleFiles = (files: FileList) => {
   Array.from(files).forEach(file => {
-    const extension = '.' + file.name.split('.').pop()?.toLowerCase();
+    const extension = "." + file.name.split(".").pop()?.toLowerCase();
     if (supportedFormats.includes(extension)) {
-      fileList.value.push(file);
+      const fileWithMetadata: FileWithMetadata = {
+        file,
+        metadata: {
+          title: "",
+          author: "",
+          institution: "",
+          publishDate: "",
+          keywords: "",
+          description: ""
+        }
+      };
+      fileList.value.push(fileWithMetadata);
     } else {
       alert(`不支持的文件格式: ${extension}`);
     }
@@ -74,34 +100,86 @@ const removeFile = (index: number) => {
 };
 
 // 选择文件进行元数据编辑
-const selectFile = (file: File) => {
-  selectedFile.value = file;
-  // 清空元数据表单
-  Object.keys(metadata).forEach(key => {
-    metadata[key] = "";
-  });
+const selectFile = (fileWithMetadata: FileWithMetadata) => {
+  selectedFile.value = fileWithMetadata;
+  const savedMetadata = metadataStorage.value.get(fileWithMetadata.file);
+  if (savedMetadata) {
+    fileWithMetadata.metadata = { ...savedMetadata };
+    Object.assign(currentMetadata, savedMetadata);
+  } else {
+    Object.assign(currentMetadata, fileWithMetadata.metadata);
+  }
+};
+
+// 验证元数据是否完整
+const validateMetadata = (metadata: Metadata): boolean => {
+  if (!metadata.title.trim()) return false;
+  if (!metadata.author.trim()) return false;
+  if (!metadata.institution.trim()) return false;
+  if (!metadata.publishDate.trim()) return false;
+  if (!metadata.keywords.trim()) return false;
+  if (!metadata.description.trim()) return false;
+  return true;
+};
+
+// 获取未完成元数据的文件
+const getFilesWithIncompleteMetadata = (): FileWithMetadata[] => {
+  return fileList.value.filter(
+    fileItem => !validateMetadata(fileItem.metadata)
+  );
+};
+
+// 保存元数据
+const saveMetadata = () => {
+  if (!selectedFile.value) return;
+
+  if (!validateMetadata(currentMetadata)) {
+    validationError.value = "请完整填写所有元数据字段";
+    return;
+  }
+
+  validationError.value = null;
+  selectedFile.value.metadata = { ...currentMetadata };
+  metadataStorage.value.set(selectedFile.value.file, { ...currentMetadata });
+  alert("元数据已成功保存");
 };
 
 // 上传并检测文件
 const uploadAndDetect = async () => {
   if (fileList.value.length === 0) return;
 
+  const incompleteFiles = getFilesWithIncompleteMetadata();
+  if (incompleteFiles.length > 0) {
+    alert(
+      `有${incompleteFiles.length}个文件缺少完整元数据信息，请完成所有文件的元数据填写。`
+    );
+    if (incompleteFiles[0] !== selectedFile.value) {
+      selectFile(incompleteFiles[0]);
+    }
+    return;
+  }
+
   uploading.value = true;
   uploadProgress.value = 0;
 
-  // 模拟上传过程
-  const progressInterval = setInterval(() => {
-    uploadProgress.value += 5;
-    if (uploadProgress.value >= 100) {
-      clearInterval(progressInterval);
-      setTimeout(() => {
-        uploading.value = false;
-        alert("所有文件已成功检测并上传!");
-        fileList.value = [];
-        selectedFile.value = null;
-      }, 500);
-    }
-  }, 100);
+  try {
+    uploadProgress.value = 30; // 设置初始进度
+    console.log(fileList.value);
+    const result = await uploadFiles(fileList.value);
+    console.log("uploadFiles返回结果:", result);
+    uploadProgress.value = 100;
+    setTimeout(() => {
+      uploading.value = false;
+      alert("所有文件已成功检测并上传!");
+      fileList.value = [];
+      selectedFile.value = null;
+      metadataStorage.value = new WeakMap();
+    }, 500);
+  } catch (error) {
+    console.error("上传失败:", error);
+    alert("上传过程中发生错误，请重试!");
+    uploading.value = false;
+  }
 };
 
 // 清空
@@ -109,65 +187,72 @@ const clearAll = () => {
   fileList.value = [];
   selectedFile.value = null;
   uploadProgress.value = 0;
-  Object.keys(metadata).forEach(key => {
-    metadata[key] = "";
+  Object.keys(currentMetadata).forEach(key => {
+    currentMetadata[key] = "";
   });
+  // 不清除元数据存储，因为可能之后还会用到
 };
 
 // 生成文件大小显示
 const formatFileSize = (size: number): string => {
   if (size < 1024) {
-    return size + ' B';
+    return size + " B";
   } else if (size < 1024 * 1024) {
-    return (size / 1024).toFixed(2) + ' KB';
+    return (size / 1024).toFixed(2) + " KB";
   } else {
-    return (size / (1024 * 1024)).toFixed(2) + ' MB';
+    return (size / (1024 * 1024)).toFixed(2) + " MB";
   }
 };
 
 // 获取文件图标
 const getFileIcon = (filename: string): string => {
-  const extension = filename.split('.').pop()?.toLowerCase();
+  const extension = filename.split(".").pop()?.toLowerCase();
 
   switch (extension) {
-    case 'jpg':
-    case 'jpeg':
-    case 'png':
-    case 'bmp':
-    case 'tiff':
-    case 'webp':
-      return '🖼️';
-    case 'doc':
-    case 'docx':
-      return '📄';
-    case 'pdf':
-      return '📑';
+    case "jpg":
+    case "jpeg":
+    case "png":
+    case "bmp":
+    case "tiff":
+    case "webp":
+      return "🖼️";
+    case "doc":
+    case "docx":
+      return "📄";
+    case "pdf":
+      return "📑";
     default:
-      return '📁';
+      return "📁";
   }
 };
 
 // 获取文件类型
 const getFileType = (filename: string): string => {
-  const extension = filename.split('.').pop()?.toLowerCase();
+  const extension = filename.split(".").pop()?.toLowerCase();
 
   switch (extension) {
-    case 'jpg':
-    case 'jpeg':
-    case 'png':
-    case 'bmp':
-    case 'tiff':
-    case 'webp':
-      return '图像';
-    case 'doc':
-    case 'docx':
-      return 'Word文档';
-    case 'pdf':
-      return 'PDF文档';
+    case "jpg":
+    case "jpeg":
+    case "png":
+    case "bmp":
+    case "tiff":
+    case "webp":
+      return "图像";
+    case "doc":
+    case "docx":
+      return "Word文档";
+    case "pdf":
+      return "PDF文档";
     default:
-      return '未知类型';
+      return "未知类型";
   }
 };
+
+// 文件元数据状态计算属性
+const fileHasCompleteMetadata = computed(() => {
+  if (!selectedFile.value) return false;
+  return validateMetadata(selectedFile.value.metadata);
+});
 </script>
 
 <template>
@@ -175,7 +260,9 @@ const getFileType = (filename: string): string => {
     <header class="app-header">
       <div class="header-content">
         <h1 class="app-title">DeFake学术图像造假检测</h1>
-        <p class="app-subtitle">支持图像、PDF和Word文档的多维度造假检测和归档管理</p>
+        <p class="app-subtitle">
+          支持图像、PDF和Word文档的多维度造假检测和归档管理
+        </p>
       </div>
     </header>
 
@@ -189,11 +276,11 @@ const getFileType = (filename: string): string => {
             <div class="text">拖放文件到此处或</div>
             <label class="upload-btn">
               选择文件
-              <input type="file" multiple :accept="supportedFormats.join(',')" @change="handleFileChange"
-                class="hidden-input">
+              <input type="file" multiple :accept="supportedFormats.join(',')" class="hidden-input"
+                @change="handleFileChange" />
             </label>
             <div class="supported-formats">
-              支持的格式: {{ supportedFormats.join(', ') }}
+              支持的格式: {{ supportedFormats.join(", ") }}
             </div>
           </div>
 
@@ -203,23 +290,34 @@ const getFileType = (filename: string): string => {
               <button class="text-btn" @click="clearAll">清空</button>
             </div>
 
-            <div class="file-item" v-for="(file, index) in fileList" :key="index"
-              :class="{ 'file-selected': selectedFile === file }" @click="selectFile(file)">
-              <div class="file-icon">{{ getFileIcon(file.name) }}</div>
+            <div v-for="(fileItem, index) in fileList" :key="index" class="file-item" :class="{
+              'file-selected': selectedFile === fileItem,
+              'file-incomplete': !validateMetadata(fileItem.metadata)
+            }" @click="selectFile(fileItem)">
+              <div class="file-icon">{{ getFileIcon(fileItem.file.name) }}</div>
               <div class="file-info">
-                <div class="file-name">{{ file.name }}</div>
+                <div class="file-name">{{ fileItem.file.name }}</div>
                 <div class="file-meta">
-                  <span class="file-type">{{ getFileType(file.name) }}</span>
-                  <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                  <span class="file-type">{{
+                    getFileType(fileItem.file.name)
+                  }}</span>
+                  <span class="file-size">{{
+                    formatFileSize(fileItem.file.size)
+                  }}</span>
+                  <!-- 显示文件元数据状态的标记 -->
+                  <span v-if="validateMetadata(fileItem.metadata)" class="has-metadata">元数据完整</span>
+                  <span v-else class="missing-metadata">缺少元数据</span>
                 </div>
               </div>
-              <button class="remove-btn" @click.stop="removeFile(index)">×</button>
+              <button class="remove-btn" @click.stop="removeFile(index)">
+                ×
+              </button>
             </div>
 
             <label class="add-more-btn">
               添加更多
-              <input type="file" multiple :accept="supportedFormats.join(',')" @change="handleFileChange"
-                class="hidden-input">
+              <input type="file" multiple :accept="supportedFormats.join(',')" class="hidden-input"
+                @change="handleFileChange" />
             </label>
           </div>
         </div>
@@ -227,12 +325,12 @@ const getFileType = (filename: string): string => {
         <!-- 上传按钮 -->
         <div class="action-buttons">
           <button class="detect-btn" :disabled="fileList.length === 0 || uploading" @click="uploadAndDetect">
-            {{ uploading ? '检测中...' : '开始检测' }}
+            {{ uploading ? "检测中..." : "开始检测" }}
           </button>
 
           <div v-if="uploading" class="upload-progress">
             <div class="progress-bar">
-              <div class="progress" :style="{ width: `${uploadProgress}%` }"></div>
+              <div class="progress" :style="{ width: `${uploadProgress}%` }" />
             </div>
             <div class="progress-text">{{ uploadProgress }}%</div>
           </div>
@@ -241,57 +339,72 @@ const getFileType = (filename: string): string => {
 
       <!-- 右侧元数据区域 -->
       <section class="metadata-section">
-        <h2 class="section-title">文件元数据</h2>
+        <h2 class="section-title">文件元数据（所有字段必填）</h2>
 
         <div v-if="selectedFile" class="metadata-content">
           <div class="selected-file-info">
-            <div class="file-icon large">{{ getFileIcon(selectedFile.name) }}</div>
+            <div class="file-icon large">
+              {{ getFileIcon(selectedFile.file.name) }}
+            </div>
             <div>
-              <h3 class="file-name">{{ selectedFile.name }}</h3>
-              <p class="file-details">{{ getFileType(selectedFile.name) }} • {{ formatFileSize(selectedFile.size) }}</p>
+              <h3 class="file-name">{{ selectedFile.file.name }}</h3>
+              <p class="file-details">
+                {{ getFileType(selectedFile.file.name) }} •
+                {{ formatFileSize(selectedFile.file.size) }}
+              </p>
             </div>
           </div>
 
-          <form class="metadata-form">
-            <div class="form-group">
-              <label for="title">文档标题</label>
-              <input type="text" id="title" v-model="metadata.title" placeholder="输入文档标题">
+          <form class="metadata-form" @submit.prevent="saveMetadata">
+            <div v-if="validationError" class="validation-error">
+              {{ validationError }}
             </div>
 
             <div class="form-group">
-              <label for="author">作者</label>
-              <input type="text" id="author" v-model="metadata.author" placeholder="输入作者姓名">
+              <label for="title">文档标题 <span class="required">*</span></label>
+              <input id="title" v-model="currentMetadata.title" type="text" placeholder="输入文档标题"
+                :class="{ 'field-error': !currentMetadata.title.trim() }" />
             </div>
 
             <div class="form-group">
-              <label for="institution">机构</label>
-              <input type="text" id="institution" v-model="metadata.institution" placeholder="输入作者所属机构">
+              <label for="author">作者 <span class="required">*</span></label>
+              <input id="author" v-model="currentMetadata.author" type="text" placeholder="输入作者姓名"
+                :class="{ 'field-error': !currentMetadata.author.trim() }" />
             </div>
 
             <div class="form-group">
-              <label for="publishDate">发布日期</label>
-              <input type="date" id="publishDate" v-model="metadata.publishDate">
+              <label for="institution">机构 <span class="required">*</span></label>
+              <input id="institution" v-model="currentMetadata.institution" type="text" placeholder="输入作者所属机构"
+                :class="{ 'field-error': !currentMetadata.institution.trim() }" />
             </div>
 
             <div class="form-group">
-              <label for="keywords">关键词</label>
-              <input type="text" id="keywords" v-model="metadata.keywords" placeholder="用逗号分隔关键词">
+              <label for="publishDate">发布日期 <span class="required">*</span></label>
+              <input id="publishDate" v-model="currentMetadata.publishDate" type="date"
+                :class="{ 'field-error': !currentMetadata.publishDate.trim() }" />
             </div>
 
             <div class="form-group">
-              <label for="description">文档描述</label>
-              <textarea id="description" v-model="metadata.description" placeholder="简要描述文档内容" rows="4"></textarea>
+              <label for="keywords">关键词 <span class="required">*</span></label>
+              <input id="keywords" v-model="currentMetadata.keywords" type="text" placeholder="用逗号分隔关键词"
+                :class="{ 'field-error': !currentMetadata.keywords.trim() }" />
+            </div>
+
+            <div class="form-group">
+              <label for="description">文档描述 <span class="required">*</span></label>
+              <textarea id="description" v-model="currentMetadata.description" placeholder="简要描述文档内容" rows="4"
+                :class="{ 'field-error': !currentMetadata.description.trim() }" />
             </div>
 
             <div class="form-actions">
-              <button type="button" class="save-btn">保存元数据</button>
+              <button type="submit" class="save-btn">保存元数据</button>
             </div>
           </form>
         </div>
 
         <div v-else class="empty-metadata">
           <div class="empty-icon">📝</div>
-          <p class="empty-text">请从左侧选择一个文件<br>添加元数据信息</p>
+          <p class="empty-text">请从左侧选择一个文件<br />添加元数据信息</p>
         </div>
       </section>
     </main>
@@ -309,8 +422,7 @@ const getFileType = (filename: string): string => {
   min-height: 100vh;
   background-color: #f8faff;
   color: #2c3e50;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0 auto !important;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .app-header {
@@ -323,13 +435,15 @@ const getFileType = (filename: string): string => {
 }
 
 .app-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0) 70%);
   pointer-events: none;
 }
 
@@ -515,6 +629,10 @@ const getFileType = (filename: string): string => {
 .file-selected {
   border-color: #1976d2;
   background-color: #e3f2fd;
+}
+
+.file-incomplete {
+  border-left: 4px solid #ff5722;
 }
 
 .file-icon {
@@ -763,5 +881,42 @@ const getFileType = (filename: string): string => {
   .main-content {
     padding: 1.5rem;
   }
+}
+
+.has-metadata {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  padding: 0.15rem 0.5rem;
+  border-radius: 100px;
+  font-weight: 500;
+}
+
+.missing-metadata {
+  background-color: rgba(255, 87, 34, 0.1);
+  color: #ff5722;
+  padding: 0.15rem 0.5rem;
+  border-radius: 100px;
+  font-weight: 500;
+}
+
+.required {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+.field-error {
+  border-color: #f44336 !important;
+  background-color: rgba(244, 67, 54, 0.03);
+}
+
+.validation-error {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-left: 4px solid #f44336;
 }
 </style>
