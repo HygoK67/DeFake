@@ -39,7 +39,7 @@ const handleDragLeave = (e: DragEvent) => {
 const handleDrop = (e: DragEvent) => {
   e.preventDefault();
   dragging.value = false;
-  
+
   if (e.dataTransfer?.files) {
     handleFiles(e.dataTransfer.files);
   }
@@ -85,10 +85,10 @@ const selectFile = (file: File) => {
 // 上传并检测文件
 const uploadAndDetect = async () => {
   if (fileList.value.length === 0) return;
-  
+
   uploading.value = true;
   uploadProgress.value = 0;
-  
+
   // 模拟上传过程
   const progressInterval = setInterval(() => {
     uploadProgress.value += 5;
@@ -128,8 +128,8 @@ const formatFileSize = (size: number): string => {
 // 获取文件图标
 const getFileIcon = (filename: string): string => {
   const extension = filename.split('.').pop()?.toLowerCase();
-  
-  switch(extension) {
+
+  switch (extension) {
     case 'jpg':
     case 'jpeg':
     case 'png':
@@ -150,8 +150,8 @@ const getFileIcon = (filename: string): string => {
 // 获取文件类型
 const getFileType = (filename: string): string => {
   const extension = filename.split('.').pop()?.toLowerCase();
-  
-  switch(extension) {
+
+  switch (extension) {
     case 'jpg':
     case 'jpeg':
     case 'png':
@@ -178,48 +178,33 @@ const getFileType = (filename: string): string => {
         <p class="app-subtitle">支持图像、PDF和Word文档的多维度造假检测和归档管理</p>
       </div>
     </header>
-    
+
     <main class="main-content">
       <!-- 左侧上传区域 -->
       <section class="upload-section">
-        <div 
-          class="drop-zone" 
-          :class="{ 'drop-zone-active': dragging }"
-          @dragover="handleDragOver"
-          @dragleave="handleDragLeave"
-          @drop="handleDrop"
-        >
+        <div class="drop-zone" :class="{ 'drop-zone-active': dragging }" @dragover="handleDragOver"
+          @dragleave="handleDragLeave" @drop="handleDrop">
           <div v-if="fileList.length === 0" class="drop-zone-content">
             <div class="icon">📁</div>
             <div class="text">拖放文件到此处或</div>
             <label class="upload-btn">
               选择文件
-              <input 
-                type="file" 
-                multiple 
-                :accept="supportedFormats.join(',')" 
-                @change="handleFileChange"
-                class="hidden-input"
-              >
+              <input type="file" multiple :accept="supportedFormats.join(',')" @change="handleFileChange"
+                class="hidden-input">
             </label>
             <div class="supported-formats">
               支持的格式: {{ supportedFormats.join(', ') }}
             </div>
           </div>
-          
+
           <div v-else class="file-list">
             <div class="file-list-header">
               <h3>待检测文件 ({{ fileList.length }})</h3>
               <button class="text-btn" @click="clearAll">清空</button>
             </div>
-            
-            <div 
-              class="file-item" 
-              v-for="(file, index) in fileList" 
-              :key="index"
-              :class="{ 'file-selected': selectedFile === file }"
-              @click="selectFile(file)"
-            >
+
+            <div class="file-item" v-for="(file, index) in fileList" :key="index"
+              :class="{ 'file-selected': selectedFile === file }" @click="selectFile(file)">
               <div class="file-icon">{{ getFileIcon(file.name) }}</div>
               <div class="file-info">
                 <div class="file-name">{{ file.name }}</div>
@@ -230,30 +215,21 @@ const getFileType = (filename: string): string => {
               </div>
               <button class="remove-btn" @click.stop="removeFile(index)">×</button>
             </div>
-            
+
             <label class="add-more-btn">
               添加更多
-              <input 
-                type="file" 
-                multiple 
-                :accept="supportedFormats.join(',')" 
-                @change="handleFileChange"
-                class="hidden-input"
-              >
+              <input type="file" multiple :accept="supportedFormats.join(',')" @change="handleFileChange"
+                class="hidden-input">
             </label>
           </div>
         </div>
-        
+
         <!-- 上传按钮 -->
         <div class="action-buttons">
-          <button 
-            class="detect-btn" 
-            :disabled="fileList.length === 0 || uploading" 
-            @click="uploadAndDetect"
-          >
+          <button class="detect-btn" :disabled="fileList.length === 0 || uploading" @click="uploadAndDetect">
             {{ uploading ? '检测中...' : '开始检测' }}
           </button>
-          
+
           <div v-if="uploading" class="upload-progress">
             <div class="progress-bar">
               <div class="progress" :style="{ width: `${uploadProgress}%` }"></div>
@@ -262,11 +238,11 @@ const getFileType = (filename: string): string => {
           </div>
         </div>
       </section>
-      
+
       <!-- 右侧元数据区域 -->
       <section class="metadata-section">
         <h2 class="section-title">文件元数据</h2>
-        
+
         <div v-if="selectedFile" class="metadata-content">
           <div class="selected-file-info">
             <div class="file-icon large">{{ getFileIcon(selectedFile.name) }}</div>
@@ -275,80 +251,51 @@ const getFileType = (filename: string): string => {
               <p class="file-details">{{ getFileType(selectedFile.name) }} • {{ formatFileSize(selectedFile.size) }}</p>
             </div>
           </div>
-          
+
           <form class="metadata-form">
             <div class="form-group">
               <label for="title">文档标题</label>
-              <input 
-                type="text" 
-                id="title" 
-                v-model="metadata.title" 
-                placeholder="输入文档标题"
-              >
+              <input type="text" id="title" v-model="metadata.title" placeholder="输入文档标题">
             </div>
-            
+
             <div class="form-group">
               <label for="author">作者</label>
-              <input 
-                type="text" 
-                id="author" 
-                v-model="metadata.author" 
-                placeholder="输入作者姓名"
-              >
+              <input type="text" id="author" v-model="metadata.author" placeholder="输入作者姓名">
             </div>
-            
+
             <div class="form-group">
               <label for="institution">机构</label>
-              <input 
-                type="text" 
-                id="institution" 
-                v-model="metadata.institution" 
-                placeholder="输入作者所属机构"
-              >
+              <input type="text" id="institution" v-model="metadata.institution" placeholder="输入作者所属机构">
             </div>
-            
+
             <div class="form-group">
               <label for="publishDate">发布日期</label>
-              <input 
-                type="date" 
-                id="publishDate" 
-                v-model="metadata.publishDate"
-              >
+              <input type="date" id="publishDate" v-model="metadata.publishDate">
             </div>
-            
+
             <div class="form-group">
               <label for="keywords">关键词</label>
-              <input 
-                type="text" 
-                id="keywords" 
-                v-model="metadata.keywords" 
-                placeholder="用逗号分隔关键词"
-              >
+              <input type="text" id="keywords" v-model="metadata.keywords" placeholder="用逗号分隔关键词">
             </div>
-            
+
             <div class="form-group">
               <label for="description">文档描述</label>
-              <textarea 
-                id="description" 
-                v-model="metadata.description" 
-                placeholder="简要描述文档内容"
-                rows="4"
-              ></textarea>
+              <textarea id="description" v-model="metadata.description" placeholder="简要描述文档内容" rows="4"></textarea>
             </div>
-            
+
             <div class="form-actions">
               <button type="button" class="save-btn">保存元数据</button>
             </div>
           </form>
         </div>
-        
+
         <div v-else class="empty-metadata">
           <div class="empty-icon">📝</div>
           <p class="empty-text">请从左侧选择一个文件<br>添加元数据信息</p>
         </div>
       </section>
     </main>
-    
+
     <footer class="app-footer">
       <p>© 2025 DeFake学术图像造假检测平台</p>
     </footer>
@@ -363,6 +310,7 @@ const getFileType = (filename: string): string => {
   background-color: #f8faff;
   color: #2c3e50;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0 auto !important;
 }
 
 .app-header {
@@ -381,7 +329,7 @@ const getFileType = (filename: string): string => {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
   pointer-events: none;
 }
 
@@ -739,7 +687,8 @@ const getFileType = (filename: string): string => {
   font-size: 0.9rem;
 }
 
-.form-group input, .form-group textarea {
+.form-group input,
+.form-group textarea {
   padding: 0.75rem;
   border: 1px solid #e0e0e0;
   border-radius: 6px;
@@ -747,7 +696,8 @@ const getFileType = (filename: string): string => {
   transition: border 0.2s;
 }
 
-.form-group input:focus, .form-group textarea:focus {
+.form-group input:focus,
+.form-group textarea:focus {
   border-color: #1976d2;
   outline: none;
   box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
@@ -809,7 +759,7 @@ const getFileType = (filename: string): string => {
   .app-title {
     font-size: 2rem;
   }
-  
+
   .main-content {
     padding: 1.5rem;
   }

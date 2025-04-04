@@ -11,11 +11,18 @@ import LaySidebarTopCollapse from "../lay-sidebar/components/SidebarTopCollapse.
 import LogoutCircleRLine from "@iconify-icons/ri/logout-circle-r-line";
 import User from "@iconify-icons/ri/user-3-fill";
 import Setting from "@iconify-icons/ri/settings-3-line";
+import LockPasswordLine from "@iconify-icons/ri/lock-password-line"; // 新增图标
 
 const router = useRouter();
 
+// 跳转到个人信息页面
 const routeToInfo = () => {
   router.push("/user-info");
+};
+
+// 跳转到修改密码页面
+const routeToChangePassword = () => {
+  router.push("/change-password");
 };
 
 const {
@@ -58,6 +65,10 @@ const {
             <el-dropdown-item @click="routeToInfo">
               <IconifyIconOffline :icon="User" style="margin: 5px" />
               个人信息
+            </el-dropdown-item>
+            <el-dropdown-item @click="routeToChangePassword">
+              <IconifyIconOffline :icon="LockPasswordLine" style="margin: 5px" />
+              修改密码
             </el-dropdown-item>
             <el-dropdown-item @click="logout">
               <IconifyIconOffline :icon="LogoutCircleRLine" style="margin: 5px" />

@@ -34,6 +34,15 @@ export type RefreshTokenResult = {
   };
 };
 
+/** 注册 */
+export const registerUser = (data: { username: string; phone: string; password: string; mail: string }) => {
+  return http.request<{ result: "SUC" | "FAIL" }>(
+    "post", // 请求方法
+    "http://localhost:8080/api/register", // 请求 URL
+    { data } // 请求体
+  );
+};
+
 /** 登录 */
 export const getLogin = (data?: object) => {
   return http.request<UserResult>("post", "/login", { data });
