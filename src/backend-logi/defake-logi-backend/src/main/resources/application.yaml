@@ -1,8 +1,24 @@
 # application.yml
 server:
   port: 8080
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
 spring:
   application:
     name: defake-logi-backend
   datasource:
-    url: jdbc:mysql://192.168.1.120:3306/mydb
+    url: jdbc:mysql://122.9.35.116:3306/testdb
+    username: root
+    password: ruangong-6-mysql-passwd
+  mail:
+    host: smtp.163.com       # 以QQ邮箱为例
+    port: 994
+    username: gordonhemu@163.com   # 发件人邮箱
+    password: JHbB8gtymCj4ndAx # QQ邮箱授权码（非登录密码）
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true

@@ -6,8 +6,8 @@ CREATE TABLE users (                       -- 用户表
     -- 基本字段
     id BIGINT AUTO_INCREMENT PRIMARY KEY,  -- 自增主键
     user_name VARCHAR(50) NOT NULL,        -- 必须填写用户名
-    email VARCHAR(255) UNIQUE,             -- 可以不填写邮箱，不能重复
-    phone VARCHAR(20) NOT NULL UNIQUE,     -- 必须填写手机号，不能重复
+    email VARCHAR(255) NOT NULL UNIQUE,    -- 必须填写邮箱，不能重复
+    phone VARCHAR(20) NULL UNIQUE,         -- 可以不填写手机号，不能重复
     password_hash VARCHAR(255) NOT NULL,   -- 用户密码
     avatar_path VARCHAR(255) NULL,         -- 用户头像存储位置 (可能是网络 url)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 用户创建时间
@@ -15,8 +15,7 @@ CREATE TABLE users (                       -- 用户表
     last_login_at TIMESTAMP NULL,
     
     -- 业务扩展字段
-    role ENUM('user', 'admin') DEFAULT 'user', -- 用户身份: 普通用户(包含组织管理员) 或者 root 用户
-
+    role ENUM('user', 'admin') DEFAULT 'user' -- 用户身份: 普通用户(包含组织管理员) 或者 root 用户
 );
 
 CREATE TABLE papers (                      -- 论文表，主要存储元文件
@@ -46,7 +45,7 @@ CREATE TABLE groups (                      -- 组织表
     id BIGINT AUTO_INCREMENT PRIMARY KEY,  -- 组织唯一 id
     group_name VARCHAR(50) NOT NULL,       -- 组织名称
     group_leader_id BIGINT NOT NULL,       -- 组织领导者的用户 id
-    foreign key (group_leader_id) references users(user_id),
+    foreign key (group_leader_id) references users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 条目创建时间
     updated_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- 条目更新时间
 );
@@ -90,7 +89,7 @@ CREATE TABLE operation_logs (              -- 操作日志表
     ip_address VARCHAR(45) NOT NULL,       -- 用户此次操作的 ip 地址
     status ENUM('success', 'failed') NOT NULL, -- 操作是否成功
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 操作时间
-    foreign key user_id references users(id),
+    foreign key (user_id) references users(id),
     INDEX idx_user_time (user_id, created_at), -- 第一个索引 (按照用户和操作时间进行索引)
     INDEX idx_type (operation_type)            -- 第二个索引 (按照操作类型进行索引)
 )
