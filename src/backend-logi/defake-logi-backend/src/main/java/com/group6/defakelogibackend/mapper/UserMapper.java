@@ -22,4 +22,7 @@ public interface UserMapper {
     public void updateUser(User user);
 
     public void deleteUser(long id);
+
+    public void updateUserPassword(User user);
+
 }

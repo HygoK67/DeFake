@@ -77,4 +77,31 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         // 生成登录令牌
         return jwtService.generateJWT(userFound.getId());
     }
+
+    @Override
+    @Transactional
+    public User userInfo(long userId) {
+        // 如果findUserById找不到用户的话，会返回null
+        User user = userMapper.findUserById(userId);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public boolean updatePassword(long userId, String oldPassword, String newPassword) {
+        User user = userMapper.findUserById(userId);
+        if (user == null) {
+            return false;
+        }
+        System.out.println(user.getPasswordHash());
+        if (!passwordService.matches(oldPassword, user.getPasswordHash())) {
+            return false;
+        }
+
+        user.setPassword(newPassword);
+        user.setPasswordHash(passwordService.encodePassword(newPassword));
+
+        userMapper.updateUserPassword(user);
+        return true;
+    }
 }

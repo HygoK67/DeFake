@@ -77,4 +77,15 @@
             id = #{id}
     </insert>
 
+    <insert id="updateUserPassword">
+        update users
+        <set>
+            <if test="passwordHash != null">
+                password_hash = #{passwordHash},
+            </if>
+            updated_at = NOW()
+        </set>
+        where id = #{id}
+    </insert>
+
 </mapper>
