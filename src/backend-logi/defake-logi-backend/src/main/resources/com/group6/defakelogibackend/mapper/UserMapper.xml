@@ -12,7 +12,7 @@
     <select id="findUserByUsername" resultType="com.group6.defakelogibackend.model.User">
         select * from users
         where
-        user_name = #{username}
+        4user_name = #{username}
     </select>
 
     <select id="findUserById" resultType="com.group6.defakelogibackend.model.User">
