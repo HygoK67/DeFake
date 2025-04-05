@@ -11,4 +11,5 @@ public interface NotificationMapper {
     public void deleteNotificationById(long notificationId);
 
     public void deleteAllNotificationByUserId(long userId);
+
 }

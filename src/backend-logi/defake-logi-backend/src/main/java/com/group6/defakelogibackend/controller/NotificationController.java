@@ -1,5 +1,6 @@
 package com.group6.defakelogibackend.controller;
 
+import com.group6.defakelogibackend.model.Notification;
 import com.group6.defakelogibackend.model.Result;
 import com.group6.defakelogibackend.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class NotificationController {
         if (notificationService.deleteNotification(notificationId)) {
             return Result.success();
         }
-        return Result.error("删除消息失败");
+        return Result.error("删除通知失败");
     }
 
     @PostMapping("/deleteAllNotification")
@@ -32,6 +33,18 @@ public class NotificationController {
         if (notificationService.deleteAllNotification(userId)) {
             return Result.success();
         }
-        return Result.error("删除全部消息失败");
+        return Result.error("删除全部通知失败");
     }
+
+    @PostMapping("/notificationInfo")
+    public Result notificationInfo(@RequestBody Map<String, String> requestBody){
+        long notificationId = Long.parseLong(requestBody.get("notificationId"));
+        Notification notification = notificationService.notificationInfo(notificationId);
+        if (notification != null){
+            return Result.success(notification);
+        }
+        return Result.error("查看通知内容失败");
+    }
+
+
 }

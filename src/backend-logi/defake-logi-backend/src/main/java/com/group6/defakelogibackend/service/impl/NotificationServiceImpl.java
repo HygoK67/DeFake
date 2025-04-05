@@ -1,6 +1,7 @@
 package com.group6.defakelogibackend.service.impl;
 
 import com.group6.defakelogibackend.mapper.NotificationMapper;
+import com.group6.defakelogibackend.model.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,5 +27,11 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
     public boolean deleteAllNotification(long userId) {
         notificationMapper.deleteAllNotificationByUserId(userId);
         return true;
+    }
+
+    @Override
+    @Transactional
+    public Notification notificationInfo(long notificationId) {
+        return notificationMapper.findNotificationById(notificationId);
     }
 }

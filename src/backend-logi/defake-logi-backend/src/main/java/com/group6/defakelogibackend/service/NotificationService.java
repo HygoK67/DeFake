@@ -7,4 +7,6 @@ public interface NotificationService {
     public boolean deleteNotification(long notificationId);
 
     public boolean deleteAllNotification(long userId);
+
+    public Notification notificationInfo(long notificationId);
 }
