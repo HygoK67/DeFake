@@ -31,4 +31,9 @@
         order by sent_at asc
     </select>
 
+    <insert id="createNotificationUser2User">
+        insert into notifications (user_id_rec, user_id_sent, title, content)
+        values (#{userId_rec}, #{userId_sent}, #{title}, #{content})
+    </insert>
+
 </mapper>

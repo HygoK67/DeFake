@@ -27,4 +27,16 @@ public class GroupController {
         }
         return Result.error("创建组织失败");
     }
+
+    @PostMapping("/applyGroup")
+    public Result applyGroup(@RequestBody Map<String, String> requestBody) {
+        Long userId = Long.parseLong(requestBody.get("userId"));
+        Long groupId = Long.parseLong(requestBody.get("groupId"));
+        String title = requestBody.get("title");
+        String content = requestBody.get("content");
+        if (groupService.applyGroup(userId, groupId, title, content)) {
+            return Result.success("发送加入组织申请成功");
+        }
+        return Result.error("发送加入组织申请失败");
+    }
 }

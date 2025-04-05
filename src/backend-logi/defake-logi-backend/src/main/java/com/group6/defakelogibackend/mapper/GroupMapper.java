@@ -9,4 +9,6 @@ public interface GroupMapper {
 
     public void createGroup(long userId, String groupname);
 
+    public Group findGroupByGroupId(long groupId);
+
 }

@@ -7,4 +7,9 @@
         insert into user_to_group (user_id, group_id)
         values ( #{userId}, #{groupId})
     </insert>
+
+    <select id="findUserToGroup" resultType="com.group6.defakelogibackend.model.UserToGroup">
+        select * from user_to_group
+        where user_id = #{userId} and group_id = #{groupId}
+    </select>
 </mapper>

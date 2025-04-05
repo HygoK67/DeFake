@@ -12,4 +12,9 @@
         insert into groups_ (group_name, group_leader_id)
         values ( #{groupname}, #{userId} )
     </insert>
+    
+    <select id="findGroupByGroupId">
+        select * from groups_
+        where id = #{groupId}
+    </select>
 </mapper>
