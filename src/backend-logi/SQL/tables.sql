@@ -79,7 +79,7 @@ CREATE TABLE notifications (                -- 通知记录表
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 通知产生的时间
     read_at TIMESTAMP NULL,                       -- 用户阅读该通知的时间
     FOREIGN KEY (template_id) REFERENCES notification_templates(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id_rec) REFERENCES users(id)
 );
 
 CREATE TABLE operation_logs (              -- 操作日志表
