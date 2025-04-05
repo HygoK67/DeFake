@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @Service
 public class NotificationServiceImpl implements com.group6.defakelogibackend.service.NotificationService {
     @Autowired
@@ -33,5 +36,17 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
     @Transactional
     public Notification notificationInfo(long notificationId) {
         return notificationMapper.findNotificationById(notificationId);
+    }
+
+    @Override
+    @Transactional
+    public List<Notification> notificationFilter(long userId, String condition) {
+        if (condition.equals("send_at_desc")) {
+            return notificationMapper.findNotificationByUserId_sent_at_desc(userId);
+        } else if (condition.equals("send_at_asc")) {
+            return notificationMapper.findNotificationByUserId_sent_at_asc(userId);
+        } else {
+            return null;
+        }
     }
 }
