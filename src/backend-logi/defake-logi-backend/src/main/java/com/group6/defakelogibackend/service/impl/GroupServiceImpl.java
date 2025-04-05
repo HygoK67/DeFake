@@ -43,12 +43,30 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         if (group == null) {
             return false;
         }
-        long groupLeaderId = group.getGroupLeaderId();
         // 如果该用户已经加入该组织，则不能发送申请
         if (userToGroupMapper.findUserToGroup(userId, groupId) != null) {
             return false;
         }
+        long groupLeaderId = group.getGroupLeaderId();
+
         notificationMapper.createNotificationUser2User(groupLeaderId, userId, title, content);
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean inviteGroup(long userId, long groupId, String title, String content) {
+        Group group = groupMapper.findGroupByGroupId(groupId);
+        // 如果groupId无效
+        if (group == null) {
+            return false;
+        }
+        // 如果该用户已经加入该组织，则不能发送申请
+        if (userToGroupMapper.findUserToGroup(userId, groupId) != null) {
+            return false;
+        }
+        long groupLeaderId = group.getGroupLeaderId();
+        notificationMapper.createNotificationUser2User(userId, groupLeaderId, title, content);
         return true;
     }
 }

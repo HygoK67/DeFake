@@ -39,4 +39,16 @@ public class GroupController {
         }
         return Result.error("发送加入组织申请失败");
     }
+
+    @PostMapping("/inviteGroup")
+    public Result inviteGroup(@RequestBody Map<String, String> requestBody) {
+        Long userId = Long.parseLong(requestBody.get("userId"));
+        Long groupId = Long.parseLong(requestBody.get("groupId"));
+        String title = requestBody.get("title");
+        String content = requestBody.get("content");
+        if (groupService.inviteGroup(userId, groupId, title, content)){
+            return Result.success("发送邀请成功");
+        }
+        return Result.error("发送邀请失败");
+    }
 }
