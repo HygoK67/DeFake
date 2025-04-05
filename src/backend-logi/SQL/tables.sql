@@ -56,7 +56,7 @@ CREATE TABLE user_to_group (
     group_id BIGINT NOT NULL,
     UNIQUE (user_id, group_id),
     foreign key (user_id) references users(id),
-    foreign key (group_id) references groups(id),
+    foreign key (group_id) references groups_(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
