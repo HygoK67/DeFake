@@ -46,9 +46,19 @@ public class GroupController {
         Long groupId = Long.parseLong(requestBody.get("groupId"));
         String title = requestBody.get("title");
         String content = requestBody.get("content");
-        if (groupService.inviteGroup(userId, groupId, title, content)){
+        if (groupService.inviteGroup(userId, groupId, title, content)) {
             return Result.success("发送邀请成功");
         }
         return Result.error("发送邀请失败");
+    }
+
+    @PostMapping("/kickGroup")
+    public Result kickGroup(@RequestBody Map<String, String> requestBody) {
+        Long userId = Long.parseLong(requestBody.get("userId"));
+        Long groupId = Long.parseLong(requestBody.get("groupId"));
+        if (groupService.kickGroup(userId, groupId)){
+            return Result.success("踢出成功");
+        }
+        return Result.error("踢出失败");
     }
 }

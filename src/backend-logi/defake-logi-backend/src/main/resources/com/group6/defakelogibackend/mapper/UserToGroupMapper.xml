@@ -12,4 +12,9 @@
         select * from user_to_group
         where user_id = #{userId} and group_id = #{groupId}
     </select>
+
+    <delete id="deleteUserToGroup">
+        delete from user_to_group
+        where user_id = #{userId} and group_id = #{groupId}
+    </delete>
 </mapper>

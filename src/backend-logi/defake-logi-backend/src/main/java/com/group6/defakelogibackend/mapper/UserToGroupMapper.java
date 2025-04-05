@@ -12,4 +12,6 @@ public interface UserToGroupMapper {
     public void addUserToGroup(long userId, long groupId);
 
     public UserToGroup findUserToGroup(long userId, long groupId);
+
+    public void deleteUserToGroup(long userId, long groupId);
 }
