@@ -20,9 +20,18 @@ public class NotificationController {
     @PostMapping("/deleteNotification")
     public Result deleteNotification(@RequestBody Map<String, String> requestBody) {
         long notificationId = Long.parseLong(requestBody.get("notificationId"));
-        if (notificationService.deleteNotification(notificationId)){
+        if (notificationService.deleteNotification(notificationId)) {
             return Result.success();
         }
         return Result.error("删除消息失败");
+    }
+
+    @PostMapping("/deleteAllNotification")
+    public Result deleteAllNotification(@RequestBody Map<String, String> requestBody) {
+        long userId = Long.parseLong(requestBody.get("userId"));
+        if (notificationService.deleteAllNotification(userId)) {
+            return Result.success();
+        }
+        return Result.error("删除全部消息失败");
     }
 }

@@ -14,4 +14,9 @@
         where id = #{id}
     </delete>
 
+    <delete id="deleteAllNotificationByUserId">
+        delete from notifications
+        where user_id = #{user_id}
+    </delete>
+
 </mapper>

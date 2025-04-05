@@ -20,4 +20,11 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
         }
         return false;
     }
+
+    @Override
+    @Transactional
+    public boolean deleteAllNotification(long userId) {
+        notificationMapper.deleteAllNotificationByUserId(userId);
+        return true;
+    }
 }
