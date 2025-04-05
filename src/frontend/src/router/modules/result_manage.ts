@@ -16,7 +16,7 @@ export default {
       name: "ResultManagement",
       component: () => import("@/views/results/management/index.vue"),
       meta: {
-        title: "检测结果",
+        title: "检测结果-测试",
         showLink: true,
         icon: "ri:file-search-line"
       }
