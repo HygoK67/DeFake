@@ -41,7 +41,7 @@ CREATE TABLE figures (                     -- 图像表
     updated_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- 条目更新时间
 );
 
-CREATE TABLE groups (                      -- 组织表
+CREATE TABLE groups_ (                      -- 组织表
     id BIGINT AUTO_INCREMENT PRIMARY KEY,  -- 组织唯一 id
     group_name VARCHAR(50) NOT NULL,       -- 组织名称
     group_leader_id BIGINT NOT NULL,       -- 组织领导者的用户 id
