@@ -71,7 +71,7 @@ CREATE TABLE notification_templates (       -- 通知模板表
 
 CREATE TABLE notifications (                -- 通知记录表
     id BIGINT AUTO_INCREMENT PRIMARY KEY,   -- 唯一 id
-    template_id INT NULL,                   -- 可以使用模板也可以不使用
+    template_id BIGINT NULL,                   -- 可以使用模板也可以不使用
     user_id BIGINT NULL,                    -- 要发送给的用户 id
     title VARCHAR(255) NOT NULL,            -- 通知真正的标题, 可能由模板生成
     content TEXT NOT NULL,                  -- 通知真正的内容, 可能由模板生成
