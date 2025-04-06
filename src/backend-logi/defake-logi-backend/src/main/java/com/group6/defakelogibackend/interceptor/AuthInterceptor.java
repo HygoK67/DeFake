@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 public class AuthInterceptor implements HandlerInterceptor {
 
     @Autowired
-    JWTService jwtService;
+    private JWTService jwtService;
 
     private static ObjectMapper jacksonObjectMapper = new ObjectMapper();
 
@@ -63,8 +63,6 @@ public class AuthInterceptor implements HandlerInterceptor {
                 return false;
             }
 
-            System.out.println("a");
-
             try {
                 String userRole = jwtService.getUserRole(token);
                 // 检查管理员权限
@@ -74,6 +72,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 }
             }
             catch (Exception e) {
+                e.printStackTrace();
                 sendErrorResponse(response, "jwtToken 错误!, 请重新登录获取 Token");
                 return false;
             }

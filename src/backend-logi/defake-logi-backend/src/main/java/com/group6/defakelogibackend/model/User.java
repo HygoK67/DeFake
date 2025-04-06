@@ -26,5 +26,5 @@ public class User {       // 用户类
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastLoginAt;
-    private UserRole userRole;
+    private UserRole role;
 }

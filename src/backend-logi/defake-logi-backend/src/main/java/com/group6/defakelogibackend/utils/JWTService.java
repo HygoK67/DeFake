@@ -24,7 +24,7 @@ public class JWTService {
                 .signWith(secretKey)
                 .claim("id", id)
                 .claim("email", email)
-                .claim("userRole", userRole)
+                .claim("userRole", userRole.toString())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 3)) // 默认过期时间3d
                 .compact();
         return jwtToken;
@@ -35,7 +35,7 @@ public class JWTService {
                 .signWith(secretKey)
                 .claim("id", id)
                 .claim("email", email)
-                .claim("userRole", userRole)
+                .claim("userRole", userRole.toString())
                 .expiration(expiration)
                 .compact();
         return jwtToken;

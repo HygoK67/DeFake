@@ -1,10 +1,12 @@
 package com.group6.defakelogibackend.controller;
 
+import com.group6.defakelogibackend.annotation.Admin;
 import com.group6.defakelogibackend.annotation.LoggedIn;
 import com.group6.defakelogibackend.model.Result;
 import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.service.UserService;
 import com.group6.defakelogibackend.utils.EmailService;
+import com.group6.defakelogibackend.utils.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +20,8 @@ public class UserController {
     EmailService emailService;
     @Autowired
     UserService userService;
+    @Autowired
+    JWTService jwtService;
 
     @GetMapping("/sendEmailCode")
     public Result sendVerifyCode(@RequestParam String email) {
@@ -42,9 +46,9 @@ public class UserController {
 
     @LoggedIn
     @GetMapping("/info")
-    public Result info(@RequestBody Map<String, String> requestBody) {
-        long userId = Long.parseLong(requestBody.get("userId"));
-        User user = userService.userInfo(userId);
+    public Result info(@RequestHeader String jwtToken) {
+        long id = Long.parseLong(jwtService.getUserId(jwtToken));
+        User user = userService.userInfo(id);
         return Result.success(user);
     }
 

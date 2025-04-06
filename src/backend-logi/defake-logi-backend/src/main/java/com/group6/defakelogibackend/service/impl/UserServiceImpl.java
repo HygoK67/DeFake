@@ -76,7 +76,7 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         tmpUser.setLastLoginAt(LocalDateTime.now());
         userMapper.updateUser(tmpUser);
         // 生成登录令牌
-        return jwtService.generateJWT(userFound.getId(), userFound.getEmail(), userFound.getUserRole());
+        return jwtService.generateJWT(userFound.getId(), userFound.getEmail(), userFound.getRole());
     }
 
     @Override
