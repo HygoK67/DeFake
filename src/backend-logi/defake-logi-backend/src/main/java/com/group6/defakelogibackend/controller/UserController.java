@@ -1,12 +1,11 @@
 package com.group6.defakelogibackend.controller;
 
+import com.group6.defakelogibackend.annotation.LoggedIn;
 import com.group6.defakelogibackend.model.Result;
 import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.service.UserService;
 import com.group6.defakelogibackend.utils.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -41,16 +40,15 @@ public class UserController {
         return Result.success(jwtToken);
     }
 
-    @PostMapping("/info")
+    @LoggedIn
+    @GetMapping("/info")
     public Result info(@RequestBody Map<String, String> requestBody) {
         long userId = Long.parseLong(requestBody.get("userId"));
         User user = userService.userInfo(userId);
-        if (user == null) {
-            return Result.error("api/user/info出错，没有找到user");
-        }
         return Result.success(user);
     }
 
+    @LoggedIn
     @PostMapping("/updatePassword")
     public Result updatePassword(@RequestBody Map<String, String> requestBody) {
         long userId = Long.parseLong(requestBody.get("userId"));

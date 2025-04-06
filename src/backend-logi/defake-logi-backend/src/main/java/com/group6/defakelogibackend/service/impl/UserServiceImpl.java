@@ -2,6 +2,7 @@ package com.group6.defakelogibackend.service.impl;
 
 import com.group6.defakelogibackend.exception.AuthenticationFailedException;
 import com.group6.defakelogibackend.exception.EntityDuplicateException;
+import com.group6.defakelogibackend.exception.EntityMissingException;
 import com.group6.defakelogibackend.exception.FieldMissingException;
 import com.group6.defakelogibackend.mapper.UserMapper;
 import com.group6.defakelogibackend.model.User;
@@ -75,7 +76,7 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         tmpUser.setLastLoginAt(LocalDateTime.now());
         userMapper.updateUser(tmpUser);
         // 生成登录令牌
-        return jwtService.generateJWT(userFound.getId());
+        return jwtService.generateJWT(userFound.getId(), userFound.getEmail(), userFound.getUserRole());
     }
 
     @Override
@@ -83,6 +84,10 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     public User userInfo(long userId) {
         // 如果findUserById找不到用户的话，会返回null
         User user = userMapper.findUserById(userId);
+        if (user == null) {
+            throw new EntityMissingException("id 错误, 找不到对应的用户!");
+        }
+        user.setPasswordHash(null);
         return user;
     }
 

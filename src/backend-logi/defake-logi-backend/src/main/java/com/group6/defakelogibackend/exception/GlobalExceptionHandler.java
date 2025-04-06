@@ -22,4 +22,9 @@ public class GlobalExceptionHandler {
     public Result handleException(FieldMissingException exception) {
         return Result.error(exception.getMessage());
     }
+
+    @ExceptionHandler(EntityMissingException.class)
+    public Result handleException(EntityMissingException exception) {
+        return Result.error(exception.getMessage());
+    }
 }
