@@ -8,13 +8,15 @@ import { useUserStoreHook } from "@/store/modules/user";
 const {
   username, // 用户名
   userAvatar, // 用户头像
+  email,
+  phone, // 电话
 } = useNav();
 
 // 定义表单对象
 const userForm = reactive({
   username: username.value, // 用户名
-  phone: "13812345678", // 电话
-  email: "user@example.com", // 邮箱
+  phone: phone.value, // 电话
+  email: email.value, // 邮箱
   school: "北京航空航天大学" // 学校
 });
 
@@ -26,7 +28,7 @@ const handleAvatarChange = (event: Event) => {
     const reader = new FileReader();
     reader.onload = () => {
       avatar.value = reader.result as string; // 更新头像为本地预览
-      useUserStoreHook().SET_AVATAR(avatar.value);
+      useUserStoreHook().SET_AVATAR(username.value, avatar.value);
       ElMessage.success("头像已更新！");
     };
     reader.readAsDataURL(file);

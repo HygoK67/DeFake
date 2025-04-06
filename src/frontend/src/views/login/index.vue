@@ -39,24 +39,28 @@ const ruleForm = reactive({
 
 const onLogin = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  await formEl.validate((valid, fields) => {
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
       loading.value = true;
-      useUserStoreHook()
-        .loginByUsername({ username: ruleForm.username, password: "admin123" })
-        .then(res => {
-          if (res.success) {
-            // 获取后端路由
-            return initRouter().then(() => {
-              router.push(getTopMenu(true).path).then(() => {
-                message("登录成功", { type: "success" });
-              });
-            });
-          } else {
-            message("登录失败", { type: "error" });
-          }
-        })
-        .finally(() => (loading.value = false));
+      try {
+        const res = await useUserStoreHook().loginByUsername({
+          username: ruleForm.username,
+          password: ruleForm.password
+        });
+        if (res.code === 0) {
+          // 获取后端路由
+          await initRouter();
+          await router.push(getTopMenu(true).path);
+          message("登录成功", { type: "success" });
+        } else {
+          message(res.message || "登录失败", { type: "error" });
+        }
+      } catch (error) {
+        // 捕获错误并显示提示
+        message(error.message || "网络错误", { type: "error" });
+      } finally {
+        loading.value = false;
+      }
     }
   });
 };

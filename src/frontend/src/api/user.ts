@@ -1,27 +1,29 @@
 import { http } from "@/utils/http";
 import { useUserStoreHook } from "@/store/modules/user";
 
-export type UserResult = {
-  success: boolean;
-  data: {
-    /** 头像 */
-    avatar: string;
-    /** 用户名 */
-    username: string;
-    /** 昵称 */
-    nickname: string;
-    /** 当前登录用户的角色 */
-    roles: Array<string>;
-    /** 按钮级别权限 */
-    permissions: Array<string>;
-    /** `token` */
-    accessToken: string;
-    /** 用于调用刷新`accessToken`的接口时所需的`token` */
-    refreshToken: string;
-    /** `accessToken`的过期时间（格式'xxxx/xx/xx xx:xx:xx'） */
-    expires: Date;
-  };
+export type LoginResult = {
+  code: number;
+  message: string;
+  data: string
 };
+
+export type UserInfoResult = {
+  code: number;
+  message: string;
+  data: {
+    id: number;
+    username: string;
+    email: string;
+    phone: string;
+    password: null;
+    passwordHash: string;
+    avatarPath: null;
+    createdAt: string;
+    updatedAt: null;
+    lastLoginAt: null;
+    userRole: null;
+  };
+}
 
 export type RefreshTokenResult = {
   success: boolean;
@@ -42,6 +44,15 @@ export type basicResult = {
   data: null;
 };
 
+/** 获取邮箱验证码 */
+export const getEmailCode = (data: { email: string }) => {
+  return http.request<basicResult>(
+    "get", // 请求方法
+    "api/user/sendEmailCode", // 请求 URL
+    { params: data }
+  );
+};
+
 /** 注册 */
 export const registerUser = (data: { username: string; phone: string; password: string; mail: string }, verificationCode: string) => {
   return http.request<{ result: "SUC" | "FAIL", message: string }>(
@@ -49,28 +60,24 @@ export const registerUser = (data: { username: string; phone: string; password: 
     "/api/register", // 请求 URL
     {
       data, // 请求体
-      params: { verificationCode } // Query 参数
+      params: { verificationCode }, // Query 参数
     }
   );
 };
 
 /** 登录 */
-export const getLogin = (data?: object) => {
-  return http.request<UserResult>("post", "/login", { data });
+export const getLoginWithoutInfo = (data?: object) => {
+  return http.request<LoginResult>("post", "/login", { data });
 };
+
+/** 获取用户信息 */
+export const getUserInfo = () => {
+  return http.request<UserInfoResult>("get", "/api/user/getUserInfo", {});
+}
 
 /** 刷新`token` */
 export const refreshTokenApi = (data?: object) => {
   return http.request<RefreshTokenResult>("post", "/refresh-token", { data });
-};
-
-/** 获取邮箱验证码 */
-export const getEmailCode = (data: { email: string }) => {
-  return http.request<basicResult>(
-    "get", // 请求方法
-    "/api/user/sendEmailCode", // 请求 URL
-    { params: data }
-  );
 };
 
 /**修改密码 */

@@ -26,7 +26,8 @@ const defaultConfig: AxiosRequestConfig = {
   // 数组格式参数序列化（https://github.com/axios/axios/issues/5142）
   paramsSerializer: {
     serialize: stringify as unknown as CustomParamsSerializer
-  }
+  },
+  // baseURL: "http://122.9.35.116:8080", 
 };
 
 class PureHttp {
@@ -48,14 +49,14 @@ class PureHttp {
   private static axiosInstance: AxiosInstance = Axios.create(defaultConfig);
 
   /** 重连原始请求 */
-  private static retryOriginalRequest(config: PureHttpRequestConfig) {
-    return new Promise(resolve => {
-      PureHttp.requests.push((token: string) => {
-        config.headers["Authorization"] = formatToken(token);
-        resolve(config);
-      });
-    });
-  }
+  // private static retryOriginalRequest(config: PureHttpRequestConfig) {
+  //   return new Promise(resolve => {
+  //     PureHttp.requests.push((token: string) => {
+  //       config.headers["Authorization"] = formatToken(token);
+  //       resolve(config);
+  //     });
+  //   });
+  // }
 
   /** 请求拦截 */
   private httpInterceptorsRequest(): void {
@@ -80,31 +81,10 @@ class PureHttp {
           : new Promise(resolve => {
             const data = getToken();
             if (data) {
-              const now = new Date().getTime();
-              const expired = parseInt(data.expires) - now <= 0;
-              if (expired) {
-                if (!PureHttp.isRefreshing) {
-                  PureHttp.isRefreshing = true;
-                  // token过期刷新
-                  useUserStoreHook()
-                    .handRefreshToken({ refreshToken: data.refreshToken })
-                    .then(res => {
-                      const token = res.data.accessToken;
-                      config.headers["Authorization"] = formatToken(token);
-                      PureHttp.requests.forEach(cb => cb(token));
-                      PureHttp.requests = [];
-                    })
-                    .finally(() => {
-                      PureHttp.isRefreshing = false;
-                    });
-                }
-                resolve(PureHttp.retryOriginalRequest(config));
-              } else {
-                config.headers["Authorization"] = formatToken(
-                  data.accessToken
-                );
-                resolve(config);
-              }
+              config.headers["Authorization"] = formatToken(
+                data.accessToken
+              );
+              resolve(config);
             } else {
               resolve(config);
             }

@@ -39,17 +39,26 @@ export function useNav() {
 
   /** 头像（如果头像为空则使用 src/assets/user.jpg ） */
   const userAvatar = computed(() => {
-    return isAllEmpty(useUserStoreHook()?.avatar)
-      ? Avatar
-      : useUserStoreHook()?.avatar;
+    const avatar = useUserStoreHook()?.avatar;
+    return avatar && avatar !== "" ? avatar : Avatar;
   });
 
   /** 昵称（如果昵称为空则显示用户名） */
   const username = computed(() => {
-    return isAllEmpty(useUserStoreHook()?.nickname)
-      ? useUserStoreHook()?.username
-      : useUserStoreHook()?.nickname;
+    return useUserStoreHook()?.username
+
   });
+
+  /** 邮箱 */
+  const email = computed(() => {
+    return useUserStoreHook()?.email;
+  });
+
+  /** 手机号 */
+  const phone = computed(() => {
+    return useUserStoreHook()?.phone;
+  });
+
 
   const avatarsStyle = computed(() => {
     return username.value ? { marginRight: "10px" } : "";
@@ -151,6 +160,8 @@ export function useNav() {
     pureApp,
     username,
     userAvatar,
+    email,
+    phone,
     avatarsStyle,
     tooltipEffect
   };

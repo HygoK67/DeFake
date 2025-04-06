@@ -66,8 +66,8 @@ const sendCode = async () => {
   try {
     loading.value = true;
     const response = await getEmailCode({ email: registerForm.mail });
-    console.log(response.result);
-    if (response.result === "SUC") {
+    console.log(response.message);
+    if (response.code === "SUC") {
       ElMessage.success("验证码已发送，请检查邮箱！");
       verificationSent.value = true;
       startCountdown(); // 开始倒计时
