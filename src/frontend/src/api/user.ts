@@ -1,4 +1,5 @@
 import { http } from "@/utils/http";
+import { useUserStoreHook } from "@/store/modules/user";
 
 export type UserResult = {
   success: boolean;
@@ -34,12 +35,22 @@ export type RefreshTokenResult = {
   };
 };
 
+/** 修改密码  邮箱验证*/
+export type basicResult = {
+  code: number;
+  message: string;
+  data: null;
+};
+
 /** 注册 */
-export const registerUser = (data: { username: string; phone: string; password: string; mail: string }) => {
-  return http.request<{ result: "SUC" | "FAIL" }>(
+export const registerUser = (data: { username: string; phone: string; password: string; mail: string }, verificationCode: string) => {
+  return http.request<{ result: "SUC" | "FAIL", message: string }>(
     "post", // 请求方法
-    "http://localhost:8080/api/register", // 请求 URL
-    { data } // 请求体
+    "/api/register", // 请求 URL
+    {
+      data, // 请求体
+      params: { verificationCode } // Query 参数
+    }
   );
 };
 
@@ -51,4 +62,29 @@ export const getLogin = (data?: object) => {
 /** 刷新`token` */
 export const refreshTokenApi = (data?: object) => {
   return http.request<RefreshTokenResult>("post", "/refresh-token", { data });
+};
+
+/** 获取邮箱验证码 */
+export const getEmailCode = (data: { email: string }) => {
+  return http.request<basicResult>(
+    "get", // 请求方法
+    "/api/user/sendEmailCode", // 请求 URL
+    { params: data }
+  );
+};
+
+/**修改密码 */
+export const updatePassword = (data: { oldPassword: string; newPassword: string }) => {
+  const userStore = useUserStoreHook();
+  const { username } = userStore;
+  return http.request<basicResult>(
+    "post", // 请求方法
+    "/api/user/updatePassword", // 请求 URL
+    {
+      data: {
+        ...data,
+        username
+      }
+    }
+  );
 };

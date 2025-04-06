@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
+import { updatePassword } from "@/api/user";
+import { useNav } from "@/layout/hooks/useNav";
+
+const { logout } = useNav();
+
+const loading = ref(false);
 
 // 表单数据
 const form = ref({
@@ -8,6 +14,8 @@ const form = ref({
   newPassword: "",
   confirmPassword: ""
 });
+
+
 
 // 表单校验规则
 const rules = {
@@ -17,30 +25,38 @@ const rules = {
     { min: 6, message: "密码长度不能少于6位", trigger: "blur" }
   ],
   confirmPassword: [
-    { required: true, message: "请确认新密码", trigger: "blur" },
-    {
-      validator: (rule: any, value: string, callback: Function) => {
-        if (value !== form.value.newPassword) {
-          callback(new Error("两次输入的新密码不一致"));
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur"
-    }
+    { required: true, message: "请输入新密码", trigger: "blur" },
+    { min: 6, message: "密码长度不能少于6位", trigger: "blur" }
   ]
 };
 
 // 提交表单
 const onSubmit = async (formEl: any) => {
   if (!formEl) return;
-  await formEl.validate((valid: boolean) => {
+
+  await formEl.validate(async (valid: boolean) => {
     if (valid) {
-      // 模拟提交修改密码请求
-      ElMessage.success("密码修改成功！");
-      form.value.currentPassword = "";
-      form.value.newPassword = "";
-      form.value.confirmPassword = "";
+      loading.value = true;
+      try {
+        const response = await updatePassword({
+          oldPassword: form.value.currentPassword,
+          newPassword: form.value.newPassword,
+        });
+        if (response.code === 0) {
+          ElMessage.success("密码修改成功！请重新登录");
+          logout();
+        } else {
+          ElMessage.error(response.message);
+        }
+        // form.value.currentPassword = "";
+        // form.value.newPassword = "";
+        // form.value.confirmPassword = "";
+      } catch (error) {
+        ElMessage.error("请求失败，请检查网络或稍后重试！");
+        console.error(error);
+      } finally {
+        loading.value = false;
+      }
     } else {
       ElMessage.error("请检查输入内容！");
     }
@@ -122,7 +138,7 @@ const onReset = (formEl: any) => {
 }
 
 .el-form-item {
-  font-size: 16px;
+  font-size: 15px;
   /* 增大表单标签字体 */
 }
 
@@ -137,15 +153,8 @@ const onReset = (formEl: any) => {
   /* 调整 label 的位置 */
 }
 
-.el-input {
-  font-size: 15px;
-  /* 增大输入框字体 */
-  height: 41px;
-  /* Ensure all rules are properly closed */
-}
-
 .el-button {
-  font-size: 16px;
+  font-size: 14px;
   /* 增大按钮字体 */
   padding: 10px 20px;
   /* 增大按钮内边距 */
