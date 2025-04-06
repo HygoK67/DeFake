@@ -16,7 +16,7 @@ export default [
     meta: {
       title: "修改密码",
       icon: "ep:lock", // 图标（可选）
-      showLink: true,
+      showLink: false,
     }
   }
 ] as RouteConfigsTable[];

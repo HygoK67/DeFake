@@ -14,7 +14,7 @@ export default [
   {
     path: "/register",
     name: "Register",
-    component: () => import("@/views/register/index.vue"),
+    component: () => import("@/views/login/register.vue"),
     meta: {
       title: "注册",
       showLink: false,

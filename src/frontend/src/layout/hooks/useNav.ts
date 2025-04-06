@@ -69,7 +69,7 @@ export function useNav() {
   });
 
   const title = computed(() => {
-    return $config.Title;
+    return "defake";
   });
 
   /** 动态title */
