@@ -53,11 +53,11 @@ onMounted(() => {
     if (organizationId.value === "5") {
       organization.name = "AAA大学2024年毕业设计";
       organization.organization = "AAA大学";
-      organization.description = "AAA大学2024年毕业设计作品收集与评比活动";
+      organization.description = "AAA大学2024年毕业设计";
     } else if (organizationId.value === "6") {
       organization.name = "AAB大学2024年毕业设计";
       organization.organization = "AAB大学";
-      organization.description = "AAB大学2024年毕业设计作品收集与评比活动";
+      organization.description = "AAB大学2024年毕业设计";
     } else {
       organization.name = `组织${organizationId.value}`;
       organization.organization = `测试组织${organizationId.value}`;

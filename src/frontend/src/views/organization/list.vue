@@ -14,7 +14,7 @@ const listType = ref(route.params.type);
 
 // 计算标题
 const pageTitle = computed(() => {
-  return listType.value === "personal" ? "个人活动" : "Active活动";
+  return listType.value === "personal" ? "个人活动" : "当前开放活动";
 });
 
 // 组织列表
