@@ -21,7 +21,7 @@ public class NotificationController {
     @Autowired
     NotificationService notificationService;
 
-    @PostMapping("/deleteNotification")
+    @PostMapping("/delete")
     public Result deleteNotification(@RequestBody Map<String, String> requestBody) {
         long notificationId = Long.parseLong(requestBody.get("notificationId"));
         if (notificationService.deleteNotification(notificationId)) {
@@ -30,7 +30,7 @@ public class NotificationController {
         return Result.error("删除通知失败");
     }
 
-    @PostMapping("/deleteAllNotification")
+    @PostMapping("/clear")
     public Result deleteAllNotification(@RequestBody Map<String, String> requestBody) {
         long userId = Long.parseLong(requestBody.get("userId"));
         if (notificationService.deleteAllNotification(userId)) {
@@ -39,7 +39,7 @@ public class NotificationController {
         return Result.error("删除全部通知失败");
     }
 
-    @PostMapping("/notificationInfo")
+    @PostMapping("/info")
     public Result notificationInfo(@RequestBody Map<String, String> requestBody) {
         long notificationId = Long.parseLong(requestBody.get("notificationId"));
         Notification notification = notificationService.notificationInfo(notificationId);
@@ -49,7 +49,7 @@ public class NotificationController {
         return Result.error("查看通知内容失败");
     }
 
-    @PostMapping("/notificationFilter")
+    @PostMapping("/filter")
     public Result notificationFilter(@RequestBody Map<String, String> requesetBody) {
         long userId = Long.parseLong(requesetBody.get("userId"));
         String condition = requesetBody.get("condition");
