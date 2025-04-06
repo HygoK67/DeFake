@@ -183,7 +183,7 @@ const classifyOrganizations = () => {
       <!-- Active活动 -->
       <div class="organization-section">
         <div class="section-header">
-          <h3>Active活动</h3>
+          <h3>当前开放活动</h3>
         </div>
 
         <div class="organization-cards">
