@@ -1,14 +1,14 @@
 package com.group6.defakelogibackend.controller;
 
+import com.group6.defakelogibackend.annotation.Admin;
+import com.group6.defakelogibackend.annotation.LoggedIn;
 import com.group6.defakelogibackend.model.Notification;
 import com.group6.defakelogibackend.model.Result;
 import com.group6.defakelogibackend.service.NotificationService;
 import com.group6.defakelogibackend.service.UserService;
+import com.group6.defakelogibackend.utils.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,10 +16,13 @@ import java.util.Map;
 
 @RestController()
 @RequestMapping("/api/notification")
+@LoggedIn
 public class NotificationController {
 
     @Autowired
     NotificationService notificationService;
+    @Autowired
+    JWTService jwtService;
 
     @PostMapping("/deleteNotification")
     public Result deleteNotification(@RequestBody Map<String, String> requestBody) {
@@ -40,6 +43,7 @@ public class NotificationController {
     }
 
     @PostMapping("/notificationInfo")
+    @Admin
     public Result notificationInfo(@RequestBody Map<String, String> requestBody) {
         long notificationId = Long.parseLong(requestBody.get("notificationId"));
         Notification notification = notificationService.notificationInfo(notificationId);
@@ -50,9 +54,9 @@ public class NotificationController {
     }
 
     @PostMapping("/notificationFilter")
-    public Result notificationFilter(@RequestBody Map<String, String> requesetBody) {
-        long userId = Long.parseLong(requesetBody.get("userId"));
-        String condition = requesetBody.get("condition");
+    public Result notificationFilter(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
+        long userId = Long.parseLong(jwtService.getUserId(jwtToken));
+        String condition = requestBody.get("condition");
         List<Notification> list = notificationService.notificationFilter(userId, condition);
         if (list != null) {
             return Result.success(list);
