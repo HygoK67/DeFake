@@ -18,7 +18,7 @@ public class GroupController {
     @Autowired
     GroupService groupService;
 
-    @PostMapping("/createGroup")
+    @PostMapping("/create")
     public Result createGroup(@RequestBody Map<String, String> requestBody) {
         Long userId = Long.parseLong(requestBody.get("userId"));
         String groupname = requestBody.get("groupname");
@@ -28,7 +28,7 @@ public class GroupController {
         return Result.error("创建组织失败");
     }
 
-    @PostMapping("/applyGroup")
+    @PostMapping("/apply")
     public Result applyGroup(@RequestBody Map<String, String> requestBody) {
         Long userId = Long.parseLong(requestBody.get("userId"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
@@ -40,7 +40,7 @@ public class GroupController {
         return Result.error("发送加入组织申请失败");
     }
 
-    @PostMapping("/inviteGroup")
+    @PostMapping("/invite")
     public Result inviteGroup(@RequestBody Map<String, String> requestBody) {
         Long userId = Long.parseLong(requestBody.get("userId"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
@@ -52,7 +52,7 @@ public class GroupController {
         return Result.error("发送邀请失败");
     }
 
-    @PostMapping("/kickGroup")
+    @PostMapping("/kick")
     public Result kickGroup(@RequestBody Map<String, String> requestBody) {
         Long userId = Long.parseLong(requestBody.get("userId"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
