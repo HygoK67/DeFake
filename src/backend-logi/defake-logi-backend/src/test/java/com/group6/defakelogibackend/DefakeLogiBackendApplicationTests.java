@@ -23,12 +23,6 @@ class DefakeLogiBackendApplicationTests {
 
     @Test
     void contextLoads() {
-        String pass = "asdasd";
-        User user0 = new User();
-        user0.setUsername("test-user");
-        user0.setEmail("example@example.com");
-        user0.setPasswordHash(passwordService.encodePassword(pass));
-        userMapper.addUser(user0);
     }
 
 }
