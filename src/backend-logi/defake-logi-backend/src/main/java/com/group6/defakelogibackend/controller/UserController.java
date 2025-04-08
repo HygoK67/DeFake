@@ -39,7 +39,7 @@ public class UserController {
         return Result.success(null);
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public Result login(@RequestBody User user) {
         String jwtToken = userService.loginUser(user);
         return Result.success(jwtToken);
@@ -54,9 +54,9 @@ public class UserController {
     }
 
     @LoggedIn
-    @PostMapping("/updateInfo")
-    public Result updatePassword(@RequestBody Map<String, String> requestBody) {
-        long userId = Long.parseLong(requestBody.get("userId"));
+    @PutMapping("/updateInfo")
+    public Result updatePassword(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
+        long userId = Long.parseLong(jwtService.getUserId(jwtToken));
         String oldPassword = requestBody.get("oldPassword");
         String newPassword = requestBody.get("newPassword");
 

@@ -1,13 +1,13 @@
 package com.group6.defakelogibackend.controller;
 
 import com.group6.defakelogibackend.annotation.Admin;
+import com.group6.defakelogibackend.model.Notification;
 import com.group6.defakelogibackend.model.OperationLog;
 import com.group6.defakelogibackend.model.Result;
+import com.group6.defakelogibackend.service.NotificationService;
 import com.group6.defakelogibackend.utils.OperationLogService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,6 +18,8 @@ public class AdminController {
 
     @Autowired
     OperationLogService operationLogService;
+    @Autowired
+    NotificationService notificationService;
 
     @GetMapping("userInfo")
     public Result getUserInfo() {
@@ -28,6 +30,12 @@ public class AdminController {
     public Result getOperationLog() {
         List<OperationLog> operationLogs = operationLogService.getOperationLog();
         return Result.success(operationLogs);
+    }
+
+    @GetMapping("/notification/info")
+    public Result notificationInfo( @RequestParam("notificationId") String notificationId) {
+        Notification notification = notificationService.notificationInfo(Long.parseLong(notificationId));
+        return Result.success(notification);
     }
 
 }

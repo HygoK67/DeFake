@@ -114,11 +114,10 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     public boolean updatePassword(long userId, String oldPassword, String newPassword) {
         User user = userMapper.findUserById(userId);
         if (user == null) {
-            return false;
+            throw new EntityMissingException("id 错误, 找不到对应的用户!");
         }
-        System.out.println(user.getPasswordHash());
         if (!passwordService.matches(oldPassword, user.getPasswordHash())) {
-            return false;
+            throw new AuthenticationFailedException("密码错误");
         }
 
         user.setPassword(newPassword);

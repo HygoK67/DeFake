@@ -21,13 +21,13 @@
 
     <select id="findNotificationByUserId_sent_at_desc">
         select * from notifications
-        where user_id = #{user_id}
+        where user_id_rec = #{user_id}
         order by sent_at desc
     </select>
 
     <select id="findNotificationByUserId_sent_at_asc">
         select * from notifications
-        where user_id = #{user_id}
+        where user_id_rec = #{user_id}
         order by sent_at asc
     </select>
 
