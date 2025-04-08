@@ -28,29 +28,29 @@ public class GroupController {
         return Result.success("创建组织成功");
 
     }
-
+    
     @LoggedIn
     @PostMapping("/apply")
     public Result applyGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
-        Long userId = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userId_sent = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userId_rec = Long.parseLong(requestBody.get("userId_rec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
         String title = requestBody.get("title");
         String content = requestBody.get("content");
-        groupService.applyGroup(userId, groupId, title, content);
+        groupService.applyGroup(userId_sent, userId_rec, groupId, title, content);
         return Result.success("发送加入组织申请成功");
-
     }
 
+    @LoggedIn
     @PostMapping("/invite")
-    public Result inviteGroup(@RequestBody Map<String, String> requestBody) {
-        Long userId = Long.parseLong(requestBody.get("userId"));
+    public Result inviteGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
+        Long userId_sent = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userId_rec = Long.parseLong(requestBody.get("userId_rec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
         String title = requestBody.get("title");
         String content = requestBody.get("content");
-        if (groupService.inviteGroup(userId, groupId, title, content)) {
-            return Result.success("发送邀请成功");
-        }
-        return Result.error("发送邀请失败");
+        groupService.inviteGroup(userId_sent, userId_rec, groupId, title, content);
+        return Result.success("发送邀请成功");
     }
 
     @PostMapping("/kick")
