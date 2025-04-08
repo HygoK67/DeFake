@@ -57,7 +57,6 @@ public class UserController {
     }
 
     @LoggedIn
-
     @PutMapping("/info")
     public Result updateInfo(
             @RequestBody User user,

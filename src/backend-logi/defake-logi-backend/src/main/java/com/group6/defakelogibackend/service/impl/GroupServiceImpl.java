@@ -1,5 +1,7 @@
 package com.group6.defakelogibackend.service.impl;
 
+import com.group6.defakelogibackend.exception.EntityDuplicateException;
+import com.group6.defakelogibackend.exception.EntityMissingException;
 import com.group6.defakelogibackend.mapper.GroupMapper;
 import com.group6.defakelogibackend.mapper.NotificationMapper;
 import com.group6.defakelogibackend.mapper.UserToGroupMapper;
@@ -27,7 +29,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
     public boolean createGroup(long userId, String groupname) {
         // 如果该用户已经创建过同名的组织
         if (groupMapper.findGroupByUserIdAndGroupname(userId, groupname) != null) {
-            return false;
+            throw new EntityDuplicateException("该 userId 已经创建过相同 groupname 的组织!");
         }
         groupMapper.createGroup(userId, groupname);
         long groupId = groupMapper.findGroupByUserIdAndGroupname(userId, groupname).getId();
@@ -41,14 +43,13 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         Group group = groupMapper.findGroupByGroupId(groupId);
         // 如果groupId无效
         if (group == null) {
-            return false;
+            throw new EntityMissingException("groupId 无效!");
         }
         // 如果该用户已经加入该组织，则不能发送申请
         if (userToGroupMapper.findUserToGroup(userId, groupId) != null) {
-            return false;
+            throw new EntityDuplicateException("该用户已经加入该组织!");
         }
         long groupLeaderId = group.getGroupLeaderId();
-
         notificationMapper.createNotificationUser2User(groupLeaderId, userId, title, content);
         return true;
     }
@@ -84,7 +85,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         }
         long groupLeaderId = group.getGroupLeaderId();
         // 管理员不能踢自己
-        if (groupLeaderId == userId){
+        if (groupLeaderId == userId) {
             return false;
         }
         userToGroupMapper.deleteUserToGroup(userId, groupId);
