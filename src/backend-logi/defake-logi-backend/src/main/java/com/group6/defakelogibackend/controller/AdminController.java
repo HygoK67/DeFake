@@ -23,6 +23,7 @@ public class AdminController {
 
     @GetMapping("userInfo")
     public Result getUserInfo() {
+
         return Result.success();
     }
 
