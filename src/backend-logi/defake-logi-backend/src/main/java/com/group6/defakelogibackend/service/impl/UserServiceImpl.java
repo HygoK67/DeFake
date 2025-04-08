@@ -1,17 +1,13 @@
 package com.group6.defakelogibackend.service.impl;
 
-import com.group6.defakelogibackend.exception.AuthenticationFailedException;
-import com.group6.defakelogibackend.exception.EntityDuplicateException;
-import com.group6.defakelogibackend.exception.EntityMissingException;
-import com.group6.defakelogibackend.exception.FieldMissingException;
+import com.group6.defakelogibackend.exception.*;
 import com.group6.defakelogibackend.mapper.UserMapper;
 import com.group6.defakelogibackend.model.User;
-import com.group6.defakelogibackend.utils.EmailService;
-import com.group6.defakelogibackend.utils.JWTService;
-import com.group6.defakelogibackend.utils.PasswordService;
+import com.group6.defakelogibackend.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +22,10 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     PasswordService passwordService;
     @Autowired
     JWTService jwtService;
+    @Autowired
+    OperationLogService operationLogService;
+    @Autowired
+    TencentCOSService cosService;
 
     @Override
     @Transactional
@@ -50,6 +50,7 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         }
         user.setPasswordHash(passwordService.encodePassword(user.getPassword()));
         userMapper.addUser(user);
+        operationLogService.addUserRegisterLog(user.getId(), user.getEmail());
     }
 
     @Override
@@ -75,10 +76,11 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         tmpUser.setId(userFound.getId());
         tmpUser.setLastLoginAt(LocalDateTime.now());
         userMapper.updateUser(tmpUser);
-        // 保证 controller 方法中能拿到 user id
-        user.setId(userFound.getId());
         // 生成登录令牌
-        return jwtService.generateJWT(userFound.getId(), userFound.getEmail(), userFound.getRole());
+        String jwtToken = jwtService.generateJWT(userFound.getId(), userFound.getEmail(), userFound.getRole());
+        // 记录日志
+        operationLogService.addUserLoginLog(userFound.getId(), userFound.getEmail(), jwtToken);
+        return jwtToken;
     }
 
     @Override
@@ -91,6 +93,20 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         }
         user.setPasswordHash(null);
         return user;
+    }
+
+    @Override
+    @Transactional
+    public String userUpload(long userId, MultipartFile file) {
+        String url;
+        try {
+            url = cosService.upload(file);
+        }
+        catch (Exception e) {
+            throw new FileHandleException("上传文件失败, 请稍后重试!");
+        }
+        operationLogService.addUserUploadLog(userId, file.getOriginalFilename(), url);
+        return url;
     }
 
     @Override

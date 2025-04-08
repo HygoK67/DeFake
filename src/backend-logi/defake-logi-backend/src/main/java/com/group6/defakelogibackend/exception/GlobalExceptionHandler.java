@@ -27,4 +27,9 @@ public class GlobalExceptionHandler {
     public Result handleException(EntityMissingException exception) {
         return Result.error(exception.getMessage());
     }
+
+    @ExceptionHandler(FileHandleException.class)
+    public Result handleException(FileHandleException exception) {
+        return Result.error(exception.getMessage());
+    }
 }

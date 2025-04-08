@@ -23,8 +23,6 @@ public class UserController {
     UserService userService;
     @Autowired
     JWTService jwtService;
-    @Autowired
-    OperationLogService operationLogService;
 
     @GetMapping("/sendEmailCode")
     public Result sendVerifyCode(@RequestParam String email) {
@@ -44,7 +42,6 @@ public class UserController {
     @GetMapping("/login")
     public Result login(@RequestBody User user) {
         String jwtToken = userService.loginUser(user);
-        operationLogService.addUserLoginLog(user.getId(), user.getEmail(), jwtToken);
         return Result.success(jwtToken);
     }
 
@@ -57,7 +54,7 @@ public class UserController {
     }
 
     @LoggedIn
-    @PostMapping("/updatePassword")
+    @PostMapping("/updateInfo")
     public Result updatePassword(@RequestBody Map<String, String> requestBody) {
         long userId = Long.parseLong(requestBody.get("userId"));
         String oldPassword = requestBody.get("oldPassword");

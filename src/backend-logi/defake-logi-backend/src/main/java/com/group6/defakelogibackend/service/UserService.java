@@ -2,6 +2,7 @@ package com.group6.defakelogibackend.service;
 
 import com.group6.defakelogibackend.model.User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
 
@@ -12,6 +13,8 @@ public interface UserService {
     public String loginUser(User user);
 
     public User userInfo(long userId);
+
+    public String userUpload(long userId, MultipartFile file);
 
     public boolean updatePassword(long userId, String oldPassword, String newPassword);
 

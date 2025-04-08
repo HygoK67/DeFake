@@ -2,12 +2,12 @@ package com.group6.defakelogibackend.controller;
 
 import com.group6.defakelogibackend.annotation.LoggedIn;
 import com.group6.defakelogibackend.model.Result;
+import com.group6.defakelogibackend.service.UserService;
+import com.group6.defakelogibackend.utils.JWTService;
+import com.group6.defakelogibackend.utils.OperationLogService;
 import com.group6.defakelogibackend.utils.TencentCOSService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -16,17 +16,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileController {
 
     @Autowired
-    TencentCOSService cosService;
+    UserService userService;
+    @Autowired
+    JWTService jwtService;
 
     @PostMapping("/upload")
-    public Result uploadFile(@RequestParam("file") MultipartFile file) {
-        try {
-            String url = cosService.upload(file);
-            return Result.success(url);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return Result.error("上传文件失败，请重试!");
-        }
+    public Result uploadFile(@RequestParam("file") MultipartFile file, @RequestHeader String jwtToken) {
+        long userId = Long.parseLong(jwtService.getUserId(jwtToken));
+        String url = userService.userUpload(userId, file);
+        return Result.success(url);
     }
 }
