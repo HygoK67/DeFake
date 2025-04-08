@@ -2,6 +2,7 @@ package com.group6.defakelogibackend.controller;
 
 import com.group6.defakelogibackend.annotation.Admin;
 import com.group6.defakelogibackend.annotation.LoggedIn;
+import com.group6.defakelogibackend.mapper.UserToGroupMapper;
 import com.group6.defakelogibackend.model.Result;
 import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.service.UserService;
@@ -23,6 +24,8 @@ public class UserController {
     UserService userService;
     @Autowired
     JWTService jwtService;
+    @Autowired
+    private UserToGroupMapper userToGroupMapper;
 
     @GetMapping("/sendEmailCode")
     public Result sendVerifyCode(@RequestParam String email) {
@@ -56,9 +59,15 @@ public class UserController {
     @LoggedIn
 
     @PutMapping("/info")
-    public Result updateInfo(@RequestBody User user, @RequestHeader String jwtToken, @RequestBody Map<String, String> map) {
-
-
-        return Result.error("修改密码失败");
+    public Result updateInfo(
+            @RequestBody User user,
+            @RequestHeader String jwtToken,
+            @RequestBody Map<String, String> map,
+            @RequestParam(required = false) String verificationCode
+    ) {
+        long id = Long.parseLong(jwtService.getUserId(jwtToken));
+        user.setId(id);
+        userService.updateUserInfo(user, map.get("oldPassword"), verificationCode);
+        return Result.success();
     }
 }

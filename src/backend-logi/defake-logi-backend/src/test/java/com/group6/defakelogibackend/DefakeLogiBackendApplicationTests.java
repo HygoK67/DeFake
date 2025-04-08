@@ -18,9 +18,6 @@ class DefakeLogiBackendApplicationTests {
     @Autowired
     UserMapper userMapper;
 
-    @Autowired
-    PasswordService passwordService;
-
     @Test
     void contextLoads() {
     }
