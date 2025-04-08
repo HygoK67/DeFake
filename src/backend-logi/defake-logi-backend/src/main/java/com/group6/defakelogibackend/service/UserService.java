@@ -16,6 +16,6 @@ public interface UserService {
 
     public String userUpload(long userId, MultipartFile file);
 
-    public void updateUserInfo(User user, String oldPassword);
+    public void updateUserInfo(User user, String oldPassword, String verificationCode);
 
 }
