@@ -11,7 +11,11 @@
             (#{userId}, #{operationType}, #{operationDetailJsonString}, #{ipAddress})
     </insert>
 
-    <select id="filterLog" resultType="com.group6.defakelogibackend.model.OperationLog">
+    <resultMap id="opLogJsonMap" type="com.group6.defakelogibackend.model.OperationLog">
+        <result property="operationDetailJsonString" column="operation_detail"/>
+    </resultMap>
+
+    <select id="filterLog" resultType="com.group6.defakelogibackend.model.OperationLog" resultMap="opLogJsonMap">
         select * from operation_logs
     </select>
 

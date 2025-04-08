@@ -39,7 +39,7 @@ public class UserController {
         return Result.success(null);
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public Result login(@RequestBody User user) {
         String jwtToken = userService.loginUser(user);
         return Result.success(jwtToken);
@@ -49,21 +49,15 @@ public class UserController {
     @GetMapping("/info")
     public Result info(@RequestHeader String jwtToken) {
         long id = Long.parseLong(jwtService.getUserId(jwtToken));
-        User user = userService.userInfo(id);
+        User user = userService.getUserInfo(id);
         return Result.success(user);
     }
 
     @LoggedIn
-    @PostMapping("/updateInfo")
-    public Result updatePassword(@RequestBody Map<String, String> requestBody) {
-        long userId = Long.parseLong(requestBody.get("userId"));
-        String oldPassword = requestBody.get("oldPassword");
-        String newPassword = requestBody.get("newPassword");
+    @PutMapping("/info")
+    public Result updateInfo(@RequestBody User user, @RequestHeader String jwtToken, @RequestBody Map<String, String> map) {
 
-        if (userService.updatePassword(userId, oldPassword, newPassword)) {
-            return Result.success();
-        }
+
         return Result.error("修改密码失败");
     }
-
 }

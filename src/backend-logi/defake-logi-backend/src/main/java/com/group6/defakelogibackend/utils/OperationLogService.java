@@ -1,6 +1,7 @@
 package com.group6.defakelogibackend.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group6.defakelogibackend.mapper.OperationLogMapper;
 import com.group6.defakelogibackend.mapper.UserMapper;
@@ -14,6 +15,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class OperationLogService {
@@ -84,8 +86,19 @@ public class OperationLogService {
             log.setUserName(user.getUsername());
             log.setUserEmail(user.getEmail());
             log.setAvatarURL(user.getAvatarPath());
+            log.setOperationDetail(stringToMap(log.getOperationDetailJsonString()));
+            log.setOperationDetailJsonString(null);
         }
         return logs;
+    }
+
+    private Map<String, Object> stringToMap(String jsonStr) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(jsonStr, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("Error parsing JSON", e);
+        }
     }
 
     private String getIP() {

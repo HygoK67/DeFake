@@ -85,7 +85,7 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
 
     @Override
     @Transactional
-    public User userInfo(long userId) {
+    public User getUserInfo(long userId) {
         // 如果findUserById找不到用户的话，会返回null
         User user = userMapper.findUserById(userId);
         if (user == null) {
@@ -111,20 +111,7 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
 
     @Override
     @Transactional
-    public boolean updatePassword(long userId, String oldPassword, String newPassword) {
-        User user = userMapper.findUserById(userId);
-        if (user == null) {
-            return false;
-        }
-        System.out.println(user.getPasswordHash());
-        if (!passwordService.matches(oldPassword, user.getPasswordHash())) {
-            return false;
-        }
+    public void updateUserInfo(User user, String oldPassword) {
 
-        user.setPassword(newPassword);
-        user.setPasswordHash(passwordService.encodePassword(newPassword));
-
-        userMapper.updateUserPassword(user);
-        return true;
     }
 }
