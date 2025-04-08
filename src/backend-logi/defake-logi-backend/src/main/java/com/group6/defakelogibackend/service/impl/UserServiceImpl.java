@@ -75,6 +75,8 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         tmpUser.setId(userFound.getId());
         tmpUser.setLastLoginAt(LocalDateTime.now());
         userMapper.updateUser(tmpUser);
+        // 保证 controller 方法中能拿到 user id
+        user.setId(userFound.getId());
         // 生成登录令牌
         return jwtService.generateJWT(userFound.getId(), userFound.getEmail(), userFound.getRole());
     }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.group6.defakelogibackend.mapper.OperationLogMapper">
+
+    <insert id="addLog">
+        insert into operation_logs
+            (user_id, operation_type, operation_detail, ip_address)
+        values
+            (#{userId}, #{operationType}, #{OperationDetailJsonString}, #{ipAddress})
+    </insert>
+
+    <select id="filterLog" resultType="com.group6.defakelogibackend.model.OperationLog">
+        select * from operation_logs
+    </select>
+
+</mapper>

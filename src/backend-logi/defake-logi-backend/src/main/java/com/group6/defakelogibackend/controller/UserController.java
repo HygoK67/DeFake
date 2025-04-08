@@ -7,6 +7,7 @@ import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.service.UserService;
 import com.group6.defakelogibackend.utils.EmailService;
 import com.group6.defakelogibackend.utils.JWTService;
+import com.group6.defakelogibackend.utils.OperationLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,8 @@ public class UserController {
     UserService userService;
     @Autowired
     JWTService jwtService;
+    @Autowired
+    OperationLogService operationLogService;
 
     @GetMapping("/sendEmailCode")
     public Result sendVerifyCode(@RequestParam String email) {
@@ -41,6 +44,7 @@ public class UserController {
     @GetMapping("/login")
     public Result login(@RequestBody User user) {
         String jwtToken = userService.loginUser(user);
+        operationLogService.addUserLoginLog(user.getId(), user.getEmail(), jwtToken);
         return Result.success(jwtToken);
     }
 
@@ -64,7 +68,5 @@ public class UserController {
         }
         return Result.error("修改密码失败");
     }
-
-
 
 }
