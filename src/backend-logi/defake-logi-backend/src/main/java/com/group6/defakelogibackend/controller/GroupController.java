@@ -28,7 +28,7 @@ public class GroupController {
         return Result.success("创建组织成功");
 
     }
-    
+
     @LoggedIn
     @PostMapping("/apply")
     public Result applyGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
@@ -53,13 +53,14 @@ public class GroupController {
         return Result.success("发送邀请成功");
     }
 
+    @LoggedIn
     @PostMapping("/kick")
-    public Result kickGroup(@RequestBody Map<String, String> requestBody) {
-        Long userId = Long.parseLong(requestBody.get("userId"));
+    public Result kickGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
+        long userId_sent = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userId_rec = Long.parseLong(requestBody.get("userId_rec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
-        if (groupService.kickGroup(userId, groupId)) {
-            return Result.success("踢出成功");
-        }
-        return Result.error("踢出失败");
+        groupService.kickGroup(userId_sent, userId_rec, groupId);
+        return Result.success("踢出成功");
+
     }
 }

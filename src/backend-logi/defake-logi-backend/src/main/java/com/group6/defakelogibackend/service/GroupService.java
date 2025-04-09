@@ -7,5 +7,5 @@ public interface GroupService {
 
     public boolean inviteGroup(long userId_sent, long userId_rec, long groupId, String title, String content);
 
-    public boolean kickGroup(long userId, long groupId);
+    public boolean kickGroup(long userId_sent, long userId_rec, long groupId);
 }

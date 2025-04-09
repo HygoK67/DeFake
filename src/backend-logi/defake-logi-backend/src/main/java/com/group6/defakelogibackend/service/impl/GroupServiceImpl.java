@@ -84,22 +84,25 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
 
     @Override
     @Transactional
-    public boolean kickGroup(long userId, long groupId) {
+    public boolean kickGroup(long userId_sent, long userId_rec, long groupId) {
         Group group = groupMapper.findGroupByGroupId(groupId);
         // 如果groupId无效
-//        if (group == null) {
-//            return false;
-//        }
-//        // 如果该用户未加入该组织，则不能将其踢出组织
-//        if (userToGroupMapper.findUserToGroup(userId, groupId) == null) {
-//            return false;
-//        }
-//        long groupLeaderId = group.getGroupLeaderId();
-//        // 管理员不能踢自己
-//        if (groupLeaderId == userId) {
-//            return false;
-//        }
-//        userToGroupMapper.deleteUserToGroup(userId, groupId);
+        if (group == null) {
+            throw new EntityMissingException("groupId 无效!");
+        }
+        // 如果该用户未加入该组织，则不能将其踢出组织
+        if (userToGroupMapper.findUserToGroup(userId_rec, groupId) == null) {
+            throw new EntityMissingException("(userId_rec, groupId) 无效!");
+        }
+
+        if (userId_rec == userId_sent) {
+            throw new EntityDuplicateException("自己不能踢自己!");
+        }
+
+        userToGroupMapper.deleteUserToGroup(userId_rec, groupId);
+        String title = group.getGroupname() + " 组织通知";
+        String content = "您已不再是 " + group.getGroupname() + " 中的成员。";
+        notificationMapper.createNotificationUser2User(userId_sent, userId_rec, groupId, title, content);
         return true;
     }
 }
