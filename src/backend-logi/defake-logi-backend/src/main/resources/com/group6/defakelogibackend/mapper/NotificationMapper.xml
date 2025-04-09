@@ -14,15 +14,15 @@
         where id = #{id}
     </delete>
 
-    <select id="findNotificationByUserId_sent_at_desc">
+    <select id="findNotificationByUserId_sent_at_desc" resultType="com.group6.defakelogibackend.model.Notification">
         select * from notifications
-        where user_id_rec = #{user_id}
+        where user_id_sent = #{user_id} or user_id_rec = #{user_id}
         order by sent_at desc
     </select>
 
-    <select id="findNotificationByUserId_sent_at_asc">
+    <select id="findNotificationByUserId_sent_at_asc" resultType="com.group6.defakelogibackend.model.Notification">
         select * from notifications
-        where user_id_rec = #{user_id}
+        where user_id_sent = #{user_id} or user_id_rec = #{user_id}
         order by sent_at asc
     </select>
 

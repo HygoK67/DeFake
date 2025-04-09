@@ -11,8 +11,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Notification {
     private long id;
-    private int template_id;
-    private long user_id;
+    private long templateId;
+    private long userIdSent;
+    private long userIdRec;
+    private long groupId;
     private String title;
     private String content;
     private LocalDateTime sentAt;
