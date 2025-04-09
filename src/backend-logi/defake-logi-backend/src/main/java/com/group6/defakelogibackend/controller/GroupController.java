@@ -32,24 +32,24 @@ public class GroupController {
     @LoggedIn
     @PostMapping("/apply")
     public Result applyGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
-        Long userId_sent = Long.parseLong(jwtService.getUserId(jwtToken));
-        Long userId_rec = Long.parseLong(requestBody.get("userId_rec"));
+        Long userIdSent = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userIdRec = Long.parseLong(requestBody.get("userIdRec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
         String title = requestBody.get("title");
         String content = requestBody.get("content");
-        groupService.applyGroup(userId_sent, userId_rec, groupId, title, content);
+        groupService.applyGroup(userIdSent, userIdRec, groupId, title, content);
         return Result.success("发送加入组织申请成功");
     }
 
     @LoggedIn
     @PostMapping("/invite")
     public Result inviteGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
-        Long userId_sent = Long.parseLong(jwtService.getUserId(jwtToken));
-        Long userId_rec = Long.parseLong(requestBody.get("userId_rec"));
+        Long userIdSent = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userIdRec = Long.parseLong(requestBody.get("userIdRec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
         String title = requestBody.get("title");
         String content = requestBody.get("content");
-        groupService.inviteGroup(userId_sent, userId_rec, groupId, title, content);
+        groupService.inviteGroup(userIdSent, userIdRec, groupId, title, content);
         return Result.success("发送邀请成功");
     }
 

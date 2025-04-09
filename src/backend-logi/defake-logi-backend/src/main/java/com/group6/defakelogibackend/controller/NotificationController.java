@@ -27,10 +27,8 @@ public class NotificationController {
     @DeleteMapping("/delete")
     public Result deleteNotification(@RequestBody Map<String, String> requestBody) {
         long notificationId = Long.parseLong(requestBody.get("notificationId"));
-        if (notificationService.deleteNotification(notificationId)) {
-            return Result.success();
-        }
-        return Result.error("删除通知失败");
+        notificationService.deleteNotification(notificationId);
+        return Result.success();
     }
 
     @LoggedIn
