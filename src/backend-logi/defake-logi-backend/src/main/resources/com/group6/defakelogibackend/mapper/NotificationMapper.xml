@@ -35,4 +35,10 @@
         select * from notifications
     </select>
 
+    <update id="updateNotificationReadAt">
+        update notifications
+        set read_at = NOW()
+        where id = #{notificationId} and user_id_rec = #{userIdRec}
+    </update>
+
 </mapper>

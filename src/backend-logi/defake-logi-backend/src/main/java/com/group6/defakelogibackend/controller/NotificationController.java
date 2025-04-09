@@ -52,4 +52,13 @@ public class NotificationController {
         List<Notification> list = notificationService.showAllNotifications();
         return Result.success(list);
     }
+
+    @LoggedIn
+    @PutMapping("/read")
+    public Result readNotification(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody){
+        long userIdRec = Long.parseLong(jwtService.getUserId(jwtToken));
+        long notificationId = Long.parseLong(requestBody.get("notificationId"));
+        notificationService.readNotification(userIdRec, notificationId);
+        return Result.success();
+    }
 }

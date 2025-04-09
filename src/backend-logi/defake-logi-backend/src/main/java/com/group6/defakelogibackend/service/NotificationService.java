@@ -14,4 +14,6 @@ public interface NotificationService {
     public List<Notification> notificationFilter(long userId, String condition);
 
     public List<Notification> showAllNotifications();
+
+    public void readNotification(long userIdRec, long notificationId);
 }

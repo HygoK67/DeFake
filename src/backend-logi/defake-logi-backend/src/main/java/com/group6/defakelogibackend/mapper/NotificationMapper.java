@@ -19,4 +19,6 @@ public interface NotificationMapper {
     public void createNotificationUser2User(long userId_sent, long userId_rec, long groupId, String title, String content);
 
     public List<Notification> getAllNotifications();
+
+    public void updateNotificationReadAt(long userIdRec, long notificationId);
 }

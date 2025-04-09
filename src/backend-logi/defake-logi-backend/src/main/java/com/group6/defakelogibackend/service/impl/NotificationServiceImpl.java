@@ -43,7 +43,7 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
     @Override
     @Transactional
     public List<Notification> notificationFilter(long userId, String condition) {
-        if (userMapper.findUserById(userId) == null){
+        if (userMapper.findUserById(userId) == null) {
             throw new EntityMissingException("userId 错误，不存在对应的user!");
         }
         if (condition.equals("sent_at_desc")) {
@@ -57,7 +57,17 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
 
     @Override
     @Transactional
-    public List<Notification> showAllNotifications(){
+    public List<Notification> showAllNotifications() {
         return notificationMapper.getAllNotifications();
+    }
+
+    @Override
+    @Transactional
+    public void readNotification(long userIdRec, long notificationId) {
+        Notification notification = notificationMapper.findNotificationById(notificationId);
+        if (notification.getUserIdRec() != userIdRec){
+            throw new FieldMissingException("userIdRec 字段不符!");
+        }
+        notificationMapper.updateNotificationReadAt(userIdRec, notificationId);
     }
 }
