@@ -10,8 +10,19 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserToGroup {
+
+    public enum Status {
+        in, pending
+    }
+
+    public enum Role {
+        leader, member
+    }
+
     private long id;
     private long userId;
     private long groupId;
     private LocalDateTime createdAt;
+    private Status status;
+    private Role role;
 }

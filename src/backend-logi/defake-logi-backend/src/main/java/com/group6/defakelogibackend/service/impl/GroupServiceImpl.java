@@ -8,6 +8,7 @@ import com.group6.defakelogibackend.mapper.UserMapper;
 import com.group6.defakelogibackend.mapper.UserToGroupMapper;
 import com.group6.defakelogibackend.model.Group;
 import com.group6.defakelogibackend.model.User;
+import com.group6.defakelogibackend.model.UserToGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,25 +85,25 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
 
     @Override
     @Transactional
-    public boolean kickGroup(long userId_sent, long userId_rec, long groupId) {
+    public boolean kickGroup(long userIdSent, long userIdRec, long groupId) {
         Group group = groupMapper.findGroupByGroupId(groupId);
         // 如果groupId无效
         if (group == null) {
             throw new EntityMissingException("groupId 无效!");
         }
         // 如果该用户未加入该组织，则不能将其踢出组织
-        if (userToGroupMapper.findUserToGroup(userId_rec, groupId) == null) {
+        if (userToGroupMapper.findUserToGroup(userIdRec, groupId) == null) {
             throw new EntityMissingException("(userId_rec, groupId) 无效!");
         }
 
-        if (userId_rec == userId_sent) {
+        if (userIdRec == userIdSent) {
             throw new EntityDuplicateException("自己不能踢自己!");
         }
 
-        userToGroupMapper.deleteUserToGroup(userId_rec, groupId);
+        userToGroupMapper.deleteUserToGroup(userIdRec, groupId);
         String title = group.getGroupname() + " 组织通知";
         String content = "您已不再是 " + group.getGroupname() + " 中的成员。";
-        notificationMapper.createNotificationUser2User(userId_sent, userId_rec, groupId, title, content);
+        notificationMapper.createNotificationUser2User(userIdSent, userIdRec, groupId, title, content);
         return true;
     }
 
@@ -111,5 +112,11 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
     public List<Group> showAllGroups() {
         List<Group> list = groupMapper.getAllGroups();
         return list;
+    }
+
+    @Override
+    @Transactional
+    public List<UserToGroup> groupMembers(long groupId) {
+        return groupMapper.findGroupMembersByGroupId(groupId);
     }
 }

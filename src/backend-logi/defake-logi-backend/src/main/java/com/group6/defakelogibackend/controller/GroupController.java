@@ -4,6 +4,8 @@ import com.group6.defakelogibackend.annotation.Admin;
 import com.group6.defakelogibackend.annotation.LoggedIn;
 import com.group6.defakelogibackend.model.Group;
 import com.group6.defakelogibackend.model.Result;
+import com.group6.defakelogibackend.model.User;
+import com.group6.defakelogibackend.model.UserToGroup;
 import com.group6.defakelogibackend.service.GroupService;
 import com.group6.defakelogibackend.utils.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +71,13 @@ public class GroupController {
     @GetMapping("/all")
     public Result groupAll() {
         List<Group> list = groupService.showAllGroups();
+        return Result.success(list);
+    }
+
+    @LoggedIn
+    @GetMapping("/members")
+    public Result groupMembers(@RequestParam("groupId") String groupId) {
+        List<UserToGroup> list = groupService.groupMembers(Long.parseLong(groupId));
         return Result.success(list);
     }
 }

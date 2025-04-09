@@ -17,4 +17,9 @@
     <select id="getAllGroups" resultType="com.group6.defakelogibackend.model.Group">
         select * from groups_
     </select>
+
+    <select id="findGroupMembersByGroupId" resultType="com.group6.defakelogibackend.model.UserToGroup">
+        select * from user_to_group
+        where group_id = #{groupId}
+    </select>
 </mapper>
