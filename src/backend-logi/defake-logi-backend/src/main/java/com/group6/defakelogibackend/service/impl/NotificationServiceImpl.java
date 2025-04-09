@@ -32,16 +32,6 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
 
     @Override
     @Transactional
-    public boolean deleteAllNotification(long userId) {
-        if (userMapper.findUserById(userId) == null){
-            throw new EntityMissingException("userId 错误，不存在对应的user!");
-        }
-        notificationMapper.deleteAllNotificationByUserId(userId);
-        return true;
-    }
-
-    @Override
-    @Transactional
     public Notification notificationInfo(long notificationId) {
         Notification notification = notificationMapper.findNotificationById(notificationId);
         if (notification == null) {
@@ -56,9 +46,6 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
         if (userMapper.findUserById(userId) == null){
             throw new EntityMissingException("userId 错误，不存在对应的user!");
         }
-        System.out.println(condition);
-        System.out.println();
-        System.out.println();
         if (condition.equals("sent_at_desc")) {
             return notificationMapper.findNotificationByUserId_sent_at_desc(userId);
         } else if (condition.equals("sent_at_asc")) {

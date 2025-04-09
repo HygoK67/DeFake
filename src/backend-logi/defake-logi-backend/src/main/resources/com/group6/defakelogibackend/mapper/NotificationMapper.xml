@@ -14,11 +14,6 @@
         where id = #{id}
     </delete>
 
-    <delete id="deleteAllNotificationByUserId">
-        delete from notifications
-        where user_id = #{user_id}
-    </delete>
-
     <select id="findNotificationByUserId_sent_at_desc">
         select * from notifications
         where user_id_rec = #{user_id}

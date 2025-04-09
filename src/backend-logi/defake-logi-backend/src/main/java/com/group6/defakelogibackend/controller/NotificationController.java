@@ -1,5 +1,6 @@
 package com.group6.defakelogibackend.controller;
 
+import com.group6.defakelogibackend.annotation.Admin;
 import com.group6.defakelogibackend.annotation.LoggedIn;
 import com.group6.defakelogibackend.model.Notification;
 import com.group6.defakelogibackend.model.Result;
@@ -22,7 +23,7 @@ public class NotificationController {
     @Autowired
     JWTService jwtService;
 
-    @LoggedIn
+    @Admin
     @DeleteMapping("/delete")
     public Result deleteNotification(@RequestBody Map<String, String> requestBody) {
         long notificationId = Long.parseLong(requestBody.get("notificationId"));
@@ -30,16 +31,6 @@ public class NotificationController {
             return Result.success();
         }
         return Result.error("删除通知失败");
-    }
-
-    @LoggedIn
-    @DeleteMapping("/clear")
-    public Result deleteAllNotification(@RequestHeader String jwtToken) {
-        long userId = Long.parseLong(jwtService.getUserId(jwtToken));
-        if (notificationService.deleteAllNotification(userId)) {
-            return Result.success();
-        }
-        return Result.error("删除全部通知失败");
     }
 
     @LoggedIn
