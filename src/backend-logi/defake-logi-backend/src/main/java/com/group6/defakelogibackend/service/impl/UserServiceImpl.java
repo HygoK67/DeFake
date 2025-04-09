@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements com.group6.defakelogibackend.service.UserService {
@@ -99,8 +100,7 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         String url;
         try {
             url = cosService.upload(file);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new FileHandleException("上传文件失败, 请稍后重试!");
         }
         operationLogService.addUserUploadLog(userId, file.getOriginalFilename(), url);
@@ -112,7 +112,7 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     public void updateUserInfo(User user, String oldPassword, String verificationCode) {
         // user 实体中包装了实体的id，oldPassword 可能为 null
         boolean newPassExists = user.getPassword() != null && !user.getPassword().isEmpty();
-        boolean oldPassExists = oldPassword != null        && !oldPassword.isEmpty();
+        boolean oldPassExists = oldPassword != null && !oldPassword.isEmpty();
         // 找到目前操作的用户的老信息
         User userFound = userMapper.findUserById(user.getId());
         if (newPassExists != oldPassExists) {
@@ -158,5 +158,11 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
             }
         }
         userMapper.updateUser(user);
+    }
+
+    @Override
+    @Transactional
+    public List<User> showAllUsers() {
+        return userMapper.getAllUsers();
     }
 }

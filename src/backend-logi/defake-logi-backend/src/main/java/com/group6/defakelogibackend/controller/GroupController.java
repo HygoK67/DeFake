@@ -1,5 +1,6 @@
 package com.group6.defakelogibackend.controller;
 
+import com.group6.defakelogibackend.annotation.Admin;
 import com.group6.defakelogibackend.annotation.LoggedIn;
 import com.group6.defakelogibackend.model.Group;
 import com.group6.defakelogibackend.model.Result;
@@ -8,6 +9,7 @@ import com.group6.defakelogibackend.utils.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController()
@@ -61,6 +63,12 @@ public class GroupController {
         Long groupId = Long.parseLong(requestBody.get("groupId"));
         groupService.kickGroup(userId_sent, userId_rec, groupId);
         return Result.success("踢出成功");
+    }
 
+    @Admin
+    @GetMapping("/all")
+    public Result groupAll() {
+        List<Group> list = groupService.showAllGroups();
+        return Result.success(list);
     }
 }

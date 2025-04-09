@@ -54,4 +54,10 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
             throw new FieldMissingException("输入的 condition 字段暂不支持!");
         }
     }
+
+    @Override
+    @Transactional
+    public List<Notification> showAllNotifications(){
+        return notificationMapper.getAllNotifications();
+    }
 }

@@ -105,4 +105,11 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         notificationMapper.createNotificationUser2User(userId_sent, userId_rec, groupId, title, content);
         return true;
     }
+
+    @Override
+    @Transactional
+    public List<Group> showAllGroups() {
+        List<Group> list = groupMapper.getAllGroups();
+        return list;
+    }
 }

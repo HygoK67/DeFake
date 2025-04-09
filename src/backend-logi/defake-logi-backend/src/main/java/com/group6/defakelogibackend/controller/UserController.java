@@ -12,6 +12,7 @@ import com.group6.defakelogibackend.utils.OperationLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController()
@@ -68,5 +69,12 @@ public class UserController {
         user.setId(id);
         userService.updateUserInfo(user, map.get("oldPassword"), verificationCode);
         return Result.success();
+    }
+
+    @Admin
+    @GetMapping("/all")
+    public Result userAll() {
+        List<User> list = userService.showAllUsers();
+        return Result.success(list);
     }
 }

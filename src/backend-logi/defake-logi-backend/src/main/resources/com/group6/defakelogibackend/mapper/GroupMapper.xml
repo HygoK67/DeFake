@@ -8,9 +8,13 @@
         insert into groups_ (group_name)
         values ( #{groupname} )
     </insert>
-    
-    <select id="findGroupByGroupId">
+
+    <select id="findGroupByGroupId" resultType="com.group6.defakelogibackend.model.Group">
         select * from groups_
         where id = #{groupId}
+    </select>
+
+    <select id="getAllGroups" resultType="com.group6.defakelogibackend.model.Group">
+        select * from groups_
     </select>
 </mapper>

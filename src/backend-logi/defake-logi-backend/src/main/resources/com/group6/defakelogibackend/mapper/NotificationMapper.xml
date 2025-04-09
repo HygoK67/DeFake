@@ -31,4 +31,8 @@
         values (#{userId_rec}, #{userId_sent}, #{groupId}, #{title}, #{content})
     </insert>
 
+    <select id="getAllNotifications" resultType="com.group6.defakelogibackend.model.Notification">
+        select * from notifications
+    </select>
+
 </mapper>

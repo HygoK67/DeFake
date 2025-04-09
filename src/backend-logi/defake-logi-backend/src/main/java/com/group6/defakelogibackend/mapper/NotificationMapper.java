@@ -17,4 +17,6 @@ public interface NotificationMapper {
     public List<Notification> findNotificationByUserId_sent_at_asc(long userId);
 
     public void createNotificationUser2User(long userId_sent, long userId_rec, long groupId, String title, String content);
+
+    public List<Notification> getAllNotifications();
 }

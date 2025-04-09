@@ -83,4 +83,8 @@
             id = #{id}
     </insert>
 
+    <select id="getAllUsers" resultType="com.group6.defakelogibackend.model.User">
+        select * from users
+    </select>
+
 </mapper>

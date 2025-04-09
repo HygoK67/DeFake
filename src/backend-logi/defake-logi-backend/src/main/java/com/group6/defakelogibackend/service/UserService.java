@@ -4,6 +4,8 @@ import com.group6.defakelogibackend.model.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 public interface UserService {
 
     // 用户注册
@@ -17,5 +19,7 @@ public interface UserService {
     public String userUpload(long userId, MultipartFile file);
 
     public void updateUserInfo(User user, String oldPassword, String verificationCode);
+
+    public List<User> showAllUsers();
 
 }

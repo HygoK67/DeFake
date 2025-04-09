@@ -38,4 +38,18 @@ public class NotificationController {
         List<Notification> list = notificationService.notificationFilter(userId, condition);
         return Result.success(list);
     }
+
+    @Admin
+    @GetMapping("/info")
+    public Result notificationInfo(@RequestParam("notificationId") String notificationId) {
+        Notification notification = notificationService.notificationInfo(Long.parseLong(notificationId));
+        return Result.success(notification);
+    }
+
+    @Admin
+    @GetMapping("/all")
+    public Result notificationAll() {
+        List<Notification> list = notificationService.showAllNotifications();
+        return Result.success(list);
+    }
 }
