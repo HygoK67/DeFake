@@ -46,6 +46,9 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         if (group == null) {
             throw new EntityMissingException("groupId 无效!");
         }
+        if (userMapper.findUserById(userId_rec) == null) {
+            throw new EntityMissingException("userId_rec 无效!");
+        }
         // 如果该用户已经加入该组织或者已经发送过申请，则不能再次发送申请
         if (userToGroupMapper.findUserToGroup(userId_sent, groupId) != null) {
             throw new EntityDuplicateException("该用户 status 为 in / pending!");
@@ -74,8 +77,8 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
             throw new EntityDuplicateException("该用户 status 为 in / pending!");
         }
 
-        notificationMapper.createNotificationUser2User(userId_sent, userId_rec,groupId, title, content);
-
+        userToGroupMapper.addUserToGroup(userId_rec, groupId, "pending", "member");
+        notificationMapper.createNotificationUser2User(userId_sent, userId_rec, groupId, title, content);
         return true;
     }
 
