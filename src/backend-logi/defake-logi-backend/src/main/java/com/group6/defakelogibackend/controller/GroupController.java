@@ -67,13 +67,6 @@ public class GroupController {
         return Result.success("踢出成功");
     }
 
-    @Admin
-    @GetMapping("/all")
-    public Result groupAll() {
-        List<Group> list = groupService.showAllGroups();
-        return Result.success(list);
-    }
-
     @LoggedIn
     @GetMapping("/members")
     public Result groupMembers(@RequestParam("groupId") String groupId) {

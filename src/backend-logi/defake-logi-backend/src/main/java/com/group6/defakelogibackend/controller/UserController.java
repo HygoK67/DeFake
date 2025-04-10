@@ -70,11 +70,4 @@ public class UserController {
         userService.updateUserInfo(user, map.get("oldPassword"), verificationCode);
         return Result.success();
     }
-
-    @Admin
-    @GetMapping("/all")
-    public Result userAll() {
-        List<User> list = userService.showAllUsers();
-        return Result.success(list);
-    }
 }
