@@ -1,6 +1,7 @@
 package com.group6.defakelogibackend.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,9 @@ import java.util.Random;
 public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
+
+    @Value("{mail.username}")
+    private String mailUsername;
 
     private static final HashMap<String, String> codeMap = new HashMap<>();        // 记录验证码
     private static final HashMap<String, LocalDateTime> timeMap = new HashMap<>(); // 记录验证码过期时间
