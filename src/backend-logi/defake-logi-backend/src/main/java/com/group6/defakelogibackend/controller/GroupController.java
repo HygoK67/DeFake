@@ -37,11 +37,8 @@ public class GroupController {
     @PostMapping("/apply")
     public Result applyGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
         Long userIdSent = Long.parseLong(jwtService.getUserId(jwtToken));
-        Long userIdRec = Long.parseLong(requestBody.get("userIdRec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
-        String title = requestBody.get("title");
-        String content = requestBody.get("content");
-        groupService.applyGroup(userIdSent, userIdRec, groupId, title, content);
+        groupService.applyGroup(userIdSent, groupId);
         return Result.success("发送加入组织申请成功");
     }
 

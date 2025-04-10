@@ -71,6 +71,7 @@ public class UserController {
         return Result.success();
     }
 
+    @LoggedIn
     @GetMapping("/id")
     public Result userId(@RequestParam String email){
         return Result.success(userService.getUserId(email));

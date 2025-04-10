@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class UserToGroup {
 
     public enum Status {
-        in, pending
+        in, pending_apply, pending_invite
     }
 
     public enum Role {
