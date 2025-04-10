@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { createGroup } from "@/api/group";
+import { ElMessage } from "element-plus";
 
 defineOptions({
   name: "OrganizationManagement"
@@ -88,6 +90,49 @@ const searchOrganizations = () => {
   // 实际搜索逻辑
 };
 
+const createOrganizationDialogVisible = ref(false)
+const createOrgLoading = ref(false)
+const createOrgForm = ref({
+  name: '',
+  description: '',
+})
+const createOrganizations = async () => {
+  // 显示对话框
+  createOrganizationDialogVisible.value = true
+  
+  // 重置表单值
+  createOrgForm.value = { name: '', description: '' }
+}
+async function submitCreateOrganization(): Promise<void> {
+  if (!createOrgForm.value.name) {
+    ElMessage.warning('请输入组织名称');
+    return;
+  }
+  
+  createOrgLoading.value = true;
+  
+  try {
+    const response = await createGroup({
+      name: createOrgForm.value.name,
+      description: createOrgForm.value.description,
+    })
+    if (response.code !== 0) {
+      ElMessage.error('组织申请失败')
+    } else {
+      ElMessage.success('组织申请成功')
+    }
+
+    createOrganizationDialogVisible.value = false
+    createOrgForm.value = { name: '', description: '' }
+
+  } catch (error) {
+    console.error(error)
+    ElMessage.error('组织申请失败')
+  } finally {
+    createOrgLoading.value = false
+  }
+}
+
 // 筛选组织
 const filterOrganizations = () => {
   console.log("筛选组织");
@@ -123,8 +168,7 @@ const classifyOrganizations = () => {
 
       <div class="search-actions">
         <el-button type="primary" @click="searchOrganizations">搜索</el-button>
-        <el-button @click="filterOrganizations">筛选</el-button>
-        <el-button @click="classifyOrganizations">分类</el-button>
+        <el-button type="primary" @click="createOrganizations">创建组织</el-button>
       </div>
     </div>
 
@@ -146,7 +190,6 @@ const classifyOrganizations = () => {
           >
             <div class="org-card-content">
               <h4 class="org-name">{{ org.name }}</h4>
-              <p class="org-detail">所属组织: {{ org.organization }}</p>
 
               <div class="org-action">
                 <el-button
@@ -196,7 +239,6 @@ const classifyOrganizations = () => {
           >
             <div class="org-card-content">
               <h4 class="org-name">{{ org.name }}</h4>
-              <p class="org-detail">所属组织: {{ org.organization }}</p>
 
               <div class="org-action">
                 <el-button
@@ -230,6 +272,34 @@ const classifyOrganizations = () => {
         </div>
       </div>
     </div>
+    <el-dialog 
+      v-model="createOrganizationDialogVisible" 
+      title="创建组织" 
+      width="500px"
+      :before-close="() => createOrganizationDialogVisible = false"
+    >
+      <el-form :model="createOrgForm" label-position="left" label-width="100px">
+        <el-form-item label="组织名称" required>
+          <el-input v-model="createOrgForm.name" placeholder="请输入组织名称"></el-input>
+        </el-form-item>
+        <el-form-item label="组织描述">
+          <el-input 
+            type="textarea" 
+            v-model="createOrgForm.description" 
+            placeholder="请输入组织描述信息"
+            :rows="4"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="createOrganizationDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitCreateOrganization" :loading="createOrgLoading">
+            提交申请
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 

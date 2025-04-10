@@ -27,7 +27,7 @@ const defaultConfig: AxiosRequestConfig = {
   paramsSerializer: {
     serialize: stringify as unknown as CustomParamsSerializer
   },
-  // baseURL: "http://122.9.35.116:8080/",
+  baseURL: "http://122.9.35.116:8080/",
 };
 
 class PureHttp {
