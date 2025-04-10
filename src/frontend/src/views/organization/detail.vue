@@ -34,17 +34,17 @@ onMounted(() => {
     if (organizationId.value === "1") {
       organization.name = "ABC大学2024年毕业设计";
       organization.organization = "ABC大学";
-      organization.manager = "王老师";
+      organization.manager = "王一";
       organization.submissionStartDate = "2024-03-15";
       organization.submissionEndDate = "2024-05-31";
       memberStatus.value = "已加入";
     } else if (organizationId.value === "3") {
       organization.name = "FGH期刊2025年度投稿";
       organization.organization = "FGH出版社";
-      organization.manager = "李编辑";
+      organization.manager = "王二";
       organization.submissionStartDate = "2024-04-01";
       organization.submissionEndDate = "2024-12-31";
-      memberStatus.value = "已提交";
+      memberStatus.value = "王三";
     } else {
       // 默认数据
       organization.name = `组织${organizationId.value}`;
@@ -81,10 +81,6 @@ const submitReport = () => {
           <div class="info-item">
             <span class="label">活动名称:</span>
             <span>{{ organization.name }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">所属组织:</span>
-            <span>{{ organization.organization }}</span>
           </div>
           <div class="info-item">
             <span class="label">负责人:</span>

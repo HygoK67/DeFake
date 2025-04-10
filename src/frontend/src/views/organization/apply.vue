@@ -52,15 +52,12 @@ onMounted(() => {
     // 模拟数据
     if (organizationId.value === "5") {
       organization.name = "AAA大学2024年毕业设计";
-      organization.organization = "AAA大学";
       organization.description = "AAA大学2024年毕业设计";
     } else if (organizationId.value === "6") {
       organization.name = "AAB大学2024年毕业设计";
-      organization.organization = "AAB大学";
       organization.description = "AAB大学2024年毕业设计";
     } else {
       organization.name = `组织${organizationId.value}`;
-      organization.organization = `测试组织${organizationId.value}`;
       organization.description = "这是一个测试组织描述";
     }
 
@@ -115,7 +112,6 @@ const goBack = () => {
       <!-- 组织信息 -->
       <div class="organization-info">
         <h3>{{ organization.name }}</h3>
-        <p class="org-detail">所属组织: {{ organization.organization }}</p>
         <p class="org-description">{{ organization.description }}</p>
 
         <el-divider>申请信息</el-divider>
