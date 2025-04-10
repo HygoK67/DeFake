@@ -35,7 +35,7 @@ public class EmailService {
 
         // 发送邮件
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("gordonhemu@163.com");
+        message.setFrom("ruangonggroup6@163.com");
         message.setTo(email);
         message.setSubject("DeFake 图像造假检测平台注册验证码");
         message.setText("您的验证码是：" + code + "，有效期" + CODE_EXPIRE_MINUTES + "分钟");

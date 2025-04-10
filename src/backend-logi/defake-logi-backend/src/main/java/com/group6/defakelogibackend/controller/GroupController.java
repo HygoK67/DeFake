@@ -78,5 +78,10 @@ public class GroupController {
         return Result.success(list);
     }
 
+    @LoggedIn
+    @GetMapping("/joined")
+    public Result getGroup(@RequestParam("groupId") String groupId) {
+        return Result.success();
+    }
 
 }
