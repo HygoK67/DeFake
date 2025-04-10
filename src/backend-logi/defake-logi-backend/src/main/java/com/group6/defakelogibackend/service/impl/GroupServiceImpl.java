@@ -31,6 +31,9 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
     public boolean createGroup(long userId, String groupname) {
         Group group = new Group();
         group.setGroupname(groupname);
+        if (groupMapper.findGroupByGroupname(groupname) != null){
+            throw new EntityDuplicateException("该 groupname 已存在!");
+        }
         groupMapper.createGroup(group);
         userToGroupMapper.addUserToGroup(userId, group.getId(), "in", "leader");
         return true;
