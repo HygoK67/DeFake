@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -35,6 +36,25 @@ public class AdminController {
     public Result getAllGroups() {
         List<Group> allGroups = groupService.showAllGroups();
         return Result.success(allGroups);
+    }
+
+    @DeleteMapping("/delete")
+    public Result deleteNotification(@RequestBody Map<String, String> requestBody) {
+        long notificationId = Long.parseLong(requestBody.get("notificationId"));
+        notificationService.deleteNotification(notificationId);
+        return Result.success();
+    }
+
+    @GetMapping("/info")
+    public Result notificationInfo(@RequestParam("notificationId") String notificationId) {
+        Notification notification = notificationService.notificationInfo(Long.parseLong(notificationId));
+        return Result.success(notification);
+    }
+
+    @GetMapping("/all")
+    public Result notificationAll() {
+        List<Notification> list = notificationService.showAllNotifications();
+        return Result.success(list);
     }
 
     @GetMapping("/operationLogs/all")

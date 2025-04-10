@@ -23,33 +23,11 @@ public class NotificationController {
     @Autowired
     JWTService jwtService;
 
-    @Admin
-    @DeleteMapping("/delete")
-    public Result deleteNotification(@RequestBody Map<String, String> requestBody) {
-        long notificationId = Long.parseLong(requestBody.get("notificationId"));
-        notificationService.deleteNotification(notificationId);
-        return Result.success();
-    }
-
     @LoggedIn
     @GetMapping("/filter")
     public Result notificationFilter(@RequestHeader String jwtToken, @RequestParam("condition") String condition) {
         long userId = Long.parseLong(jwtService.getUserId(jwtToken));
         List<Notification> list = notificationService.notificationFilter(userId, condition);
-        return Result.success(list);
-    }
-
-    @Admin
-    @GetMapping("/info")
-    public Result notificationInfo(@RequestParam("notificationId") String notificationId) {
-        Notification notification = notificationService.notificationInfo(Long.parseLong(notificationId));
-        return Result.success(notification);
-    }
-
-    @Admin
-    @GetMapping("/all")
-    public Result notificationAll() {
-        List<Notification> list = notificationService.showAllNotifications();
         return Result.success(list);
     }
 
