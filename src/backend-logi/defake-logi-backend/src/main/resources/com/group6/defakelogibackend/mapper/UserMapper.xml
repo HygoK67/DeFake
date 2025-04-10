@@ -54,7 +54,7 @@
         )
     </insert>
 
-    <insert id="updateUser">
+    <update id="updateUser">
         update users
         <set>
             <if test="username != null">
@@ -81,7 +81,7 @@
         </set>
         where
             id = #{id}
-    </insert>
+    </update>
 
     <select id="getAllUsers" resultType="com.group6.defakelogibackend.model.User">
         select * from users

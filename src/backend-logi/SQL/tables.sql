@@ -20,6 +20,7 @@ CREATE TABLE users (                       -- 用户表
 
 CREATE TABLE papers (                      -- 论文表，主要存储元文件
     id BIGINT AUTO_INCREMENT PRIMARY KEY,  
+    uploader_id BIGINT NOT NULL,           -- 上传该论文的用户的用户id, 不能为空
     title VARCHAR(255) NOT NULL,           -- 论文标题
     abstract TEXT NULL,                    -- 论文摘要
     doi VARCHAR(100) UNIQUE NULL,          -- 论文 doi 号
@@ -28,6 +29,20 @@ CREATE TABLE papers (                      -- 论文表，主要存储元文件
     page_num  INT NULL,                    -- 论文页面数量
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 条目创建时间
     updated_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- 条目更新时间
+);
+
+CREATE TABLE authors (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 条目创建时间
+    updated_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- 条目更新时间
+);
+
+CREATE TABLE author_to_paper (
+    author_id BIGINT NOT NULL, 
+    paper_id BIGINT NOT NULL, 
+    UNIQUE (author_id, paper_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- 条目创建时间
 );
 
 CREATE TABLE figures (                     -- 图像表
