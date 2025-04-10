@@ -17,6 +17,8 @@ public interface GroupMapper {
 
     public List<UserToGroup> findGroupMembersByGroupId(long groupId);
 
-    public List<Group> findGroupByGroupname(String groupname);
+    public Group findGroupByGroupname(String groupname);
+
+    public List<Group> searchGroupByGroupname(String groupname);
 
 }

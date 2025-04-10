@@ -1,5 +1,6 @@
 package com.group6.defakelogibackend.service;
 
+import com.group6.defakelogibackend.model.Group;
 import com.group6.defakelogibackend.model.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,5 +24,7 @@ public interface UserService {
     public List<User> showAllUsers();
 
     public long getUserId(String email);
+
+    public List<Group> getGroups(long userId);
 
 }

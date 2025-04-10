@@ -2,6 +2,8 @@ package com.group6.defakelogibackend.service.impl;
 
 import com.group6.defakelogibackend.exception.*;
 import com.group6.defakelogibackend.mapper.UserMapper;
+import com.group6.defakelogibackend.mapper.UserToGroupMapper;
+import com.group6.defakelogibackend.model.Group;
 import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     OperationLogService operationLogService;
     @Autowired
     TencentCOSService cosService;
+    @Autowired
+    UserToGroupMapper userToGroupMapper;
 
     @Override
     @Transactional
@@ -170,5 +174,11 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     @Transactional
     public long getUserId(String email) {
         return userMapper.findUserByEmail(email).getId();
+    }
+
+    @Override
+    @Transactional
+    public List<Group> getGroups(long userId) {
+        return userToGroupMapper.findGroupsByUserId(userId);
     }
 }

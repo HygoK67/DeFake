@@ -5,8 +5,8 @@
 <mapper namespace="com.group6.defakelogibackend.mapper.GroupMapper">
 
     <insert id="createGroup" useGeneratedKeys="true" keyProperty="id">
-        insert into groups_ (group_name)
-        values ( #{groupname} )
+        insert into groups_ (group_name, introduction, ddl)
+        values ( #{groupname} , #{introduction}, #{ddl} )
     </insert>
 
     <select id="findGroupByGroupId" resultType="com.group6.defakelogibackend.model.Group">
@@ -23,8 +23,13 @@
         where group_id = #{groupId}
     </select>
 
-    <select id="findGroupByGroupname" resultType="com.group6.defakelogibackend.model.Group">
+    <select id="searchGroupByGroupname" resultType="com.group6.defakelogibackend.model.Group">
         select * from groups_
         where lower(group_name) like lower(concat('%', #{groupname}, '%'))
+    </select>
+
+    <select id="findGroupByGroupname" resultType="com.group6.defakelogibackend.model.Group">
+        select * from groups_
+        where group_name = #{groupname}
     </select>
 </mapper>

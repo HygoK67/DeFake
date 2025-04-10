@@ -17,4 +17,9 @@
         delete from user_to_group
         where user_id = #{userId} and group_id = #{groupId}
     </delete>
+
+    <select id="findGroupsByUserId" resultType="com.group6.defakelogibackend.model.UserToGroup">
+        select * from user_to_group
+        where user_id = #{userId}
+    </select>
 </mapper>

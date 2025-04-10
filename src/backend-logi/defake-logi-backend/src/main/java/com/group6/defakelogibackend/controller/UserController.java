@@ -76,4 +76,11 @@ public class UserController {
     public Result userId(@RequestParam String email){
         return Result.success(userService.getUserId(email));
     }
+
+    @LoggedIn
+    @GetMapping("/groups")
+    public Result groups(@RequestHeader String jwtToken){
+        long userId = Long.parseLong(jwtService.getUserId(jwtToken));
+        return Result.success(userService.getGroups(userId));
+    }
 }

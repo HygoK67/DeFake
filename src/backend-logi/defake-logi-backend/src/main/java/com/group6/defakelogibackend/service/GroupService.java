@@ -4,10 +4,11 @@ import com.group6.defakelogibackend.model.Group;
 import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.model.UserToGroup;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface GroupService {
-    public boolean createGroup(long userId, String groupname);
+    public boolean createGroup(long userId, String groupname, String introduction, String ddl);
 
     public boolean applyGroup(long userId_sent, long groupId);
 
