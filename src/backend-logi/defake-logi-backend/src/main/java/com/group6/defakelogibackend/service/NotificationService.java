@@ -9,9 +9,11 @@ public interface NotificationService {
 
     public boolean deleteNotification(long notificationId);
 
-    public boolean deleteAllNotification(long userId);
-
     public Notification notificationInfo(long notificationId);
 
     public List<Notification> notificationFilter(long userId, String condition);
+
+    public List<Notification> showAllNotifications();
+
+    public void readNotification(long userIdRec, long notificationId);
 }

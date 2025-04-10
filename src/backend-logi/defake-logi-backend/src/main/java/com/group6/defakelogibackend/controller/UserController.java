@@ -2,14 +2,17 @@ package com.group6.defakelogibackend.controller;
 
 import com.group6.defakelogibackend.annotation.Admin;
 import com.group6.defakelogibackend.annotation.LoggedIn;
+import com.group6.defakelogibackend.mapper.UserToGroupMapper;
 import com.group6.defakelogibackend.model.Result;
 import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.service.UserService;
 import com.group6.defakelogibackend.utils.EmailService;
 import com.group6.defakelogibackend.utils.JWTService;
+import com.group6.defakelogibackend.utils.OperationLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController()
@@ -22,6 +25,8 @@ public class UserController {
     UserService userService;
     @Autowired
     JWTService jwtService;
+    @Autowired
+    private UserToGroupMapper userToGroupMapper;
 
     @GetMapping("/sendEmailCode")
     public Result sendVerifyCode(@RequestParam String email) {
@@ -38,7 +43,7 @@ public class UserController {
         return Result.success(null);
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public Result login(@RequestBody User user) {
         String jwtToken = userService.loginUser(user);
         return Result.success(jwtToken);
@@ -48,23 +53,21 @@ public class UserController {
     @GetMapping("/info")
     public Result info(@RequestHeader String jwtToken) {
         long id = Long.parseLong(jwtService.getUserId(jwtToken));
-        User user = userService.userInfo(id);
+        User user = userService.getUserInfo(id);
         return Result.success(user);
     }
 
     @LoggedIn
-    @PostMapping("/updatePassword")
-    public Result updatePassword(@RequestBody Map<String, String> requestBody) {
-        long userId = Long.parseLong(requestBody.get("userId"));
-        String oldPassword = requestBody.get("oldPassword");
-        String newPassword = requestBody.get("newPassword");
-
-        if (userService.updatePassword(userId, oldPassword, newPassword)) {
-            return Result.success();
-        }
-        return Result.error("修改密码失败");
+    @PutMapping("/info")
+    public Result updateInfo(
+            @RequestBody User user,
+            @RequestHeader String jwtToken,
+            @RequestBody Map<String, String> map,
+            @RequestParam(required = false) String verificationCode
+    ) {
+        long id = Long.parseLong(jwtService.getUserId(jwtToken));
+        user.setId(id);
+        userService.updateUserInfo(user, map.get("oldPassword"), verificationCode);
+        return Result.success();
     }
-
-
-
 }

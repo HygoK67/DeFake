@@ -4,11 +4,18 @@ server:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+  log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+tencent-cloud:
+  cos:
+    secretId: AKIDCuX8kE2jEjCaBcrw33rSq23ta4KPK1Uk
+    secretKey: AIEwTt66vZ0EF4g5JMDtMb3OWQ7apqdN
+    bucketId: se-project-1301778434
+    regionName: ap-beijing
 spring:
   application:
     name: defake-logi-backend
   datasource:
-    url: jdbc:mysql://122.9.35.116:3306/testdb
+    url: jdbc:mysql://122.9.35.116:3306/testdb?useUnicode=true&characterEncoding=UTF-8
     username: root
     password: ruangong-6-mysql-passwd
   mail:

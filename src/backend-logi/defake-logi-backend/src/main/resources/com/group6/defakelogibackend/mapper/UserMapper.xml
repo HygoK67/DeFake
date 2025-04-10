@@ -27,13 +27,16 @@
         phone = #{phone}
     </select>
 
-    <insert id="addUser">
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="id">
         insert into users
         (
             user_name,
             email,
             <if test="phone != null">
             phone,
+            </if>
+            <if test="avatarPath != null">
+            avatar_path,
             </if>
             password_hash
         )
@@ -44,6 +47,9 @@
             <if test="phone != null">
             #{phone},
             </if>
+            <if test="avatarPath != null">
+            #{avatarPath},
+            </if>
             #{passwordHash}
         )
     </insert>
@@ -52,7 +58,7 @@
         update users
         <set>
             <if test="username != null">
-                user_name = #{email},
+                user_name = #{username},
             </if>
             <if test="email != null">
                 email = #{email},
@@ -77,15 +83,8 @@
             id = #{id}
     </insert>
 
-    <insert id="updateUserPassword">
-        update users
-        <set>
-            <if test="passwordHash != null">
-                password_hash = #{passwordHash},
-            </if>
-            updated_at = NOW()
-        </set>
-        where id = #{id}
-    </insert>
+    <select id="getAllUsers" resultType="com.group6.defakelogibackend.model.User">
+        select * from users
+    </select>
 
 </mapper>

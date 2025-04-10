@@ -1,14 +1,17 @@
 package com.group6.defakelogibackend.controller;
 
+import com.group6.defakelogibackend.annotation.Admin;
+import com.group6.defakelogibackend.annotation.LoggedIn;
 import com.group6.defakelogibackend.model.Group;
 import com.group6.defakelogibackend.model.Result;
+import com.group6.defakelogibackend.model.User;
+import com.group6.defakelogibackend.model.UserToGroup;
 import com.group6.defakelogibackend.service.GroupService;
+import com.group6.defakelogibackend.utils.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController()
@@ -17,48 +20,57 @@ public class GroupController {
 
     @Autowired
     GroupService groupService;
+    @Autowired
+    JWTService jwtService;
 
+    @LoggedIn
     @PostMapping("/create")
-    public Result createGroup(@RequestBody Map<String, String> requestBody) {
-        Long userId = Long.parseLong(requestBody.get("userId"));
+    public Result createGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
+        long userId = Long.parseLong(jwtService.getUserId(jwtToken));
         String groupname = requestBody.get("groupname");
-        if (groupService.createGroup(userId, groupname)) {
-            return Result.success("创建组织成功");
-        }
-        return Result.error("创建组织失败");
+        groupService.createGroup(userId, groupname);
+        return Result.success("创建组织成功");
+
     }
 
+    @LoggedIn
     @PostMapping("/apply")
-    public Result applyGroup(@RequestBody Map<String, String> requestBody) {
-        Long userId = Long.parseLong(requestBody.get("userId"));
+    public Result applyGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
+        Long userIdSent = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userIdRec = Long.parseLong(requestBody.get("userIdRec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
         String title = requestBody.get("title");
         String content = requestBody.get("content");
-        if (groupService.applyGroup(userId, groupId, title, content)) {
-            return Result.success("发送加入组织申请成功");
-        }
-        return Result.error("发送加入组织申请失败");
+        groupService.applyGroup(userIdSent, userIdRec, groupId, title, content);
+        return Result.success("发送加入组织申请成功");
     }
 
+    @LoggedIn
     @PostMapping("/invite")
-    public Result inviteGroup(@RequestBody Map<String, String> requestBody) {
-        Long userId = Long.parseLong(requestBody.get("userId"));
+    public Result inviteGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
+        Long userIdSent = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userIdRec = Long.parseLong(requestBody.get("userIdRec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
         String title = requestBody.get("title");
         String content = requestBody.get("content");
-        if (groupService.inviteGroup(userId, groupId, title, content)) {
-            return Result.success("发送邀请成功");
-        }
-        return Result.error("发送邀请失败");
+        groupService.inviteGroup(userIdSent, userIdRec, groupId, title, content);
+        return Result.success("发送邀请成功");
     }
 
+    @LoggedIn
     @PostMapping("/kick")
-    public Result kickGroup(@RequestBody Map<String, String> requestBody) {
-        Long userId = Long.parseLong(requestBody.get("userId"));
+    public Result kickGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
+        long userId_sent = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userId_rec = Long.parseLong(requestBody.get("userId_rec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
-        if (groupService.kickGroup(userId, groupId)){
-            return Result.success("踢出成功");
-        }
-        return Result.error("踢出失败");
+        groupService.kickGroup(userId_sent, userId_rec, groupId);
+        return Result.success("踢出成功");
+    }
+
+    @LoggedIn
+    @GetMapping("/members")
+    public Result groupMembers(@RequestParam("groupId") String groupId) {
+        List<UserToGroup> list = groupService.groupMembers(Long.parseLong(groupId));
+        return Result.success(list);
     }
 }

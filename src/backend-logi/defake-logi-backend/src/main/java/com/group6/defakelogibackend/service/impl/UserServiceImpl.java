@@ -1,19 +1,16 @@
 package com.group6.defakelogibackend.service.impl;
 
-import com.group6.defakelogibackend.exception.AuthenticationFailedException;
-import com.group6.defakelogibackend.exception.EntityDuplicateException;
-import com.group6.defakelogibackend.exception.EntityMissingException;
-import com.group6.defakelogibackend.exception.FieldMissingException;
+import com.group6.defakelogibackend.exception.*;
 import com.group6.defakelogibackend.mapper.UserMapper;
 import com.group6.defakelogibackend.model.User;
-import com.group6.defakelogibackend.utils.EmailService;
-import com.group6.defakelogibackend.utils.JWTService;
-import com.group6.defakelogibackend.utils.PasswordService;
+import com.group6.defakelogibackend.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements com.group6.defakelogibackend.service.UserService {
@@ -23,9 +20,11 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     @Autowired
     EmailService emailService;
     @Autowired
-    PasswordService passwordService;
-    @Autowired
     JWTService jwtService;
+    @Autowired
+    OperationLogService operationLogService;
+    @Autowired
+    TencentCOSService cosService;
 
     @Override
     @Transactional
@@ -48,8 +47,9 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         if (!emailService.verifyCode(user.getEmail(), verificationCode)) {
             throw new AuthenticationFailedException("邮箱验证码错误!");
         }
-        user.setPasswordHash(passwordService.encodePassword(user.getPassword()));
+        user.setPasswordHash(PasswordService.encodePassword(user.getPassword()));
         userMapper.addUser(user);
+        operationLogService.addUserRegisterLog(user.getId(), user.getEmail());
     }
 
     @Override
@@ -66,7 +66,7 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         if (userFound == null) { // 可能找不到给定的邮箱对应的用户
             throw new AuthenticationFailedException("用户不存在!");
         }
-        if (!passwordService.matches(user.getPassword(), userFound.getPasswordHash())) {
+        if (!PasswordService.matches(user.getPassword(), userFound.getPasswordHash())) {
             System.out.println(userFound.getId());
             throw new AuthenticationFailedException("用户邮箱和密码组合不正确!");
         }
@@ -76,12 +76,15 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         tmpUser.setLastLoginAt(LocalDateTime.now());
         userMapper.updateUser(tmpUser);
         // 生成登录令牌
-        return jwtService.generateJWT(userFound.getId(), userFound.getEmail(), userFound.getRole());
+        String jwtToken = jwtService.generateJWT(userFound.getId(), userFound.getEmail(), userFound.getRole());
+        // 记录日志
+        operationLogService.addUserLoginLog(userFound.getId(), userFound.getEmail(), jwtToken);
+        return jwtToken;
     }
 
     @Override
     @Transactional
-    public User userInfo(long userId) {
+    public User getUserInfo(long userId) {
         // 如果findUserById找不到用户的话，会返回null
         User user = userMapper.findUserById(userId);
         if (user == null) {
@@ -93,20 +96,73 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
 
     @Override
     @Transactional
-    public boolean updatePassword(long userId, String oldPassword, String newPassword) {
-        User user = userMapper.findUserById(userId);
-        if (user == null) {
-            return false;
+    public String userUpload(long userId, MultipartFile file) {
+        String url;
+        try {
+            url = cosService.upload(file);
+        } catch (Exception e) {
+            throw new FileHandleException("上传文件失败, 请稍后重试!");
         }
-        System.out.println(user.getPasswordHash());
-        if (!passwordService.matches(oldPassword, user.getPasswordHash())) {
-            return false;
+        operationLogService.addUserUploadLog(userId, file.getOriginalFilename(), url);
+        return url;
+    }
+
+    @Override
+    @Transactional
+    public void updateUserInfo(User user, String oldPassword, String verificationCode) {
+        // user 实体中包装了实体的id，oldPassword 可能为 null
+        boolean newPassExists = user.getPassword() != null && !user.getPassword().isEmpty();
+        boolean oldPassExists = oldPassword != null && !oldPassword.isEmpty();
+        // 找到目前操作的用户的老信息
+        User userFound = userMapper.findUserById(user.getId());
+        if (newPassExists != oldPassExists) {
+            throw new FieldMissingException("请确保旧密码和新密码都存在!");
         }
+        if (newPassExists) { // 如果用户需要更改密码
+            if (oldPassword.equals(user.getPassword())) { // 检测新旧密码是否相同
+                throw new EntityDuplicateException("旧密码不能和新密码相同!");
+            }
+            // 检查用户输入的旧密码是否正确
+            String realOldPasswordHash = userFound.getPasswordHash();
+            if (!PasswordService.matches(oldPassword, realOldPasswordHash)) {
+                throw new AuthenticationFailedException("旧密码不正确!");
+            }
+            // 加密用户的新密码
+            String hashedPassword = PasswordService.encodePassword(user.getPassword());
+            user.setPasswordHash(hashedPassword);
+        }
+        // 检查手机号是否与自己，与其他人重复
+        if (user.getPhone() != null && !user.getPhone().isEmpty()) {
+            if (user.getPhone().equals(userFound.getPhone())) {
+                throw new EntityDuplicateException("手机号重复，与之前手机号相同!");
+            }
+            User userAnother = userMapper.findUserByPhone(user.getPhone());
+            if (userAnother != null && userAnother.getId() != userFound.getId()) {
+                throw new EntityDuplicateException("手机号已被占用，请更换后再尝试");
+            }
+        }
+        // 如果要更改邮箱，对邮箱进行验证
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            if (user.getEmail().equals(userFound.getEmail())) {
+                throw new EntityDuplicateException("不可与之前的邮箱相同!");
+            }
+            User userAnother = userMapper.findUserByEmail(user.getEmail());
+            if (userAnother != null && userAnother.getId() != userFound.getId()) {
+                throw new EntityDuplicateException("该邮箱已被占用，请换一个!");
+            }
+            if (verificationCode == null || verificationCode.isEmpty()) {
+                throw new FieldMissingException("请输入邮箱验证码!");
+            }
+            if (!emailService.verifyCode(user.getEmail(), verificationCode)) {
+                throw new AuthenticationFailedException("邮箱验证码不正确!");
+            }
+        }
+        userMapper.updateUser(user);
+    }
 
-        user.setPassword(newPassword);
-        user.setPasswordHash(passwordService.encodePassword(newPassword));
-
-        userMapper.updateUserPassword(user);
-        return true;
+    @Override
+    @Transactional
+    public List<User> showAllUsers() {
+        return userMapper.getAllUsers();
     }
 }
