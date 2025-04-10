@@ -39,22 +39,19 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
 
     @Override
     @Transactional
-    public boolean applyGroup(long userId_sent, long userId_rec, long groupId, String title, String content) {
+    public boolean applyGroup(long userId_sent, long groupId) {
         Group group = groupMapper.findGroupByGroupId(groupId);
         // 如果groupId无效
         if (group == null) {
             throw new EntityMissingException("groupId 无效!");
         }
-        if (userMapper.findUserById(userId_rec) == null) {
-            throw new EntityMissingException("userId_rec 无效!");
-        }
+
         // 如果该用户已经加入该组织或者已经发送过申请，则不能再次发送申请
         if (userToGroupMapper.findUserToGroup(userId_sent, groupId) != null) {
             throw new EntityDuplicateException("该用户 status 为 in / pending!");
         }
 
-        userToGroupMapper.addUserToGroup(userId_sent, groupId, "pending", "member");
-        notificationMapper.createNotificationUser2User(userId_sent, userId_rec, groupId, title, content);
+        userToGroupMapper.addUserToGroup(userId_sent, groupId, "pending_apply", "member");
         return true;
     }
 
@@ -76,7 +73,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
             throw new EntityDuplicateException("该用户 status 为 in / pending!");
         }
 
-        userToGroupMapper.addUserToGroup(userIdRec, groupId, "pending", "member");
+        userToGroupMapper.addUserToGroup(userIdRec, groupId, "pending_invite", "member");
         notificationMapper.createNotificationUser2User(userIdSent, userIdRec, groupId, title, content);
         return true;
     }

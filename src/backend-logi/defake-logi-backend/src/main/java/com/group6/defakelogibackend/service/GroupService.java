@@ -9,7 +9,7 @@ import java.util.List;
 public interface GroupService {
     public boolean createGroup(long userId, String groupname);
 
-    public boolean applyGroup(long userId_sent, long userId_rec, long groupId, String title, String content);
+    public boolean applyGroup(long userId_sent, long groupId);
 
     public boolean inviteGroup(long userIdSent, long userIdRec, long groupId, String title, String content);
 
