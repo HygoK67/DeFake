@@ -70,4 +70,9 @@ public class UserController {
         userService.updateUserInfo(user, map.get("oldPassword"), verificationCode);
         return Result.success();
     }
+
+    @GetMapping("/id")
+    public Result userId(@RequestParam String email){
+        return Result.success(userService.getUserId(email));
+    }
 }

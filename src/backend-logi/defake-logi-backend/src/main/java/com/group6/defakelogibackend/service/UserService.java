@@ -22,4 +22,6 @@ public interface UserService {
 
     public List<User> showAllUsers();
 
+    public long getUserId(String email);
+
 }
