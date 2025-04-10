@@ -19,5 +19,7 @@ public interface GroupService {
 
     public List<UserToGroup> groupMembers(long groupId);
 
+    public List<Group> searchGroup(String groupname);
+
 
 }

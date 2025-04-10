@@ -74,9 +74,11 @@ public class GroupController {
         return Result.success(list);
     }
 
+    @LoggedIn
     @GetMapping("/search")
     public Result searchGroup(@RequestParam("groupname") String groupname) {
-        List<Group> list = groupService
+        List<Group> list = groupService.searchGroup(groupname);
+        return Result.success(list);
     }
 
 

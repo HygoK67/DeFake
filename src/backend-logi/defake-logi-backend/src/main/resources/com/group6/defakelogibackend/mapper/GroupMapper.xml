@@ -22,4 +22,9 @@
         select * from user_to_group
         where group_id = #{groupId}
     </select>
+
+    <select id="findGroupByGroupname" resultType="com.group6.defakelogibackend.model.Group">
+        select * from groups_
+        where lower(group_name) like lower(concat('%', #{groupname}, '%'))
+    </select>
 </mapper>

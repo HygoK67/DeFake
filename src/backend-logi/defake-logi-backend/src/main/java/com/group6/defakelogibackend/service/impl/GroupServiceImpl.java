@@ -7,14 +7,12 @@ import com.group6.defakelogibackend.mapper.NotificationMapper;
 import com.group6.defakelogibackend.mapper.UserMapper;
 import com.group6.defakelogibackend.mapper.UserToGroupMapper;
 import com.group6.defakelogibackend.model.Group;
-import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.model.UserToGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class GroupServiceImpl implements com.group6.defakelogibackend.service.GroupService {
@@ -118,5 +116,11 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
     @Transactional
     public List<UserToGroup> groupMembers(long groupId) {
         return groupMapper.findGroupMembersByGroupId(groupId);
+    }
+
+    @Override
+    @Transactional
+    public List<Group> searchGroup(String groupname) {
+        return groupMapper.findGroupByGroupname(groupname);
     }
 }
