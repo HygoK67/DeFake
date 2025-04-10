@@ -14,7 +14,7 @@ export interface DataInfo {
   /** 电话 */
   phone?: string;
   // /** 当前登录用户的角色 */
-  // roles?: Array<string>;
+  roles?: Array<string>;
   // /** 当前登录用户的按钮级别权限 */
   // permissions?: Array<string>;
 }

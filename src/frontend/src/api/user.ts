@@ -1,6 +1,8 @@
 import { http } from "@/utils/http";
 import { useUserStoreHook } from "@/store/modules/user";
 
+
+/** 登录 上传文件 */
 export type LoginResult = {
   code: number;
   message: string;
@@ -37,7 +39,7 @@ export type RefreshTokenResult = {
   };
 };
 
-/** 修改密码  邮箱验证*/
+/** 修改个人信息  邮箱验证*/
 export type basicResult = {
   code: number;
   message: string;
@@ -54,10 +56,10 @@ export const getEmailCode = (data: { email: string }) => {
 };
 
 /** 注册 */
-export const registerUser = (data: { username: string; phone: string; password: string; mail: string }, verificationCode: string) => {
-  return http.request<{ result: "SUC" | "FAIL", message: string }>(
+export const registerUser = (data: { username: string; phone: string; password: string; email: string }, verificationCode: string) => {
+  return http.request<basicResult>(
     "post", // 请求方法
-    "/api/register", // 请求 URL
+    "/api/user/register", // 请求 URL
     {
       data, // 请求体
       params: { verificationCode }, // Query 参数
@@ -67,31 +69,47 @@ export const registerUser = (data: { username: string; phone: string; password: 
 
 /** 登录 */
 export const getLoginWithoutInfo = (data?: object) => {
-  return http.request<LoginResult>("post", "/login", { data });
+  return http.request<LoginResult>("post", "/api/user/login", { data });
 };
 
 /** 获取用户信息 */
 export const getUserInfo = () => {
-  return http.request<UserInfoResult>("get", "/api/user/getUserInfo", {});
+  return http.request<UserInfoResult>("get", "/api/user/info", {});
 }
 
-/** 刷新`token` */
-export const refreshTokenApi = (data?: object) => {
-  return http.request<RefreshTokenResult>("post", "/refresh-token", { data });
-};
-
-/**修改密码 */
-export const updatePassword = (data: { oldPassword: string; newPassword: string }) => {
-  const userStore = useUserStoreHook();
-  const { username } = userStore;
+/**修改个人信息 */
+export const updateInfo = (data) => {
   return http.request<basicResult>(
-    "post", // 请求方法
-    "/api/user/updatePassword", // 请求 URL
-    {
-      data: {
-        ...data,
-        username
-      }
-    }
+    "put", // 请求方法
+    "/api/user/info", // 请求 URL
+    { data }
   );
 };
+
+export const updateEmail = (data: { email: string }, verificationCode: string) => {
+  return http.request<basicResult>(
+    "put", // 请求方法
+    "/api/user/info", // 请求 URL
+    {
+      data, // 请求体
+      params: { verificationCode }, // Query 参数
+    }
+  );
+}
+
+/** 上传文件 */
+export const uploadFile = (data: { file: File }) => {
+  return http.request<LoginResult>(
+    "post", // 请求方法
+    "/api/file/upload", // 请求 URL
+    { data }
+  );
+}
+
+export const updateUserInfo = (data: { username: string; email: string; phone: string; avatarPath: string }) => {
+  return http.request<basicResult>(
+    "put", // 请求方法
+    "/api/user/info", // 请求 URL
+    { data }
+  );
+}

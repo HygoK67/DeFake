@@ -23,10 +23,10 @@ const countdown = ref(0); // 倒计时秒数
 const registerForm = reactive({
   username: "11",
   phone: "13965656565",
-  mail: "1231@qq.com",
-  password: "12",
-  confirmPassword: "12",
-  verificationCode: "13131" // 验证码字段
+  mail: "",
+  password: "11",
+  confirmPassword: "11",
+  verificationCode: "" // 验证码字段
 });
 
 const rules = {
@@ -86,7 +86,7 @@ const sendCode = async () => {
 };
 
 const startCountdown = () => {
-  countdown.value = 60; // 设置倒计时为 60 秒
+  countdown.value = 3; // 设置倒计时为 60 秒
   const timer = setInterval(() => {
     countdown.value--;
     if (countdown.value <= 0) {
@@ -107,10 +107,10 @@ const onRegister = async () => {
         const response = await registerUser({
           username: registerForm.username,
           phone: registerForm.phone,
-          mail: registerForm.mail,
+          email: registerForm.mail,
           password: registerForm.password
         }, registerForm.verificationCode);
-        if (response.result === "SUC") {
+        if (response.code === 0) {
           ElMessage.success("注册成功！");
           router.push("/login");
         } else {

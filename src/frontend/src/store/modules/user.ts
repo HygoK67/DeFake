@@ -19,7 +19,7 @@ export const useUserStore = defineStore({
   id: "pure-user",
   state: (): userType => ({
     // 头像
-    avatar: storageLocal().getItem(storageLocal().getItem<DataInfo>(userKey)?.username ?? "") ?? "",
+    avatar: storageLocal().getItem<DataInfo>(userKey)?.avatar ?? "",
     // 用户名
     username: storageLocal().getItem<DataInfo>(userKey)?.username ?? "",
     // 邮箱
@@ -37,22 +37,31 @@ export const useUserStore = defineStore({
     // loginDay: 7
   }),
   actions: {
+    /** 更新 storageLocal 中的用户信息 */
+    updateStorage(key: keyof userType, value: string) {
+      const userInfo: DataInfo = storageLocal().getItem<DataInfo>(userKey) || {} as DataInfo;
+      userInfo[key] = value; // 更新指定字段
+      storageLocal().setItem(userKey, userInfo); // 保存到 storageLocal
+    },
     /** 存储头像 */
-    SET_AVATAR(username: string, avatar: string) {
-      this.avatar = avatar;
-      storageLocal().setItem(username, avatar)
+    SET_AVATAR(avatar: string) {
+      this.avatar = avatar; // 更新 Pinia 状态
+      this.updateStorage("avatar", avatar);
     },
     /** 存储用户名 */
     SET_USERNAME(username: string) {
       this.username = username;
+      this.updateStorage("username", username);
     },
     /** 存储邮箱 */
     SET_EMAIL(email: string) {
       this.email = email;
+      this.updateStorage("email", email);
     },
     /** 存储手机号 */
     SET_PHONE(phone: string) {
       this.phone = phone;
+      this.updateStorage("phone", phone);
     },
     // /** 存储角色 */
     // SET_ROLES(roles: Array<string>) {
@@ -84,17 +93,8 @@ export const useUserStore = defineStore({
             const userInfoResponse = await getUserInfo();
             if (userInfoResponse?.code === 0) {
               const userInfo = userInfoResponse.data;
-
-              // 存储用户信息到本地
-              storageLocal().setItem(userKey, {
-                // avatar: userInfo.avatarPath ?? "",
-                username: userInfo.username ?? "",
-                email: userInfo.email ?? "",
-                phone: userInfo.phone ?? "",
-                accessToken: loginResponse,
-              });
-
               // 更新状态管理中的用户信息
+              this.SET_AVATAR(userInfo.avatarPath ?? "");
               this.SET_USERNAME(userInfo.username ?? "");
               this.SET_EMAIL(userInfo.email ?? "");
               this.SET_PHONE(userInfo.phone ?? "");
@@ -120,21 +120,6 @@ export const useUserStore = defineStore({
       resetRouter();
       router.push("/login");
     },
-    /** 刷新`token` */
-    // async handRefreshToken(data) {
-    //   return new Promise<RefreshTokenResult>((resolve, reject) => {
-    //     refreshTokenApi(data)
-    //       .then(data => {
-    //         if (data) {
-    //           setToken(data.data);
-    //           resolve(data);
-    //         }
-    //       })
-    //       .catch(error => {
-    //         reject(error);
-    //       });
-    //   });
-    // }
   }
 });
 

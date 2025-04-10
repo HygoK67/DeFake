@@ -4,7 +4,7 @@ import { defineFakeRoute } from "vite-plugin-fake-server/client";
 
 export default defineFakeRoute([
   {
-    url: "/login",
+    url: "/api/user/login",
     method: "post",
     response: ({ body }) => {
       if (body.username !== "000000") {

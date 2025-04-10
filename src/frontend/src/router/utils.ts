@@ -26,8 +26,8 @@ const IFrame = () => import("@/layout/frame.vue");
 // https://cn.vitejs.dev/guide/features.html#glob-import
 const modulesRoutes = import.meta.glob("/src/views/**/*.{vue,tsx}");
 
-// 动态路由
-import { getAsyncRoutes } from "@/api/routes";
+// // 动态路由
+// import { getAsyncRoutes } from "@/api/routes";
 
 function handRank(routeInfo: any) {
   const { name, path, parentId, meta } = routeInfo;
@@ -84,7 +84,7 @@ function isOneOfArray(a: Array<string>, b: Array<string>) {
 /** 从localStorage里取出当前登录用户的角色roles，过滤无权限的菜单 */
 function filterNoPermissionTree(data: RouteComponent[]) {
   const currentRoles =
-    storageLocal().getItem<DataInfo<number>>(userKey)?.roles ?? [];
+    storageLocal().getItem<DataInfo>(userKey)?.roles ?? [];
   const newTree = cloneDeep(data).filter((v: any) =>
     isOneOfArray(v.meta?.roles, currentRoles)
   );
@@ -189,6 +189,55 @@ function handleAsyncRoutes(routeList) {
   addPathMatch();
 }
 
+const permissionRouter = [{
+  path: "/permission",
+  meta: {
+    title: "权限管理",
+    icon: "ep:lollipop",
+    rank: 10
+  },
+  children: [
+    {
+      path: "/permission/page/index",
+      name: "PermissionPage",
+      meta: {
+        title: "页面权限",
+        roles: ["admin", "common"]
+      }
+    },
+    {
+      path: "/permission/button",
+      meta: {
+        title: "按钮权限",
+        roles: ["admin", "common"]
+      },
+      children: [
+        {
+          path: "/permission/button/router",
+          component: "permission/button/index",
+          name: "PermissionButtonRouter",
+          meta: {
+            title: "路由返回按钮权限",
+            auths: [
+              "permission:btn:add",
+              "permission:btn:edit",
+              "permission:btn:delete"
+            ]
+          }
+        },
+        {
+          path: "/permission/button/login",
+          component: "permission/button/perms",
+          name: "PermissionButtonLogin",
+          meta: {
+            title: "登录接口返回按钮权限"
+          }
+        }
+      ]
+    }
+  ]
+}];
+
 /** 初始化路由（`new Promise` 写法防止在异步请求中造成无限循环）*/
 function initRouter() {
   if (getConfig()?.CachingAsyncRoutes) {
@@ -202,19 +251,15 @@ function initRouter() {
       });
     } else {
       return new Promise(resolve => {
-        getAsyncRoutes().then(({ data }) => {
-          handleAsyncRoutes(cloneDeep(data));
-          storageLocal().setItem(key, data);
-          resolve(router);
-        });
+        handleAsyncRoutes(cloneDeep(permissionRouter));
+        storageLocal().setItem(key, permissionRouter);
+        resolve(router);
       });
     }
   } else {
     return new Promise(resolve => {
-      getAsyncRoutes().then(({ data }) => {
-        handleAsyncRoutes(cloneDeep(data));
-        resolve(router);
-      });
+      handleAsyncRoutes(cloneDeep(permissionRouter));
+      resolve(router);
     });
   }
 }

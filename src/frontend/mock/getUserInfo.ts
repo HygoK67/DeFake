@@ -2,7 +2,7 @@ import { defineFakeRoute } from "vite-plugin-fake-server/client";
 
 export default defineFakeRoute([
   {
-    url: "/api/user/getUserInfo", // 模拟获取用户信息接口
+    url: "/api/user/info", // 模拟获取用户信息接口
     method: "get", // 请求方法为 GET
     response: () => {
       return {

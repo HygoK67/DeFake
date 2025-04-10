@@ -40,13 +40,13 @@ export function useNav() {
   /** 头像（如果头像为空则使用 src/assets/user.jpg ） */
   const userAvatar = computed(() => {
     const avatar = useUserStoreHook()?.avatar;
+    console.log("avatar", avatar);
     return avatar && avatar !== "" ? avatar : Avatar;
   });
 
   /** 昵称（如果昵称为空则显示用户名） */
   const username = computed(() => {
     return useUserStoreHook()?.username
-
   });
 
   /** 邮箱 */

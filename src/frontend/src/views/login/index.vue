@@ -16,7 +16,7 @@ import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
 import Lock from "@iconify-icons/ri/lock-fill";
-import User from "@iconify-icons/ri/user-3-fill";
+import Mail from "@iconify-icons/ri/mail-line";
 
 defineOptions({
   name: "Login"
@@ -33,8 +33,8 @@ dataThemeChange(overallStyle.value);
 const { title } = useNav();
 
 const ruleForm = reactive({
-  username: "admin",
-  password: "admin123"
+  email: "",
+  password: ""
 });
 
 const onLogin = async (formEl: FormInstance | undefined) => {
@@ -44,13 +44,14 @@ const onLogin = async (formEl: FormInstance | undefined) => {
       loading.value = true;
       try {
         const res = await useUserStoreHook().loginByUsername({
-          username: ruleForm.username,
+          email: ruleForm.email,
           password: ruleForm.password
         });
         if (res.code === 0) {
           // 获取后端路由
           await initRouter();
-          await router.push(getTopMenu(true).path);
+          // await router.push(getTopMenu(true).path);
+          await router.push("/welcome"); // 跳转到欢迎界面
           message("登录成功", { type: "success" });
         } else {
           message(res.message || "登录失败", { type: "error" });
@@ -115,11 +116,11 @@ onBeforeUnmount(() => {
               <el-form-item :rules="[
                 {
                   required: true,
-                  message: '请输入账号',
+                  message: '请输入邮箱',
                   trigger: 'blur'
                 }
-              ]" prop="username">
-                <el-input v-model="ruleForm.username" clearable placeholder="账号" :prefix-icon="useRenderIcon(User)" />
+              ]" prop="email">
+                <el-input v-model="ruleForm.email" clearable placeholder="邮箱" :prefix-icon="useRenderIcon(Mail)" />
               </el-form-item>
             </Motion>
 
@@ -130,14 +131,14 @@ onBeforeUnmount(() => {
               </el-form-item>
             </Motion>
 
-            <Motion :delay="250">
+            <Motion :delay="200">
               <el-button class="w-full mt-4" size="default" type="primary" :loading="loading"
                 @click="onLogin(ruleFormRef)">
                 登录
               </el-button>
             </Motion>
 
-            <Motion :delay="300">
+            <Motion :delay="250">
               <el-button class="w-full mt-3" size="default" type="default" @click="onRegister">
                 注册
               </el-button>

@@ -27,7 +27,7 @@ const defaultConfig: AxiosRequestConfig = {
   paramsSerializer: {
     serialize: stringify as unknown as CustomParamsSerializer
   },
-  // baseURL: "http://122.9.35.116:8080", 
+  // baseURL: "http://122.9.35.116:8080/",
 };
 
 class PureHttp {
@@ -36,11 +36,11 @@ class PureHttp {
     this.httpInterceptorsResponse();
   }
 
-  /** `token`过期后，暂存待执行的请求 */
-  private static requests = [];
+  // /** `token`过期后，暂存待执行的请求 */
+  // private static requests = [];
 
-  /** 防止重复刷新`token` */
-  private static isRefreshing = false;
+  // /** 防止重复刷新`token` */
+  // private static isRefreshing = false;
 
   /** 初始化配置对象 */
   private static initConfig: PureHttpRequestConfig = {};
@@ -80,10 +80,12 @@ class PureHttp {
           ? config
           : new Promise(resolve => {
             const data = getToken();
+            console.log("请求头中的token:", data);
             if (data) {
-              config.headers["Authorization"] = formatToken(
+              config.headers["jwtToken"] = formatToken(
                 data.accessToken
               );
+              console.log(config)
               resolve(config);
             } else {
               resolve(config);
@@ -140,6 +142,7 @@ class PureHttp {
       ...axiosConfig
     } as PureHttpRequestConfig;
 
+    console.log("请求配置:", config);
     // 单独处理自定义请求/响应回调
     return new Promise((resolve, reject) => {
       PureHttp.axiosInstance

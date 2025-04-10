@@ -10,14 +10,16 @@ export default defineFakeRoute([
       // 校验邮箱是否存在
       if (email === "11@qq.com") {
         return {
-          result: "FAIL",
-          message: "邮箱不能为空"
+          code: 1,
+          message: "邮箱已存在",
+          data: null
         };
       }
       // 模拟发送成功
       return {
-        result: "SUC",
-        message: "验证码已发送到邮箱"
+        code: 0,
+        message: "验证码发送成功",
+        data: null
       };
     }
   }
