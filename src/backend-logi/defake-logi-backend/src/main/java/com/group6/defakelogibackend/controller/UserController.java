@@ -62,12 +62,11 @@ public class UserController {
     public Result updateInfo(
             @RequestBody User user,
             @RequestHeader String jwtToken,
-            @RequestBody Map<String, String> map,
             @RequestParam(required = false) String verificationCode
     ) {
         long id = Long.parseLong(jwtService.getUserId(jwtToken));
         user.setId(id);
-        userService.updateUserInfo(user, map.get("oldPassword"), verificationCode);
+        userService.updateUserInfo(user, user.getOldPassword(), verificationCode);
         return Result.success();
     }
 
