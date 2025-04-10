@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Mapper
 public interface UserToGroupMapper {
-    public void addUserToGroup(long userId, long groupId);
+    public void addUserToGroup(long userId, long groupId, String status, String role);
 
     public UserToGroup findUserToGroup(long userId, long groupId);
 

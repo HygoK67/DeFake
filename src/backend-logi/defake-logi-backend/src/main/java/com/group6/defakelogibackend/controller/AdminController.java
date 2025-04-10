@@ -32,11 +32,4 @@ public class AdminController {
         List<OperationLog> operationLogs = operationLogService.getOperationLog();
         return Result.success(operationLogs);
     }
-
-    @GetMapping("/notification/info")
-    public Result notificationInfo( @RequestParam("notificationId") String notificationId) {
-        Notification notification = notificationService.notificationInfo(Long.parseLong(notificationId));
-        return Result.success(notification);
-    }
-
 }

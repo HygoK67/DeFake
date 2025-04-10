@@ -1,5 +1,6 @@
 package com.group6.defakelogibackend.controller;
 
+import com.group6.defakelogibackend.annotation.Admin;
 import com.group6.defakelogibackend.annotation.LoggedIn;
 import com.group6.defakelogibackend.model.Notification;
 import com.group6.defakelogibackend.model.Result;
@@ -22,24 +23,12 @@ public class NotificationController {
     @Autowired
     JWTService jwtService;
 
-    @LoggedIn
+    @Admin
     @DeleteMapping("/delete")
     public Result deleteNotification(@RequestBody Map<String, String> requestBody) {
         long notificationId = Long.parseLong(requestBody.get("notificationId"));
-        if (notificationService.deleteNotification(notificationId)) {
-            return Result.success();
-        }
-        return Result.error("删除通知失败");
-    }
-
-    @LoggedIn
-    @DeleteMapping("/clear")
-    public Result deleteAllNotification(@RequestHeader String jwtToken) {
-        long userId = Long.parseLong(jwtService.getUserId(jwtToken));
-        if (notificationService.deleteAllNotification(userId)) {
-            return Result.success();
-        }
-        return Result.error("删除全部通知失败");
+        notificationService.deleteNotification(notificationId);
+        return Result.success();
     }
 
     @LoggedIn
@@ -48,5 +37,28 @@ public class NotificationController {
         long userId = Long.parseLong(jwtService.getUserId(jwtToken));
         List<Notification> list = notificationService.notificationFilter(userId, condition);
         return Result.success(list);
+    }
+
+    @Admin
+    @GetMapping("/info")
+    public Result notificationInfo(@RequestParam("notificationId") String notificationId) {
+        Notification notification = notificationService.notificationInfo(Long.parseLong(notificationId));
+        return Result.success(notification);
+    }
+
+    @Admin
+    @GetMapping("/all")
+    public Result notificationAll() {
+        List<Notification> list = notificationService.showAllNotifications();
+        return Result.success(list);
+    }
+
+    @LoggedIn
+    @PutMapping("/read")
+    public Result readNotification(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody){
+        long userIdRec = Long.parseLong(jwtService.getUserId(jwtToken));
+        long notificationId = Long.parseLong(requestBody.get("notificationId"));
+        notificationService.readNotification(userIdRec, notificationId);
+        return Result.success();
     }
 }

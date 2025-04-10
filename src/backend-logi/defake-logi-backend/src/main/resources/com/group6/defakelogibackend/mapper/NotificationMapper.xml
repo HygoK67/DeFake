@@ -14,26 +14,31 @@
         where id = #{id}
     </delete>
 
-    <delete id="deleteAllNotificationByUserId">
-        delete from notifications
-        where user_id = #{user_id}
-    </delete>
-
-    <select id="findNotificationByUserId_sent_at_desc">
+    <select id="findNotificationByUserId_sent_at_desc" resultType="com.group6.defakelogibackend.model.Notification">
         select * from notifications
-        where user_id_rec = #{user_id}
+        where user_id_sent = #{user_id} or user_id_rec = #{user_id}
         order by sent_at desc
     </select>
 
-    <select id="findNotificationByUserId_sent_at_asc">
+    <select id="findNotificationByUserId_sent_at_asc" resultType="com.group6.defakelogibackend.model.Notification">
         select * from notifications
-        where user_id_rec = #{user_id}
+        where user_id_sent = #{user_id} or user_id_rec = #{user_id}
         order by sent_at asc
     </select>
 
     <insert id="createNotificationUser2User">
-        insert into notifications (user_id_rec, user_id_sent, title, content)
-        values (#{userId_rec}, #{userId_sent}, #{title}, #{content})
+        insert into notifications (user_id_rec, user_id_sent, group_id, title, content)
+        values (#{userId_rec}, #{userId_sent}, #{groupId}, #{title}, #{content})
     </insert>
+
+    <select id="getAllNotifications" resultType="com.group6.defakelogibackend.model.Notification">
+        select * from notifications
+    </select>
+
+    <update id="updateNotificationReadAt">
+        update notifications
+        set read_at = NOW()
+        where id = #{notificationId} and user_id_rec = #{userIdRec}
+    </update>
 
 </mapper>

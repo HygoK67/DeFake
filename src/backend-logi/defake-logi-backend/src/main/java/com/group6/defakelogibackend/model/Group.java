@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class Group {
     private long id;
     private String groupname;
-    private long groupLeaderId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

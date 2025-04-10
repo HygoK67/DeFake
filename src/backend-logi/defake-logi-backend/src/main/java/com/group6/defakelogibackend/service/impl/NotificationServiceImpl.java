@@ -32,16 +32,6 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
 
     @Override
     @Transactional
-    public boolean deleteAllNotification(long userId) {
-        if (userMapper.findUserById(userId) == null){
-            throw new EntityMissingException("userId 错误，不存在对应的user!");
-        }
-        notificationMapper.deleteAllNotificationByUserId(userId);
-        return true;
-    }
-
-    @Override
-    @Transactional
     public Notification notificationInfo(long notificationId) {
         Notification notification = notificationMapper.findNotificationById(notificationId);
         if (notification == null) {
@@ -53,12 +43,9 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
     @Override
     @Transactional
     public List<Notification> notificationFilter(long userId, String condition) {
-        if (userMapper.findUserById(userId) == null){
+        if (userMapper.findUserById(userId) == null) {
             throw new EntityMissingException("userId 错误，不存在对应的user!");
         }
-        System.out.println(condition);
-        System.out.println();
-        System.out.println();
         if (condition.equals("sent_at_desc")) {
             return notificationMapper.findNotificationByUserId_sent_at_desc(userId);
         } else if (condition.equals("sent_at_asc")) {
@@ -66,5 +53,21 @@ public class NotificationServiceImpl implements com.group6.defakelogibackend.ser
         } else {
             throw new FieldMissingException("输入的 condition 字段暂不支持!");
         }
+    }
+
+    @Override
+    @Transactional
+    public List<Notification> showAllNotifications() {
+        return notificationMapper.getAllNotifications();
+    }
+
+    @Override
+    @Transactional
+    public void readNotification(long userIdRec, long notificationId) {
+        Notification notification = notificationMapper.findNotificationById(notificationId);
+        if (notification.getUserIdRec() != userIdRec){
+            throw new FieldMissingException("userIdRec 字段不符!");
+        }
+        notificationMapper.updateNotificationReadAt(userIdRec, notificationId);
     }
 }
