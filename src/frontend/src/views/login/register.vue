@@ -23,10 +23,10 @@ const countdown = ref(0); // 倒计时秒数
 const registerForm = reactive({
   username: "11",
   phone: "13965656565",
-  mail: "1231@qq.com",
-  password: "12",
-  confirmPassword: "12",
-  verificationCode: "13131" // 验证码字段
+  mail: "",
+  password: "11",
+  confirmPassword: "11",
+  verificationCode: "" // 验证码字段
 });
 
 const rules = {
@@ -68,12 +68,14 @@ const sendCode = async () => {
   try {
     loading.value = true;
     const response = await getEmailCode({ email: registerForm.mail });
+    console.log(response);
     if (response.code === 0) {
       ElMessage.success("验证码已发送，请检查邮箱！");
       verificationSent.value = true;
       startCountdown(); // 开始倒计时
     } else {
       ElMessage.error("验证码发送失败，请重试！");
+      console.error(response.message);
     }
   } catch (error) {
     ElMessage.error("请求失败，请检查网络或稍后重试！");
@@ -84,7 +86,7 @@ const sendCode = async () => {
 };
 
 const startCountdown = () => {
-  countdown.value = 60; // 设置倒计时为 60 秒
+  countdown.value = 3; // 设置倒计时为 60 秒
   const timer = setInterval(() => {
     countdown.value--;
     if (countdown.value <= 0) {
@@ -105,10 +107,10 @@ const onRegister = async () => {
         const response = await registerUser({
           username: registerForm.username,
           phone: registerForm.phone,
-          mail: registerForm.mail,
+          email: registerForm.mail,
           password: registerForm.password
         }, registerForm.verificationCode);
-        if (response.result === "SUC") {
+        if (response.code === 0) {
           ElMessage.success("注册成功！");
           router.push("/login");
         } else {

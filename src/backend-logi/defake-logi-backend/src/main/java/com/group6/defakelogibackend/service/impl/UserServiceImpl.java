@@ -165,4 +165,10 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     public List<User> showAllUsers() {
         return userMapper.getAllUsers();
     }
+
+    @Override
+    @Transactional
+    public long getUserId(String email) {
+        return userMapper.findUserByEmail(email).getId();
+    }
 }
