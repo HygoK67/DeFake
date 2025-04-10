@@ -45,7 +45,7 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         if (userMapper.findUserByEmail(user.getEmail()) != null) {
             throw new EntityDuplicateException("邮箱已被注册，请换一个邮箱!");
         }
-        if (userMapper.findUserByEmail(user.getEmail()) != null) {
+        if (userMapper.findUserByPhone(user.getPhone()) != null) {
             throw new EntityDuplicateException("手机号已被注册，请换一个手机号!");
         }
         if (!emailService.verifyCode(user.getEmail(), verificationCode)) {

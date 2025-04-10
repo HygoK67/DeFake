@@ -23,10 +23,10 @@ spring:
     username: root
     password: ruangong-6-mysql-passwd
   mail:
-    host: smtp.163.com       # 以QQ邮箱为例
+    host: smtp.163.com
     port: 994
-    username: gordonhemu@163.com   # 发件人邮箱
-    password: JHbB8gtymCj4ndAx # QQ邮箱授权码（非登录密码）
+    username: ruangonggroup6@163.com   # 发件人邮箱
+    password: VNuPX3AG9y3Fbj9i     # 163邮箱授权码（非登录密码）
     protocol: smtp
     properties:
       mail:

@@ -1,6 +1,7 @@
 package com.group6.defakelogibackend.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,9 @@ import java.util.Random;
 public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
+
+    @Value("{mail.username}")
+    private String mailUsername;
 
     private static final HashMap<String, String> codeMap = new HashMap<>();        // 记录验证码
     private static final HashMap<String, LocalDateTime> timeMap = new HashMap<>(); // 记录验证码过期时间
@@ -35,7 +39,7 @@ public class EmailService {
 
         // 发送邮件
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("gordonhemu@163.com");
+        message.setFrom("ruangonggroup6@163.com");
         message.setTo(email);
         message.setSubject("DeFake 图像造假检测平台注册验证码");
         message.setText("您的验证码是：" + code + "，有效期" + CODE_EXPIRE_MINUTES + "分钟");

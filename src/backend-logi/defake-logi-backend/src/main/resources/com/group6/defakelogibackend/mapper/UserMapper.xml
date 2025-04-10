@@ -68,7 +68,7 @@
             </if>
             <if test="passwordHash != null">
                 password_hash = #{passwordHash},
-            </if>,
+            </if>
             <if test="avatarPath != null">
                 avatar_path = #{avatarPath},
             </if>
@@ -76,7 +76,7 @@
                 updated_at = updated_at,
             </if>
             <if test="lastLoginAt != null">
-                last_login_at = #{lastLoginAt},
+                last_login_at = #{lastLoginAt}
             </if>
         </set>
         where

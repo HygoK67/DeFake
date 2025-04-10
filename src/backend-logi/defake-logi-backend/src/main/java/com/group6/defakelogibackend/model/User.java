@@ -20,6 +20,7 @@ public class User {       // 用户类
     private String email;
     private String phone;
     private String password;
+    private String oldPassword;
     private String passwordHash;
     private String avatarPath;
     private LocalDateTime createdAt;
