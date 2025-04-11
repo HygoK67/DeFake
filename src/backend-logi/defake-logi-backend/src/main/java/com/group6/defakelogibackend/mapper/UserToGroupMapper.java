@@ -13,5 +13,7 @@ public interface UserToGroupMapper {
 
     public UserToGroup findUserToGroup(long userId, long groupId);
 
+    public List<UserToGroup> findGroupsByUserId(long userId);
+
     public void deleteUserToGroup(long userId, long groupId);
 }

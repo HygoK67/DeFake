@@ -7,11 +7,13 @@ import com.group6.defakelogibackend.mapper.NotificationMapper;
 import com.group6.defakelogibackend.mapper.UserMapper;
 import com.group6.defakelogibackend.mapper.UserToGroupMapper;
 import com.group6.defakelogibackend.model.Group;
+import com.group6.defakelogibackend.model.GroupDTO;
 import com.group6.defakelogibackend.model.UserToGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -123,4 +125,25 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
     public List<Group> searchGroup(String groupname) {
         return groupMapper.findGroupByGroupname(groupname);
     }
+
+    @Override
+    @Transactional
+    public List<GroupDTO> listGroupByUser(long userId) {
+        List<UserToGroup> userToGroups = userToGroupMapper.findGroupsByUserId(userId);
+        List<GroupDTO> groupDTOList = new ArrayList<>();
+        for (UserToGroup userToGroup : userToGroups) {
+            long groupId = userToGroup.getGroupId();
+            Group group = groupMapper.findGroupByGroupId(groupId);
+            GroupDTO groupDTO = new GroupDTO();
+            groupDTO.setGroupname(group.getGroupname());
+            groupDTO.setId(groupId);
+            groupDTO.setStatus(userToGroup.getStatus());
+            groupDTO.setCreatedAt(group.getCreatedAt());
+            groupDTO.setUpdatedAt(group.getUpdatedAt());
+            groupDTOList.add(groupDTO);
+        }
+        return groupDTOList;
+    }
+
+
 }
