@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +31,16 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
 
     @Override
     @Transactional
-    public boolean createGroup(long userId, String groupname) {
+    public boolean createGroup(long userId, String groupname, String introduction, String ddl) {
         Group group = new Group();
         group.setGroupname(groupname);
-        if (groupMapper.findGroupByGroupname(groupname) != null){
+        group.setIntroduction(introduction);
+        group.setDdl(ddl);
+        System.out.println(groupname);
+        System.out.println(groupname);
+        System.out.println(groupname);
+        System.out.println(groupMapper.findGroupByGroupname(groupname));
+        if (groupMapper.findGroupByGroupname(groupname) != null) {
             throw new EntityDuplicateException("该 groupname 已存在!");
         }
         groupMapper.createGroup(group);
@@ -91,8 +98,14 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         if (group == null) {
             throw new EntityMissingException("groupId 无效!");
         }
+
+        if (userToGroupMapper.findUserToGroup(userIdSent, groupId).getRole() != UserToGroup.Role.leader) {
+            throw new EntityMissingException("发起者并非该组织的管理员!");
+        }
+
         // 如果该用户未加入该组织，则不能将其踢出组织
-        if (userToGroupMapper.findUserToGroup(userIdRec, groupId) == null) {
+        if (userToGroupMapper.findUserToGroup(userIdRec, groupId) == null ||
+                userToGroupMapper.findUserToGroup(userIdRec, groupId).getStatus() != UserToGroup.Status.in) {
             throw new EntityMissingException("(userId_rec, groupId) 无效!");
         }
 
@@ -123,7 +136,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
     @Override
     @Transactional
     public List<Group> searchGroup(String groupname) {
-        return groupMapper.findGroupByGroupname(groupname);
+        return groupMapper.searchGroupByGroupname(groupname);
     }
 
     @Override
@@ -140,6 +153,8 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
             groupDTO.setStatus(userToGroup.getStatus());
             groupDTO.setCreatedAt(group.getCreatedAt());
             groupDTO.setUpdatedAt(group.getUpdatedAt());
+            groupDTO.setDdl(group.getDdl());
+            groupDTO.setIntroduction(group.getIntroduction());
             groupDTOList.add(groupDTO);
         }
         return groupDTOList;

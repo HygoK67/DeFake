@@ -8,6 +8,7 @@ import com.group6.defakelogibackend.utils.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +26,9 @@ public class GroupController {
     public Result createGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
         long userId = Long.parseLong(jwtService.getUserId(jwtToken));
         String groupname = requestBody.get("groupname");
-        groupService.createGroup(userId, groupname);
+        String introduction = requestBody.get("introduction");
+        String ddl = requestBody.get("ddl");
+        groupService.createGroup(userId, groupname, introduction, ddl);
         return Result.success("创建组织成功");
 
     }
@@ -76,5 +79,7 @@ public class GroupController {
         List<GroupDTO> groups = groupService.listGroupByUser(userId);
         return Result.success(groups);
     }
+
+
 
 }

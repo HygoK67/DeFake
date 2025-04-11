@@ -14,4 +14,6 @@ public class Group {
     private String groupname;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String introduction;
+    private String ddl;
 }

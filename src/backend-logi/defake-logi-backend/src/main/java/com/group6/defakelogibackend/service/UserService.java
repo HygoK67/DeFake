@@ -1,7 +1,6 @@
 package com.group6.defakelogibackend.service;
 
 import com.group6.defakelogibackend.model.User;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
