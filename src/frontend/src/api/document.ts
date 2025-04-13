@@ -2,23 +2,44 @@ import { http } from "@/utils/http";
 import type { FileWithMetadata } from "@/types/document";
 
 /**
- * @param filesData 带有元数据的文件对象数组
- * @returns 上传结果，包含所有文件的ID和状态
+ * 上传文件（第一步）
+ * @param fileData 文件对象
+ * @returns 上传结果，包含文件URL
  */
 export const uploadFiles = (fileData: FileWithMetadata) => {
   const formData = new FormData();
 
   formData.append(`files`, fileData.file);
-  formData.append(`metadata`, JSON.stringify(fileData.metadata));
 
-  return http.post<{ code: string; message: string; data: any[] }, FormData>(
+  return http.post<any, { code: string; message: string; data: any[] }>(
     "/api/file/upload",
-    formData as any,
+    {
+      data: formData as unknown as { code: string; message: string; data: any[] },
+      headers: {
+        "Content-Type": undefined
+      },
+      timeout: 30000
+    }
+  );
+};
+
+/**
+ * 提交文件元数据（第二步）
+ * @param fileUrl 已上传文件的URL
+ * @param metadata 文件的元数据
+ * @returns 提取出的图片列表
+ */
+export const submitFileMetadata = (fileUrl: string, metadata: any) => {
+  return http.post<any, { code: string; message: string; data: any[] }>(
+    "/api/file/process", // 根据实际API路径调整
+    {
+      fileUrl,
+      metadata
+    },
     {
       headers: {
-        // 使用浏览器自动设置的Content-Type和boundary
-      },
-      timeout: 30000 // 增加超时时间到30秒
+        "Content-Type": "application/json"
+      }
     }
   );
 };
@@ -29,13 +50,35 @@ export const uploadFiles = (fileData: FileWithMetadata) => {
  * @returns 提交结果
  */
 export const submitSelectedImages = (selectedImages: any[]) => {
-  return http.post<{ code: string; message: string; data: any }>(
+  return http.post<any, { code: string; message: string; data: { images: any[] } }>(
     "/api/file/submit-selection",
-    { images: selectedImages }, // 确保包装在images属性中
+    { data: { images: selectedImages } }, // 确保包装在data属性中
     {
       headers: {
         "Content-Type": "application/json"
       }
     }
   );
+};
+
+/**
+ * 一次性完成文件上传和元数据提交（组合步骤）
+ * @param fileData 文件对象
+ * @param metadata 文件的元数据
+ * @returns 处理结果，包含提取出的图片列表
+ */
+export const uploadAndProcessFile = async (fileData: FileWithMetadata) => {
+  try {
+    const uploadResult = await uploadFiles(fileData);
+    if (uploadResult.data) {
+      const fileUrl = uploadResult.data;
+      const processResult = await submitFileMetadata(fileUrl, fileData.metadata);
+      return processResult;
+    } else {
+      throw new Error("文件上传失败: " + uploadResult.message);
+    }
+  } catch (error) {
+    console.error("文件上传和处理失败:", error);
+    throw error;
+  }
 };
