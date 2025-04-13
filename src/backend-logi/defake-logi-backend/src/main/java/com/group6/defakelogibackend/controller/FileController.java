@@ -21,7 +21,7 @@ public class FileController {
     JWTService jwtService;
 
     @PostMapping("/upload")
-    public Result uploadFile(@RequestParam("file") MultipartFile file, @RequestHeader String jwtToken) {
+    public Result uploadFile(@RequestParam("files") MultipartFile file, @RequestHeader String jwtToken) {
         long userId = Long.parseLong(jwtService.getUserId(jwtToken));
         String url = userService.userUpload(userId, file);
         return Result.success(url);

@@ -1,7 +1,6 @@
 package com.group6.defakelogibackend.mapper;
 
 import com.group6.defakelogibackend.model.Group;
-import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.model.UserToGroup;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -17,5 +16,9 @@ public interface GroupMapper {
     public List<Group> getAllGroups();
 
     public List<UserToGroup> findGroupMembersByGroupId(long groupId);
+
+    public Group findGroupByGroupname(String groupname);
+
+    public List<Group> searchGroupByGroupname(String groupname);
 
 }

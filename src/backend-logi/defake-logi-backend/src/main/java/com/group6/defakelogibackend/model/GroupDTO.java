@@ -9,11 +9,13 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Group {
-    private long id;
+public class GroupDTO {
+
+    private Long id;
     private String groupname;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private String introduction;
     private String ddl;
+    private UserToGroup.Status status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

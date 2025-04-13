@@ -194,7 +194,6 @@ const searchOrganizations = () => {
             </a>
           </template>
         </el-table-column>
-        <el-table-column prop="organization" label="所属组织" min-width="150" />
         <el-table-column prop="date" label="创建日期" width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">

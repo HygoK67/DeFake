@@ -2,6 +2,8 @@ package com.group6.defakelogibackend.service.impl;
 
 import com.group6.defakelogibackend.exception.*;
 import com.group6.defakelogibackend.mapper.UserMapper;
+import com.group6.defakelogibackend.mapper.UserToGroupMapper;
+import com.group6.defakelogibackend.model.Group;
 import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     OperationLogService operationLogService;
     @Autowired
     TencentCOSService cosService;
+    @Autowired
+    UserToGroupMapper userToGroupMapper;
 
     @Override
     @Transactional
@@ -41,7 +45,7 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         if (userMapper.findUserByEmail(user.getEmail()) != null) {
             throw new EntityDuplicateException("邮箱已被注册，请换一个邮箱!");
         }
-        if (userMapper.findUserByEmail(user.getEmail()) != null) {
+        if (userMapper.findUserByPhone(user.getPhone()) != null) {
             throw new EntityDuplicateException("手机号已被注册，请换一个手机号!");
         }
         if (!emailService.verifyCode(user.getEmail(), verificationCode)) {
@@ -164,5 +168,11 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     @Transactional
     public List<User> showAllUsers() {
         return userMapper.getAllUsers();
+    }
+
+    @Override
+    @Transactional
+    public long getUserId(String email) {
+        return userMapper.findUserByEmail(email).getId();
     }
 }

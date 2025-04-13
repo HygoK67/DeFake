@@ -7,14 +7,15 @@ import com.group6.defakelogibackend.mapper.NotificationMapper;
 import com.group6.defakelogibackend.mapper.UserMapper;
 import com.group6.defakelogibackend.mapper.UserToGroupMapper;
 import com.group6.defakelogibackend.model.Group;
-import com.group6.defakelogibackend.model.User;
+import com.group6.defakelogibackend.model.GroupDTO;
 import com.group6.defakelogibackend.model.UserToGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class GroupServiceImpl implements com.group6.defakelogibackend.service.GroupService {
@@ -30,9 +31,18 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
 
     @Override
     @Transactional
-    public boolean createGroup(long userId, String groupname) {
+    public boolean createGroup(long userId, String groupname, String introduction, String ddl) {
         Group group = new Group();
         group.setGroupname(groupname);
+        group.setIntroduction(introduction);
+        group.setDdl(ddl);
+        System.out.println(groupname);
+        System.out.println(groupname);
+        System.out.println(groupname);
+        System.out.println(groupMapper.findGroupByGroupname(groupname));
+        if (groupMapper.findGroupByGroupname(groupname) != null) {
+            throw new EntityDuplicateException("该 groupname 已存在!");
+        }
         groupMapper.createGroup(group);
         userToGroupMapper.addUserToGroup(userId, group.getId(), "in", "leader");
         return true;
@@ -41,22 +51,19 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
 
     @Override
     @Transactional
-    public boolean applyGroup(long userId_sent, long userId_rec, long groupId, String title, String content) {
+    public boolean applyGroup(long userId_sent, long groupId) {
         Group group = groupMapper.findGroupByGroupId(groupId);
         // 如果groupId无效
         if (group == null) {
             throw new EntityMissingException("groupId 无效!");
         }
-        if (userMapper.findUserById(userId_rec) == null) {
-            throw new EntityMissingException("userId_rec 无效!");
-        }
+
         // 如果该用户已经加入该组织或者已经发送过申请，则不能再次发送申请
         if (userToGroupMapper.findUserToGroup(userId_sent, groupId) != null) {
             throw new EntityDuplicateException("该用户 status 为 in / pending!");
         }
 
-        userToGroupMapper.addUserToGroup(userId_sent, groupId, "pending", "member");
-        notificationMapper.createNotificationUser2User(userId_sent, userId_rec, groupId, title, content);
+        userToGroupMapper.addUserToGroup(userId_sent, groupId, "pending_apply", "member");
         return true;
     }
 
@@ -78,7 +85,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
             throw new EntityDuplicateException("该用户 status 为 in / pending!");
         }
 
-        userToGroupMapper.addUserToGroup(userIdRec, groupId, "pending", "member");
+        userToGroupMapper.addUserToGroup(userIdRec, groupId, "pending_invite", "member");
         notificationMapper.createNotificationUser2User(userIdSent, userIdRec, groupId, title, content);
         return true;
     }
@@ -91,8 +98,14 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         if (group == null) {
             throw new EntityMissingException("groupId 无效!");
         }
+
+        if (userToGroupMapper.findUserToGroup(userIdSent, groupId).getRole() != UserToGroup.Role.leader) {
+            throw new EntityMissingException("发起者并非该组织的管理员!");
+        }
+
         // 如果该用户未加入该组织，则不能将其踢出组织
-        if (userToGroupMapper.findUserToGroup(userIdRec, groupId) == null) {
+        if (userToGroupMapper.findUserToGroup(userIdRec, groupId) == null ||
+                userToGroupMapper.findUserToGroup(userIdRec, groupId).getStatus() != UserToGroup.Status.in) {
             throw new EntityMissingException("(userId_rec, groupId) 无效!");
         }
 
@@ -119,4 +132,33 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
     public List<UserToGroup> groupMembers(long groupId) {
         return groupMapper.findGroupMembersByGroupId(groupId);
     }
+
+    @Override
+    @Transactional
+    public List<Group> searchGroup(String groupname) {
+        return groupMapper.searchGroupByGroupname(groupname);
+    }
+
+    @Override
+    @Transactional
+    public List<GroupDTO> listGroupByUser(long userId) {
+        List<UserToGroup> userToGroups = userToGroupMapper.findGroupsByUserId(userId);
+        List<GroupDTO> groupDTOList = new ArrayList<>();
+        for (UserToGroup userToGroup : userToGroups) {
+            long groupId = userToGroup.getGroupId();
+            Group group = groupMapper.findGroupByGroupId(groupId);
+            GroupDTO groupDTO = new GroupDTO();
+            groupDTO.setGroupname(group.getGroupname());
+            groupDTO.setId(groupId);
+            groupDTO.setStatus(userToGroup.getStatus());
+            groupDTO.setCreatedAt(group.getCreatedAt());
+            groupDTO.setUpdatedAt(group.getUpdatedAt());
+            groupDTO.setDdl(group.getDdl());
+            groupDTO.setIntroduction(group.getIntroduction());
+            groupDTOList.add(groupDTO);
+        }
+        return groupDTOList;
+    }
+
+
 }
