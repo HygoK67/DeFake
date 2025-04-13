@@ -5,5 +5,15 @@
 <mapper namespace="com.group6.defakelogibackend.mapper.PaperMapper">
 
 
+    <insert id="addPaper">
+        insert into papers
+        (
+            uploader_id,
+            title,
+            <if test="abstracT != null">abstract,</if>
+            <if test="doi != null">doi,</if>
+        )
 
+
+    </insert>
 </mapper>
