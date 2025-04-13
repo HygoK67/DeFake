@@ -2,6 +2,7 @@
 import { ref, reactive, computed } from "vue";
 import { FileWithMetadata, Metadata } from "@/types/document";
 import { uploadFiles } from "@/api/document";
+import { useRouter } from "vue-router"; // 添加这行导入
 
 defineOptions({
   name: "ForensicsDetection"
@@ -12,9 +13,6 @@ const supportedFormats = [
   ".jpg",
   ".jpeg",
   ".png",
-  ".bmp",
-  ".tiff",
-  ".webp",
   ".doc",
   ".docx",
   ".pdf"
@@ -144,6 +142,9 @@ const saveMetadata = () => {
   alert("元数据已成功保存");
 };
 
+// 获取router实例
+const router = useRouter();
+
 // 上传并检测文件
 const uploadAndDetect = async () => {
   if (fileList.value.length === 0) return;
@@ -163,17 +164,52 @@ const uploadAndDetect = async () => {
   uploadProgress.value = 0;
 
   try {
-    uploadProgress.value = 30; // 设置初始进度
-    console.log(fileList.value);
-    const result = await uploadFiles(fileList.value);
-    console.log("uploadFiles返回结果:", result);
+    uploadProgress.value = 5;
+    console.log("开始顺序上传文件");
+    
+    const allExtractedImages = [];
+    const totalFiles = fileList.value.length;
+    
+    for (let i = 0; i < fileList.value.length; i++) {
+      const fileWithMeta = fileList.value[i];
+      
+      const fileStartProgress = 5 + Math.floor((i / totalFiles) * 90);
+      const fileEndProgress = 5 + Math.floor(((i + 1) / totalFiles) * 90);
+      uploadProgress.value = fileStartProgress;
+      
+      const singleFileResult = await uploadFiles(fileWithMeta);
+      console.log(`文件 ${i+1}/${totalFiles} 上传结果:`, singleFileResult);
+      
+      if (singleFileResult.data && Array.isArray(singleFileResult.data)) {
+        // 添加文件来源信息到每张图片
+        const imagesWithSource = singleFileResult.data.map(img => ({
+          ...img,
+          sourceFile: fileWithMeta.file.name,
+          sourceType: getFileType(fileWithMeta.file.name)
+        }));
+        
+        allExtractedImages.push(...imagesWithSource);
+      }
+      
+      uploadProgress.value = fileEndProgress;
+    }
+    
+    console.log("所有文件上传完成，共提取图片:", allExtractedImages.length);
     uploadProgress.value = 100;
+    
     setTimeout(() => {
       uploading.value = false;
-      alert("所有文件已成功检测并上传!");
-      fileList.value = [];
-      selectedFile.value = null;
-      metadataStorage.value = new WeakMap();
+      
+      // 使用query参数传递数据，避免params的问题
+      const imagesData = encodeURIComponent(JSON.stringify(allExtractedImages));
+      
+      // 同时在sessionStorage中存一份，作为备用
+      sessionStorage.setItem('uploadedImages', JSON.stringify(allExtractedImages));
+      
+      router.push({
+        name: 'ImageSelection',
+        query: { images: imagesData }
+      });
     }, 500);
   } catch (error) {
     console.error("上传失败:", error);
@@ -212,9 +248,6 @@ const getFileIcon = (filename: string): string => {
     case "jpg":
     case "jpeg":
     case "png":
-    case "bmp":
-    case "tiff":
-    case "webp":
       return "🖼️";
     case "doc":
     case "docx":
@@ -234,9 +267,6 @@ const getFileType = (filename: string): string => {
     case "jpg":
     case "jpeg":
     case "png":
-    case "bmp":
-    case "tiff":
-    case "webp":
       return "图像";
     case "doc":
     case "docx":
