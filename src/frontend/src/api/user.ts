@@ -50,7 +50,7 @@ export type basicResult = {
 export const getEmailCode = (data: { email: string }) => {
   return http.request<basicResult>(
     "get", // 请求方法
-    "api/user/sendEmailCode", // 请求 URL
+    "/api/user/sendEmailCode", // 请求 URL
     { params: data }
   );
 };
@@ -78,7 +78,7 @@ export const getUserInfo = () => {
 }
 
 /**修改个人信息 */
-export const updateInfo = (data) => {
+export const updateUserInfo = (data) => {
   return http.request<basicResult>(
     "put", // 请求方法
     "/api/user/info", // 请求 URL
@@ -97,19 +97,11 @@ export const updateEmail = (data: { email: string }, verificationCode: string) =
   );
 }
 
-/** 上传文件 */
-export const uploadFile = (data: { file: File }) => {
-  return http.request<LoginResult>(
-    "post", // 请求方法
-    "/api/file/upload", // 请求 URL
-    { data }
-  );
-}
-
-export const updateUserInfo = (data: { username: string; email: string; phone: string; avatarPath: string }) => {
-  return http.request<basicResult>(
-    "put", // 请求方法
-    "/api/user/info", // 请求 URL
-    { data }
-  );
-}
+// /** 上传文件 */
+// export const uploadFile = (data) => {
+//   return http.request<LoginResult>(
+//     "post", // 请求方法
+//     "/api/file/upload", // 请求 URL
+//     { data }
+//   );
+// }

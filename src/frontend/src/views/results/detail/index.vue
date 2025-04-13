@@ -73,6 +73,9 @@ const provideFeedback = () => {
         <el-tab-pane label="检测报告" name="report">
           <div class="report-summary">
             <div class="summary-card">
+              <div class="book-icon">
+                <img src="" alt="Report" />
+              </div>
               <div class="summary-info">
                 <h3>{{ reportData.fileName }}</h3>
                 <div class="info-row">
@@ -93,11 +96,8 @@ const provideFeedback = () => {
                 </div>
                 <div class="info-row">
                   <span class="info-label">检测状态:</span>
-                  <el-tag
-                    :type="
-                      reportData.status === '已完成' ? 'success' : 'warning'
-                    "
-                  >
+                  <el-tag :type="reportData.status === '已完成' ? 'success' : 'warning'
+                    ">
                     {{ reportData.status }}
                   </el-tag>
                 </div>
@@ -122,24 +122,16 @@ const provideFeedback = () => {
           <!-- 检测结果详情表格 -->
           <div class="result-details">
             <h3>检测结果详情</h3>
-            <el-table
-              :data="reportData.analysisResults"
-              border
-              style="width: 100%"
-            >
+            <el-table :data="reportData.analysisResults" border style="width: 100%">
               <el-table-column prop="page" label="页码" width="100" />
               <el-table-column prop="similarity" label="相似度 (%)" width="150">
                 <template #default="scope">
-                  <el-progress
-                    :percentage="scope.row.similarity"
-                    :color="
-                      scope.row.similarity > 60
-                        ? '#F56C6C'
-                        : scope.row.similarity > 40
-                          ? '#E6A23C'
-                          : '#67C23A'
-                    "
-                  />
+                  <el-progress :percentage="scope.row.similarity" :color="scope.row.similarity > 60
+                      ? '#F56C6C'
+                      : scope.row.similarity > 40
+                        ? '#E6A23C'
+                        : '#67C23A'
+                    " />
                 </template>
               </el-table-column>
               <el-table-column prop="source" label="可能来源" />

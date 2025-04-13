@@ -9,8 +9,11 @@ import {
 } from "../utils";
 import {
   type LoginResult,
+  type basicResult,
   getLoginWithoutInfo,
-  getUserInfo
+  getUserInfo,
+  updateUserInfo,
+  updateEmail
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { type DataInfo, removeToken, userKey, mySetToken } from "@/utils/auth";
@@ -100,10 +103,83 @@ export const useUserStore = defineStore({
               this.SET_PHONE(userInfo.phone ?? "");
               // this.SET_ROLES(userInfo.userRole ? [userInfo.userRole] : []);
               // this.SET_PERMS([]); // 如果有权限信息，可以在此设置
+            } else {
+              console.log("获取用户信息失败", userInfoResponse)
             }
             resolve(loginResponse);
           } else {
             reject(new Error(loginResponse?.message || "登录失败"));
+            console.log("登录失败", loginResponse)
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    /** 更新个人信息 */
+    async updateUserInfo(data: { phone: string, username: string, email: string, verifyCode: string }, msg: string) {
+      return new Promise<basicResult>(async (resolve, reject) => {
+        try {
+          if (msg === "phone") {
+            const response = await updateUserInfo({ phone: data.phone });
+            if (response?.code === 0) {
+              this.SET_PHONE(data.phone);
+              response.message = "手机号更新成功";
+              resolve(response);
+            } else {
+              reject(new Error(response?.message || "更新失败"));
+            }
+          } else if (msg === "username") {
+            const response = await updateUserInfo({ username: data.username });
+            if (response?.code === 0) {
+              this.SET_USERNAME(data.username);
+              response.message = "用户名更新成功";
+              resolve(response);
+            } else {
+              reject(new Error(response?.message || "更新失败"));
+            }
+          } else if (msg === "email") {
+            const response = await updateEmail({ email: data.email }, data.verifyCode);
+            if (response?.code === 0) {
+              this.SET_EMAIL(data.email);
+              response.message = "邮箱更新成功";
+              resolve(response);
+            } else {
+              reject(new Error(response?.message || "更新失败"));
+            }
+          } else {
+            reject(new Error("未知操作"));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    async updatePassword(data: { oldPassword: string, password: string }) {
+      return new Promise<basicResult>(async (resolve, reject) => {
+        try {
+          const response = await updateUserInfo({ password: data.password, oldPassword: data.oldPassword });
+          if (response?.code === 0) {
+            response.message = "密码更新成功";
+            resolve(response);
+          } else {
+            reject(new Error(response?.message || "更新失败"));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    /** 更新头像 */
+    async updateAvatar(data) {
+      return new Promise<basicResult>(async (resolve, reject) => {
+        try {
+          const response = await updateUserInfo({ avatarPath: data });
+          if (response?.code === 0) {
+            this.SET_AVATAR(data);
+            resolve(response);
+          } else {
+            reject(new Error(response?.message || "更新失败"));
           }
         } catch (error) {
           reject(error);

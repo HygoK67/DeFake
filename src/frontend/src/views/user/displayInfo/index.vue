@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useNav } from "@/layout/hooks/useNav";
-import { reactive, ref } from "vue";
+import { reactive, ref, computed } from "vue";
 import { ElMessage, ElDialog } from "element-plus";
 import { useUserStoreHook } from "@/store/modules/user";
-import { uploadFile, updateUserInfo } from "@/api/user"; // 新增接口导入
+import { getEmailCode } from "@/api/user"; // 新增接口导入
+import { getToken } from "@/utils/auth";
 
 const {
   username,
@@ -21,27 +22,39 @@ const userForm = reactive({
 
 // 头像相关
 const avatar = ref(userAvatar.value); // 当前头像
-const handleAvatarChange = async (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
-  if (file) {
-    try {
-      // 调用上传接口
-      const res = await uploadFile({ file });
-      if (res.code === 0) {
-        avatar.value = res.data; // 使用后端返回的 data 作为头像路径
-        useUserStoreHook().SET_AVATAR(avatar.value); // 更新到状态管理
-        ElMessage.success("头像已更新！");
+const handleAvatarSuccess = async (response) => {
+  try {
+    if (response.code === 0) {
+      const respond2 = await useUserStoreHook().updateAvatar(response.data);
+      if (respond2.code === 0) {
+        avatar.value = response.data; // 使用后端返回的 data 作为头像路径
+        ElMessage.success("头像更新成功！");
       } else {
-        ElMessage.error(res.message || "头像上传失败！");
+        ElMessage.error(respond2.message || "头像更新失败！");
       }
-    } catch (error) {
-      ElMessage.error(error.message || "网络错误，头像上传失败！");
     }
+  } catch (error) {
+    ElMessage.error(error.message || "网络错误，头像上传失败！");
   }
 };
 
-const isSubmitting = ref(false);
+const handleAvatarError = (error) => {
+  ElMessage.error(error.message || "头像上传失败！");
+};
 
+const beforeAvatarUpload = (file) => {
+  const isJPG = file.type === 'image/jpeg' || file.type === 'image/png';
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isJPG) {
+    ElMessage.error('上传头像图片只能是 JPG 或 PNG 格式！');
+  }
+  if (!isLt2M) {
+    ElMessage.error('上传头像图片大小不能超过 2MB！');
+  }
+  return isJPG && isLt2M;
+};
+
+const isSubmitting = ref(false);
 const currentField = ref('');
 const dialogVisible = ref(false);
 const tempForm = reactive({
@@ -49,6 +62,7 @@ const tempForm = reactive({
   phone: '',
   email: '',
   school: '',
+  verifyCode: '',
 });
 
 const openDialog = (field: string) => {
@@ -60,36 +74,80 @@ const openDialog = (field: string) => {
 };
 
 const handleInputSubmit = async () => {
-  // if (isSubmitting.value) return; // 防止重复提交
-
-  // // 表单验证（示例：必填项检查）
+  if (isSubmitting.value) return; // 防止重复提交
+  // 表单验证（示例：必填项检查）
   // const requiredFields = ['username', 'phone', 'email'];
   // const missing = requiredFields.filter(f => !tempForm[f as keyof typeof tempForm]);
   // if (missing.length > 0) {
   //   ElMessage.warning(`请填写：${missing.join('、')}`);
   //   return;
   // }
-
-  // try {
-  //   isSubmitting.value = true;
-  //   // 更新 userForm
-  //   userForm[currentField.value as keyof typeof userForm] = tempForm[currentField.value as keyof typeof tempForm];
-  //   // 调用后端接口（模拟传递所有表单数据）
-  //   const res = await updateUserInfo(userForm);
-  //   if (res.code === 0) {
-  //     ElMessage.success(`「${currentField.value}」更新成功！`);
-  //     // 同步到状态管理（示例）
-  //     useUserStoreHook().updateUserInfo(userForm);
-  //     dialogVisible.value = false;
-  //   } else {
-  //     ElMessage.error(res.message || '更新失败，请重试');
-  //   }
-  // } catch (error) {
-  //   ElMessage.error('网络错误，请检查连接');
-  // } finally {
-  //   isSubmitting.value = false;
-  // }
+  try {
+    isSubmitting.value = true;
+    // 调用接口函数
+    const respond = await useUserStoreHook().updateUserInfo(tempForm, currentField.value);
+    if (respond.code === 0) {
+      userForm[currentField.value as keyof typeof userForm] = tempForm[currentField.value as keyof typeof tempForm];
+      ElMessage.success(respond.message || '更新成功！');
+    } else {
+      throw new Error(respond.message || '更新失败，请重试');
+    }
+    dialogVisible.value = false;
+  } catch (error) {
+    ElMessage.error(error.message || '更新失败，请重试');
+  } finally {
+    tempForm['verifyCode'] = ''; // 清空验证码
+    isSubmitting.value = false;
+  }
 };
+
+const loading = ref(false);
+const verificationSent = ref(false);
+const countdown = ref(0); // 倒计时秒数
+
+
+const sendCode = async () => {
+  if (!tempForm.email) {
+    ElMessage.warning("请先输入邮箱！");
+    return;
+  }
+  try {
+    loading.value = true;
+    const response = await getEmailCode({ email: tempForm.email });
+    console.log(response);
+    if (response.code === 0) {
+      ElMessage.success("验证码已发送，请检查邮箱！");
+      verificationSent.value = true;
+      startCountdown(); // 开始倒计时
+    } else {
+      ElMessage.error("验证码发送失败，请重试！");
+      console.error(response.message);
+    }
+  } catch (error) {
+    ElMessage.error("请求失败，请检查网络或稍后重试！");
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const startCountdown = () => {
+  countdown.value = 3; // 设置倒计时为 60 秒
+  const timer = setInterval(() => {
+    countdown.value--;
+    if (countdown.value <= 0) {
+      clearInterval(timer); // 倒计时结束，清除定时器
+      verificationSent.value = false; // 允许重新发送验证码
+    }
+  }, 1000);
+};
+
+// const uploadHeader = computed(() => {
+//   const token = getToken();
+//   return {
+//     "token": token.accessToken
+//   }
+// })
 </script>
 
 <template>
@@ -99,36 +157,52 @@ const handleInputSubmit = async () => {
         <el-form :model="userForm" label-position="left" label-width="80px" class="info-form">
           <!-- 每个输入框添加点击事件，弹出对话框 -->
           <el-form-item label="用户名">
-            <el-input v-model="userForm.username" @click="openDialog('username')" :disabled="false"
+            <el-input class="el-input__inner" v-model="userForm.username" @click="openDialog('username')" readonly
               style="cursor: pointer;" />
           </el-form-item>
           <el-form-item label="电话">
-            <el-input v-model="userForm.phone" @click="openDialog('phone')" :disabled="false"
+            <el-input class="el-input__inner" v-model="userForm.phone" @click="openDialog('phone')" readonly
               style="cursor: pointer;" />
           </el-form-item>
           <el-form-item label="邮箱">
-            <el-input v-model="userForm.email" @click="openDialog('email')" :disabled="false"
+            <el-input class="el-input__inner" v-model="userForm.email" @click="openDialog('email')" readonly
               style="cursor: pointer;" />
           </el-form-item>
           <el-form-item label="学校">
-            <el-input v-model="userForm.school" @click="openDialog('school')" :disabled="false"
+            <el-input class="el-input__inner" v-model="userForm.school" @click="openDialog('school')" readonly
               style="cursor: pointer;" />
           </el-form-item>
         </el-form>
 
         <!-- 右侧头像 -->
         <div class="avatar-container">
-          <label for="avatar-upload" class="avatar-label">
-            <img :src="avatar" alt="用户头像" class="avatar" />
-          </label>
-          <input id="avatar-upload" type="file" accept="image/*" class="avatar-input" @change="handleAvatarChange" />
+
+          <el-upload class="avatar-uploader" action="http://122.9.35.116:8080/api/file/upload" :headers="{
+            'jwtToken': getToken().accessToken.trim()
+          }" :show-file-list="false" :on-success="handleAvatarSuccess" :on-error="handleAvatarError"
+            :before-upload="beforeAvatarUpload" name="files">
+            <label for="avatar-upload" class="avatar-label">
+              <img :src="avatar" alt="用户头像" class="avatar" />
+            </label>
+          </el-upload>
         </div>
       </div>
     </div>
-    <el-dialog v-model="dialogVisible" title="修改信息" :before-close="() => dialogVisible = false">
-      <el-form :model="tempForm" label-position="left" label-width="80px">
+    <el-dialog class="my_dialog" width="500px" v-model="dialogVisible" title="修改信息"
+      :before-close="() => dialogVisible = false">
+      <el-form :model="tempForm" label-position="left" label-width="75px">
         <el-form-item :label="currentField">
-          <el-input v-model="tempForm[currentField]" :key="currentField" />
+          <el-input v-model="tempForm[currentField]" :key="currentField">
+            <template #suffix>
+              <el-button class="send-code-button" size="small" type="primary" :loading="loading" @click="sendCode"
+                :disabled="verificationSent" v-if="currentField === 'email'">
+                {{ verificationSent ? `${countdown}s` : "验证" }}
+              </el-button>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="verifyCode" v-if="currentField === 'email'">
+          <el-input v-model="tempForm['verifyCode']" :key="currentField" />
         </el-form-item>
       </el-form>
 
@@ -226,5 +300,21 @@ const handleInputSubmit = async () => {
 .el-dialog__wrapper {
   z-index: 9999 !important;
   /* 确保对话框在最上层 */
+}
+
+.send-code-button {
+  padding: 0 px;
+  height: 100%;
+  margin-right: -14px;
+}
+
+.el-input__inner {
+  transition: all 0.3s ease;
+}
+
+/* 鼠标悬停时边框颜色加深，并向上浮动 2px */
+.el-input__inner:hover {
+  border-color: #409eff !important;
+  transform: translateY(-0.8px);
 }
 </style>
