@@ -115,6 +115,7 @@ const onRegister = async () => {
           router.push("/login");
         } else {
           ElMessage.error(response.message);
+          console.log(response);
         }
       } catch (error) {
         ElMessage.error("请求失败，请检查网络或稍后重试！");

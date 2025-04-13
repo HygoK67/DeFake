@@ -80,7 +80,6 @@ class PureHttp {
           ? config
           : new Promise(resolve => {
             const data = getToken();
-            console.log("请求头中的token:", data);
             if (data) {
               config.headers["jwtToken"] = formatToken(
                 data.accessToken
