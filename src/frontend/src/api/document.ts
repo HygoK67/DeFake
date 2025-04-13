@@ -2,7 +2,6 @@ import { http } from "@/utils/http";
 import type { FileWithMetadata } from "@/types/document";
 
 /**
- * 批量上传带有元数据的文件
  * @param filesData 带有元数据的文件对象数组
  * @returns 上传结果，包含所有文件的ID和状态
  */

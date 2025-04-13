@@ -73,9 +73,6 @@ const provideFeedback = () => {
         <el-tab-pane label="检测报告" name="report">
           <div class="report-summary">
             <div class="summary-card">
-              <div class="book-icon">
-                <img src="@/assets/svg/book-open.svg" alt="Report" />
-              </div>
               <div class="summary-info">
                 <h3>{{ reportData.fileName }}</h3>
                 <div class="info-row">
