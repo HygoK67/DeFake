@@ -32,12 +32,6 @@ public class AdminController {
         return Result.success(allUsers);
     }
 
-    @GetMapping("/group/all")
-    public Result getAllGroups() {
-        List<Group> allGroups = groupService.showAllGroups();
-        return Result.success(allGroups);
-    }
-
     @DeleteMapping("/delete")
     public Result deleteNotification(@RequestBody Map<String, String> requestBody) {
         long notificationId = Long.parseLong(requestBody.get("notificationId"));

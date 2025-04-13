@@ -22,6 +22,6 @@ public interface GroupService {
 
     public List<Group> searchGroup(String groupname);
 
-    public List<GroupDTO> listGroupByUser(long userId);
+    public List<GroupDTO> listGroupByUserId(long userId);
 
 }

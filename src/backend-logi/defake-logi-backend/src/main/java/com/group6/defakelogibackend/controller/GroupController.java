@@ -74,10 +74,16 @@ public class GroupController {
     }
 
     @GetMapping("/list") // 获取所有和当前登录用户相关的组织
-    public Result getGroup(@RequestHeader String jwtToken) {
+    public Result getGroupByUserId(@RequestHeader String jwtToken) {
         long userId = Long.parseLong(jwtService.getUserId(jwtToken));
-        List<GroupDTO> groups = groupService.listGroupByUser(userId);
+        List<GroupDTO> groups = groupService.listGroupByUserId(userId);
         return Result.success(groups);
+    }
+
+    @GetMapping("/all")
+    public Result getAllGroups() {
+        List<Group> allGroups = groupService.showAllGroups();
+        return Result.success(allGroups);
     }
 
 

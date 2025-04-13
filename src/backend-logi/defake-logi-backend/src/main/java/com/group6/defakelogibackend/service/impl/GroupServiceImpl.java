@@ -141,7 +141,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
 
     @Override
     @Transactional
-    public List<GroupDTO> listGroupByUser(long userId) {
+    public List<GroupDTO> listGroupByUserId(long userId) {
         List<UserToGroup> userToGroups = userToGroupMapper.findGroupsByUserId(userId);
         List<GroupDTO> groupDTOList = new ArrayList<>();
         for (UserToGroup userToGroup : userToGroups) {
@@ -151,6 +151,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
             groupDTO.setGroupname(group.getGroupname());
             groupDTO.setId(groupId);
             groupDTO.setStatus(userToGroup.getStatus());
+            groupDTO.setRole(userToGroup.getRole());
             groupDTO.setCreatedAt(group.getCreatedAt());
             groupDTO.setUpdatedAt(group.getUpdatedAt());
             groupDTO.setDdl(group.getDdl());
