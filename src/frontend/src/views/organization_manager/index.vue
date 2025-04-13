@@ -260,26 +260,13 @@ const inviteForm = ref({
 // 成员数据
 const membersData = ref<MemberItem[]>([
   {
-    id: 1,
-    username: '张三',
-    role: '管理员',
-    status: '已上传文件',
-    email: 'zhangsan@example.com'
+      "id": 6,
+      "userId": 4,
+      "groupId": 7,
+      "createdAt": "2025-04-08T21:46:51",
+      "status": "in",
+      "role": "leader"
   },
-  {
-    id: 2,
-    username: '李四',
-    role: '成员',
-    status: '已上传文件',
-    email: 'lisi@example.com'
-  },
-  {
-    id: 5,
-    username: '钱七',
-    role: '成员',
-    status: '申请加入组织中',
-    email: 'qianqi@example.com'
-  }
 ]);
 
 const resultsData = ref<FileItem[]>([
@@ -345,9 +332,38 @@ const filteredResultsData = computed((): FileItem[] => {
 const membersDataTotal = computed((): number => filteredMemberData.value.length);
 const resultsDataTotal = computed((): number => filteredResultsData.value.length);
 
-// 初始化
+async function fetchMembers(id:) { // 根据 组织的 id 获取所有 members
+  memberTableLoading.value = true;
+  try {
+    // 替换成您的实际 API 端点
+    const response = await axios.get('/api/group/members');
+    if (response.data.code === 0) {
+      // 假设您的 API 返回的数据结构包含 data 数组
+      const backendMembers = response.data.data || [];
+      
+      // 将后端数据映射为前端所需的格式
+      membersData.value = backendMembers.map(item => ({
+        id: item.id,
+        username: item.username || `用户${item.userId}`,
+        email: item.email || `user${item.userId}@example.com`,
+        role: item.role === 'leader' ? '管理员' : '成员',
+        status: mapMemberStatus(item.status),
+        joinTime: item.createdAt
+      }));
+    } else {
+      ElMessage.error(response.data.message || '获取成员数据失败');
+    }
+  } catch (error) {
+    console.error('获取成员数据失败:', error);
+    ElMessage.error('获取成员数据失败，请检查网络连接');
+  } finally {
+    memberTableLoading.value = false;
+  }
+}
+
 onMounted((): void => {
   console.log('组织管理界面已加载');
+  fetch
 });
 
 // 成员数据过滤函数
