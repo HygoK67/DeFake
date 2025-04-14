@@ -175,7 +175,8 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
             throw new EntityMissingException("该用户不是当前组织的管理员!");
         }
 
-        if (userToGroupMapper.findUserToGroup(userIdSent, groupId) == null){
+        if (userToGroupMapper.findUserToGroup(userIdSent, groupId) == null ||
+        userToGroupMapper.findUserToGroup(userIdSent, groupId).getStatus() != UserToGroup.Status.pending_apply){
             throw new EntityMissingException("该用户没有发送申请!");
         }
 
