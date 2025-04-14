@@ -23,4 +23,6 @@ public interface UserService {
 
     public long getUserId(String email);
 
+    public String getUsernameByUserId(long useId);
+
 }

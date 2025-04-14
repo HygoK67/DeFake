@@ -175,4 +175,14 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     public long getUserId(String email) {
         return userMapper.findUserByEmail(email).getId();
     }
+
+    @Override
+    @Transactional
+    public String getUsernameByUserId(long userId) {
+        User user = userMapper.findUserById(userId);
+        if (user == null) {
+            throw new EntityMissingException("userId 不存在!");
+        }
+        return user.getUsername();
+    }
 }

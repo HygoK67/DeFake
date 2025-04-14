@@ -22,4 +22,10 @@
         delete from user_to_group
         where user_id = #{userId} and group_id = #{groupId}
     </delete>
+
+    <update id="updateUserToGroupStatus">
+        update user_to_group
+        set status = "in"
+        where user_id = #{userId} and group_id = #{groupId}
+    </update>
 </mapper>

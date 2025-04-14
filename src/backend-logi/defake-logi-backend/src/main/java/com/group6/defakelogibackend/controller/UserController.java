@@ -72,7 +72,13 @@ public class UserController {
 
     @LoggedIn
     @GetMapping("/id")
-    public Result userId(@RequestParam String email){
+    public Result userId(@RequestParam String email) {
         return Result.success(userService.getUserId(email));
+    }
+
+    @LoggedIn
+    @GetMapping("/name")
+    public Result username(@RequestParam String userId) {
+        return Result.success(userService.getUsernameByUserId(Long.parseLong(userId)));
     }
 }
