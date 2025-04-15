@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { createGroup, getAllGroupByUserId, getAllGroup } from "@/api/group"; // 引入所需API
 import { ElMessage } from "element-plus";
 import { Search } from '@element-plus/icons-vue'; // 引入图标
+import { Group } from '@/types/organization'
 
 defineOptions({
   name: "OrganizationManagement"
@@ -19,8 +20,8 @@ const createOrgLoading = ref(false);
 const createOrganizationDialogVisible = ref(false);
 
 // --- 数据存储 ---
-const personalPreviewList = ref<any[]>([]); // 个人活动预览列表
-const activePreviewList = ref<any[]>([]);   // 开放活动预览列表
+const personalPreviewList = ref<Group[]>([]); // 个人活动预览列表
+const activePreviewList = ref<Group[]>([]);   // 开放活动预览列表
 const personalGroupIds = ref<Set<number>>(new Set()); // 存储个人相关活动的ID，用于过滤开放活动
 
 const PREVIEW_LIMIT = 4; // 设置预览显示的数量
@@ -30,10 +31,6 @@ const createOrgForm = ref({
   name: '',
   description: '',
 });
-
-// --- 计算属性（可选，如果需要在模板中直接计算） ---
-// const hasPersonalActivities = computed(() => personalPreviewList.value.length > 0);
-// const hasActiveActivities = computed(() => activePreviewList.value.length > 0);
 
 // --- 数据获取 ---
 onMounted(() => {
@@ -53,30 +50,27 @@ async function fetchPersonalPreview() {
   try {
     console.log("正在获取个人活动预览...");
     const res = await getAllGroupByUserId();
-
-    const mappedData = res.data.map((item: any) => {
+    const mappedData = res.data.map((item: Group) => {
       personalGroupIds.value.add(item.id); // 记录ID
       return {
         id: item.id,
-        name: item.groupname || `活动 ${item.id}`,
-        organization: item.organization || item.groupname,
-        status: mapApiStatus(item.status, item.role), // '组长', '已加入', '申请中'
-        apiStatus: item.status,
+        groupname: item.groupname,
+        introduction: item.introduction || "暂无简介",
+        ddl: item.ddl,
+        status: item.status, // '组长', '已加入', '申请中'
         role: item.role,
-        date: item.createdAt ? item.createdAt.split('T')[0] : 'N/A',
+        createdAt: item.createdAt ? item.createdAt.split('T')[0] : 'N/A',
       };
     });
 
-    const getSortPriority = (org: any) => {
-      if (org.role === 'leader' && org.apiStatus === 'in') return 1;
-      if (org.role === 'member' && org.apiStatus === 'in') return 2;
-      if (org.apiStatus === 'pending_apply') return 3;
+    const getSortPriority = (org: Group) => {
+      if (org.role === 'leader' && org.status === 'in') return 1;
+      if (org.role === 'member' && org.status === 'in') return 2;
+      if (org.status === 'pending_apply') return 3;
       return 4;
     };
     mappedData.sort((a, b) => getSortPriority(a) - getSortPriority(b));
-
     personalPreviewList.value = mappedData.slice(0, PREVIEW_LIMIT); // 截取预览数量
-
   } catch (error) {
     console.error("获取个人活动预览失败:", error);
     ElMessage.error("获取个人活动预览失败");
@@ -90,27 +84,25 @@ async function fetchActivePreview() {
   activeLoading.value = true;
   activePreviewList.value = [];
   try {
-    
     console.log("正在获取ALL group");
     const res = await getAllGroup();
     console.log("正在获取ALL group");
     const allGroupsData = res.data;
-
     const filteredData = allGroupsData
       .filter((item: any) => !personalGroupIds.value.has(item.id))
       .map((item: any) => ({ // 映射数据结构
         id: item.id,
-        name: item.groupname || `活动 ${item.id}`,
-        organization: item.organization || item.groupname,
-        status: '未加入',
-        apiStatus: 'not_in',
+        groupname: item.groupname,
+        introduction: item.introduction || "暂无简介",
+        ddl: item.ddl,
+        status: 'not_in' as const,
         role: null,
-        date: item.createdAt ? item.createdAt.split('T')[0] : 'N/A',
+        createdAt: item.createdAt ? item.createdAt.split('T')[0] : 'N/A',
       }))
-      .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a: Group, b: Group) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    activePreviewList.value = filteredData.slice(0, PREVIEW_LIMIT); 
-  
+    activePreviewList.value = filteredData.slice(0, PREVIEW_LIMIT);
+
   } catch (error) {
     console.error("获取开放活动预览失败:", error);
     ElMessage.error("获取开放活动预览失败");
@@ -119,8 +111,7 @@ async function fetchActivePreview() {
   }
 }
 
-// --- 辅助函数 ---
-// (复用之前的状态映射函数)
+// 复用之前的状态映射函数
 const mapApiStatus = (status: string, role: string | null): string => {
   if (status === 'in') {
     return role === 'leader' ? '管理员' : '已加入';
@@ -130,52 +121,31 @@ const mapApiStatus = (status: string, role: string | null): string => {
   }
   return status; // Fallback
 };
-// (复用之前的标签类型获取函数)
+// 复用之前的标签类型获取函数
 const getStatusTagType = (status: string) => {
   switch (status) {
     case '管理员': return 'warning';
     case '已加入': return 'success';
     case '申请中': return 'info';
     case '未加入': return 'primary'; // 未加入用 primary 按钮样式匹配
-    default: return 'default';
+    default: return 'info';
   }
 };
 
-// 关于  点击     卡片
-
-const handlePersonalCardClick = (org: any) => {
-  // --- 判断状态是否为 '管理员' ---
-  if (org.status === '管理员') {
-    // --- 跳转到管理页面，确保路由路径正确 ---
-    console.log(`跳转到管理页面: /organization/manage/${org.id}`); // 确认管理页面的路由
-    router.push(`/organization/manage/${org.id}`); // <--- 修改这里为你的实际管理页面路由
-  } else {
-    // --- 其他状态（已加入、申请中）跳转到详情页 ---
-    viewOrganizationDetail(org.id); // 调用之前的详情页跳转函数
-  }
-};
-// 查看组织详情 (通用)
-
-
-
-// --- 下面是其他方法，保持不变 ---
-// const searchOrganizations = () => {
-//   // ...
-//   // TODO
-// };
-// ... 其他方法 ...
-
-
-// --- 事件处理 ---
-
-// 处理申请加入 (只在开放活动卡片上触发)
-const handleJoinRequest = (orgId: number) => {
-  router.push(`/organization/apply/${orgId}`);
+// 关于 点击卡片
+const handlePersonalCardClick = (orgId: number) => {
+  router.push(`/organization/detail/${orgId}`);
 };
 
 // 查看组织详情 (两个列表的卡片都可触发)
 const viewOrganizationDetail = (orgId: number) => {
   router.push(`/organization/detail/${orgId}`);
+};
+
+
+// 处理申请加入 (只在开放活动卡片上触发)
+const handleJoinRequest = (orgId: number) => {
+  router.push(`/organization/apply/${orgId}`);
 };
 
 // 搜索组织 (当前实现: 跳转到列表页并带上搜索词)
@@ -199,9 +169,7 @@ async function submitCreateOrganization(): Promise<void> {
     ElMessage.warning('请输入组织名称');
     return;
   }
-
   createOrgLoading.value = true;
-
   try {
     const response = await createGroup({
       groupname: createOrgForm.value.name, // 假设API需要groupname
@@ -237,15 +205,12 @@ async function submitCreateOrganization(): Promise<void> {
 
     <!-- 搜索栏 -->
     <div class="search-container">
-      <el-input
-        v-model="searchKeyword"
-        placeholder="输入活动名称、组织或关键词搜索..."
-        class="search-input"
-        clearable
-        @keyup.enter="searchOrganizations"
-      >
+      <el-input v-model="searchKeyword" placeholder="输入活动名称、组织或关键词搜索..." class="search-input" clearable
+        @keyup.enter="searchOrganizations">
         <template #prefix>
-          <el-icon><search /></el-icon>
+          <el-icon>
+            <search />
+          </el-icon>
         </template>
       </el-input>
 
@@ -266,26 +231,22 @@ async function submitCreateOrganization(): Promise<void> {
         </template>
 
         <div v-if="!personalLoading && personalPreviewList.length > 0" class="organization-cards">
-          <el-card
-            v-for="org in personalPreviewList"
-            :key="org.id"
-            class="org-card"
-            shadow="hover"
-            @click="handlePersonalCardClick(org.id)"
-          >
+          <el-card v-for="org in personalPreviewList" :key="org.id" class="org-card" shadow="hover"
+            @click="handlePersonalCardClick(org.id)">
             <div class="org-card-content">
-              <h4 class="org-name">{{ org.name }}</h4>
-              <p class="org-detail">{{ org.organization }} - {{ org.date }}</p>
+              <h4 class="org-name">{{ org.groupname }}</h4>
+              <p class="org-detail">{{ org.introduction }} - {{ org.createdAt }}</p>
               <div class="org-action">
-                 <!-- 使用 mapApiStatus 后的状态判断 -->
+                <!-- 使用 mapApiStatus 后的状态判断 -->
                 <el-tag :type="getStatusTagType(org.status)" size="small">
-                  {{ org.status }}
+                  {{ mapApiStatus(org.status, org.role) }}
                 </el-tag>
               </div>
             </div>
           </el-card>
         </div>
-        <el-empty v-if="!personalLoading && personalPreviewList.length === 0" description="暂无个人相关活动" :image-size="80"></el-empty>
+        <el-empty v-if="!personalLoading && personalPreviewList.length === 0" description="暂无个人相关活动"
+          :image-size="80"></el-empty>
 
         <div v-if="!personalLoading && personalPreviewList.length > 0" class="view-more">
           <router-link to="/organization/list/personal">查看全部个人活动 ></router-link>
@@ -293,36 +254,28 @@ async function submitCreateOrganization(): Promise<void> {
       </el-card>
 
       <!-- 当前开放活动 -->
-       <el-card class="organization-section" shadow="never" v-loading="activeLoading">
-         <template #header>
-            <div class="section-header">
-              <h3>当前开放活动</h3>
-            </div>
-         </template>
+      <el-card class="organization-section" shadow="never" v-loading="activeLoading">
+        <template #header>
+          <div class="section-header">
+            <h3>当前开放活动</h3>
+          </div>
+        </template>
 
         <div v-if="!activeLoading && activePreviewList.length > 0" class="organization-cards">
-          <el-card
-            v-for="org in activePreviewList"
-            :key="org.id"
-            class="org-card"
-            shadow="hover"
-            @click="viewOrganizationDetail(org.id)"
-          >
+          <el-card v-for="org in activePreviewList" :key="org.id" class="org-card" shadow="hover"
+            @click="viewOrganizationDetail(org.id)">
             <div class="org-card-content">
-              <h4 class="org-name">{{ org.name }}</h4>
-               <p class="org-detail">{{ org.organization }} - {{ org.date }}</p>
+              <h4 class="org-name">{{ org.groupname }}</h4>
+              <p class="org-detail">{{ org.introduction }} - {{ org.createdAt }}</p>
               <div class="org-action">
                 <!-- 开放活动的状态固定为 '未加入'，按钮为 '申请加入' -->
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click.stop="handleJoinRequest(org.id)"
-                >申请加入</el-button>
+                <el-button type="primary" size="small" @click.stop="handleJoinRequest(org.id)">申请加入</el-button>
               </div>
             </div>
           </el-card>
         </div>
-         <el-empty v-if="!activeLoading && activePreviewList.length === 0" description="暂无开放活动" :image-size="80"></el-empty>
+        <el-empty v-if="!activeLoading && activePreviewList.length === 0" description="暂无开放活动"
+          :image-size="80"></el-empty>
 
         <div v-if="!activeLoading && activePreviewList.length > 0" class="view-more">
           <router-link to="/organization/list/active">查看全部开放活动 ></router-link>
@@ -331,24 +284,15 @@ async function submitCreateOrganization(): Promise<void> {
     </div>
 
     <!-- 创建组织对话框 -->
-    <el-dialog
-      v-model="createOrganizationDialogVisible"
-      title="申请创建组织"
-      width="500px"
-      :close-on-click-modal="false"
-      :before-close="() => createOrganizationDialogVisible = false"
-    >
+    <el-dialog v-model="createOrganizationDialogVisible" title="申请创建组织" width="500px" :close-on-click-modal="false"
+      :before-close="() => createOrganizationDialogVisible = false">
       <el-form :model="createOrgForm" label-position="top">
         <el-form-item label="组织/活动名称" required>
           <el-input v-model="createOrgForm.name" placeholder="请输入组织或活动的全称"></el-input>
         </el-form-item>
         <el-form-item label="描述/简介">
-          <el-input
-            type="textarea"
-            v-model="createOrgForm.description"
-            placeholder="（选填）可以简单介绍组织或活动的目的、范围等"
-            :rows="4"
-          ></el-input>
+          <el-input type="textarea" v-model="createOrgForm.description" placeholder="（选填）可以简单介绍组织或活动的目的、范围等"
+            :rows="4"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -371,6 +315,7 @@ async function submitCreateOrganization(): Promise<void> {
 
 .page-header {
   margin-bottom: 20px;
+
   .page-title {
     font-size: 20px;
     font-weight: bold;
@@ -391,6 +336,7 @@ async function submitCreateOrganization(): Promise<void> {
   .search-input {
     flex: 1; // 占据更多空间
   }
+
   .search-actions {
     display: flex;
     gap: 10px;
@@ -403,17 +349,19 @@ async function submitCreateOrganization(): Promise<void> {
   gap: 25px;
 
   .organization-section {
+
     // 使用 ElCard 代替 div 作为 section 容器
     :deep(.el-card__header) {
       padding: 15px 20px; // 调整卡片头部内边距
       border-bottom: 1px solid #ebeef5; // 添加分隔线
     }
-     :deep(.el-card__body) {
+
+    :deep(.el-card__body) {
       padding: 15px 20px; // 调整卡片主体内边距
-       min-height: 200px; // 给个最小高度，防止空状态时太矮
-       display: flex;
-       flex-direction: column;
-       justify-content: space-between; // 让内容和查看更多按钮分开
+      min-height: 200px; // 给个最小高度，防止空状态时太矮
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between; // 让内容和查看更多按钮分开
     }
 
     .section-header {
@@ -440,22 +388,22 @@ async function submitCreateOrganization(): Promise<void> {
         }
 
         .org-card-content {
-           display: flex;
-           flex-direction: column; // 让内容垂直排列
+          display: flex;
+          flex-direction: column; // 让内容垂直排列
 
           .org-name {
             font-weight: 600; // 名称加粗
             margin: 0 0 5px 0; // 调整间距
             font-size: 15px;
             color: #303133;
-            white-space: nowrap;       // 不换行
-            overflow: hidden;          // 隐藏溢出
-            text-overflow: ellipsis;   // 显示省略号
+            white-space: nowrap; // 不换行
+            overflow: hidden; // 隐藏溢出
+            text-overflow: ellipsis; // 显示省略号
           }
 
           .org-detail {
-            color: #909399;       // 组织和日期用灰色
-            margin: 0 0 10px 0;   // 调整间距
+            color: #909399; // 组织和日期用灰色
+            margin: 0 0 10px 0; // 调整间距
             font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
@@ -486,6 +434,7 @@ async function submitCreateOrganization(): Promise<void> {
         }
       }
     }
+
     .el-empty {
       padding: 20px 0; // 调整空状态的内边距
     }
