@@ -11,15 +11,23 @@ const router = useRouter();
 const organizationId = ref(route.params.id);
 const loading = ref(false);
 
+const group = reactive({
+  id:
+  groupname: 
+  introduction:
+  ddl:
+})
+
+
 // 组织信息 - 简化版
-const organization = reactive({
-  id: organizationId.value,
-  name: "",
-  organization: "",
-  manager: "",
-  submissionStartDate: "",
-  submissionEndDate: ""
-});
+// const organization = reactive({
+//   id: organizationId.value,
+//   name: "",
+//   organization: "",
+//   manager: "",
+//   submissionStartDate: "",
+//   submissionEndDate: ""
+// });
 
 // 组织状态
 const memberStatus = ref("未加入"); // "已加入", "已提交"
@@ -60,9 +68,9 @@ onMounted(() => {
 });
 
 // 提交报告
-const submitReport = () => {
-  router.push(`/report/submit/${organizationId.value}`);
-};
+// const submitReport = () => {
+//   router.push(`/report/submit/${organizationId.value}`);
+// };
 </script>
 
 <template>

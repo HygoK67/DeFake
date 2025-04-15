@@ -16,6 +16,7 @@ public class GroupDTO {
     private String introduction;
     private String ddl;
     private UserToGroup.Status status;
+    private UserToGroup.Role role;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

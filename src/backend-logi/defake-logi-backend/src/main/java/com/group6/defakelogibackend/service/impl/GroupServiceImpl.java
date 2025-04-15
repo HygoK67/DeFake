@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,8 +122,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
     @Override
     @Transactional
     public List<Group> showAllGroups() {
-        List<Group> list = groupMapper.getAllGroups();
-        return list;
+        return groupMapper.getAllGroups();
     }
 
     @Override
@@ -141,7 +139,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
 
     @Override
     @Transactional
-    public List<GroupDTO> listGroupByUser(long userId) {
+    public List<GroupDTO> listGroupByUserId(long userId) {
         List<UserToGroup> userToGroups = userToGroupMapper.findGroupsByUserId(userId);
         List<GroupDTO> groupDTOList = new ArrayList<>();
         for (UserToGroup userToGroup : userToGroups) {
@@ -151,6 +149,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
             groupDTO.setGroupname(group.getGroupname());
             groupDTO.setId(groupId);
             groupDTO.setStatus(userToGroup.getStatus());
+            groupDTO.setRole(userToGroup.getRole());
             groupDTO.setCreatedAt(group.getCreatedAt());
             groupDTO.setUpdatedAt(group.getUpdatedAt());
             groupDTO.setDdl(group.getDdl());
@@ -160,5 +159,40 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         return groupDTOList;
     }
 
+    @Override
+    @Transactional
+    public void dealApply(long groupLeaderId, long userIdSent, long groupId, int isAgree) {
+        if (userMapper.findUserById(userIdSent) == null) {
+            throw new EntityMissingException("userIdSent 无效!");
+        }
+
+        Group group = groupMapper.findGroupByGroupId(groupId);
+        if (group == null) {
+            throw new EntityMissingException("groupId 无效!");
+        }
+
+        if (userToGroupMapper.findUserToGroup(groupLeaderId, groupId).getRole() != UserToGroup.Role.leader) {
+            throw new EntityMissingException("该用户不是当前组织的管理员!");
+        }
+
+        if (userToGroupMapper.findUserToGroup(userIdSent, groupId) == null ||
+        userToGroupMapper.findUserToGroup(userIdSent, groupId).getStatus() != UserToGroup.Status.pending_apply){
+            throw new EntityMissingException("该用户没有发送申请!");
+        }
+
+        String groupname = group.getGroupname();
+
+        // 组织管理员同意用户申请
+        if (isAgree != 0) {
+            userToGroupMapper.updateUserToGroupStatus(userIdSent, groupId);
+            notificationMapper.createNotificationUser2User(groupLeaderId, userIdSent, groupId, "组织通知", "您成功加入" + groupname + "!");
+        }
+        // 组织管理员拒绝用户申请
+        else {
+            userToGroupMapper.deleteUserToGroup(userIdSent, groupId);
+            notificationMapper.createNotificationUser2User(groupLeaderId, userIdSent, groupId, "组织通知", groupname + "不允许您加入!");
+        }
+
+    }
 
 }

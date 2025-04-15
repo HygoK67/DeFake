@@ -161,6 +161,18 @@ class PureHttp {
     params?: AxiosRequestConfig<P>,
     config?: PureHttpRequestConfig
   ): Promise<T> {
+    // 检查是否是文件上传（FormData）
+    if (params?.data instanceof FormData) {
+      // 对于FormData，删除Content-Type让浏览器自动设置带boundary的multipart/form-data
+      const uploadConfig = {
+        ...config,
+        headers: {
+          ...(config?.headers || {}),
+          "Content-Type": undefined // 让Axios自动设置正确的Content-Type
+        }
+      };
+      return this.request<T>("post", url, params, uploadConfig);
+    }
     return this.request<T>("post", url, params, config);
   }
 

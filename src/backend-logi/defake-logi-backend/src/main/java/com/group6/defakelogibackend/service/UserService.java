@@ -23,4 +23,8 @@ public interface UserService {
 
     public long getUserId(String email);
 
+    public String getUsernameByUserId(long useId);
+
+    public void dealInvite(long userId, long groupLeaderId, long groupId, int isAgree);
+
 }

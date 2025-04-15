@@ -1,10 +1,13 @@
 package com.group6.defakelogibackend.service.impl;
 
 import com.group6.defakelogibackend.exception.*;
+import com.group6.defakelogibackend.mapper.GroupMapper;
+import com.group6.defakelogibackend.mapper.NotificationMapper;
 import com.group6.defakelogibackend.mapper.UserMapper;
 import com.group6.defakelogibackend.mapper.UserToGroupMapper;
 import com.group6.defakelogibackend.model.Group;
 import com.group6.defakelogibackend.model.User;
+import com.group6.defakelogibackend.model.UserToGroup;
 import com.group6.defakelogibackend.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,10 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     TencentCOSService cosService;
     @Autowired
     UserToGroupMapper userToGroupMapper;
+    @Autowired
+    GroupMapper groupMapper;
+    @Autowired
+    NotificationMapper notificationMapper;
 
     @Override
     @Transactional
@@ -174,5 +181,47 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
     @Transactional
     public long getUserId(String email) {
         return userMapper.findUserByEmail(email).getId();
+    }
+
+    @Override
+    @Transactional
+    public String getUsernameByUserId(long userId) {
+        User user = userMapper.findUserById(userId);
+        if (user == null) {
+            throw new EntityMissingException("userId 不存在!");
+        }
+        return user.getUsername();
+    }
+
+    @Override
+    @Transactional
+    public void dealInvite(long userId, long groupLeaderId, long groupId, int isAgree) {
+        if (userMapper.findUserById(groupLeaderId) == null) {
+            throw new EntityMissingException("groupLeaderId 无效!");
+        }
+        User user = userMapper.findUserById(userId);
+        Group group = groupMapper.findGroupByGroupId(groupId);
+        if (group == null) {
+            throw new EntityMissingException("groupId 无效!");
+        }
+
+        if (userToGroupMapper.findUserToGroup(groupLeaderId, groupId).getRole() != UserToGroup.Role.leader) {
+            throw new EntityMissingException("该 groupLeaderId 不是当前组织的管理员!");
+        }
+
+        if (userToGroupMapper.findUserToGroup(userId, groupId) == null ||
+                userToGroupMapper.findUserToGroup(userId, groupId).getStatus() != UserToGroup.Status.pending_invite) {
+            throw new EntityMissingException("该用户没有收到组织的邀请!");
+        }
+
+        String username = user.getUsername();
+        String groupname = group.getGroupname();
+        if (isAgree != 0) {
+            userToGroupMapper.updateUserToGroupStatus(userId, groupId);
+            notificationMapper.createNotificationUser2User(userId, groupLeaderId, groupId, "组织管理", "您邀请的用户 " + username + " 同意加入 " + groupname);
+        } else {
+            userToGroupMapper.deleteUserToGroup(userId, groupId);
+            notificationMapper.createNotificationUser2User(userId, groupLeaderId, groupId, "组织管理", "您邀请的用户 " + username + " 拒绝加入 " + groupname);
+        }
     }
 }

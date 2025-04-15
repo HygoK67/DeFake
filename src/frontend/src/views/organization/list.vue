@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getAllGroup } from "@/api/group";
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -23,6 +24,20 @@ const organizations = ref([]);
 // 获取组织列表
 onMounted(() => {
   loading.value = true;
+  // 这里请求所有的组织,放到 organizations
+  
+  // organization
+   
+
+  // getAllGroupByUserId()
+  //   .then((res) => {
+  //     organizations.value = res.data;
+  //     loading.value = false;
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //     loading.value = false;
+  //   });
 
   // 模拟API请求
   setTimeout(() => {

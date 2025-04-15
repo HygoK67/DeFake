@@ -28,7 +28,7 @@
 
     <insert id="createNotificationUser2User">
         insert into notifications (user_id_rec, user_id_sent, group_id, title, content)
-        values (#{userId_rec}, #{userId_sent}, #{groupId}, #{title}, #{content})
+        values (#{userIdRec}, #{userIdSent}, #{groupId}, #{title}, #{content})
     </insert>
 
     <select id="getAllNotifications" resultType="com.group6.defakelogibackend.model.Notification">

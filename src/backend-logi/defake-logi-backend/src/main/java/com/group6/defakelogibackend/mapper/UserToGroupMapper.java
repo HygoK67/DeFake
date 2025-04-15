@@ -1,12 +1,9 @@
 package com.group6.defakelogibackend.mapper;
 
-import com.group6.defakelogibackend.model.Group;
-import com.group6.defakelogibackend.model.User;
 import com.group6.defakelogibackend.model.UserToGroup;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
-import java.util.Set;
 
 @Mapper
 public interface UserToGroupMapper {
@@ -17,4 +14,6 @@ public interface UserToGroupMapper {
     public List<UserToGroup> findGroupsByUserId(long userId);
 
     public void deleteUserToGroup(long userId, long groupId);
+
+    public void updateUserToGroupStatus(long userId, long groupId);
 }
