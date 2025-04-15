@@ -61,7 +61,7 @@ public class GroupController {
 
     @GetMapping("/members")
     public Result groupMembers(@RequestParam("groupId") String groupId) {
-        List<UserToGroup> list = groupService.groupMembers(Long.parseLong(groupId));
+        List<UserToGroupDTO> list = groupService.groupMembers(Long.parseLong(groupId));
         return Result.success(list);
     }
 

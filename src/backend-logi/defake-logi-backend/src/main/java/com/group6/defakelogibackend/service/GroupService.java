@@ -3,6 +3,7 @@ package com.group6.defakelogibackend.service;
 import com.group6.defakelogibackend.model.Group;
 import com.group6.defakelogibackend.model.GroupDTO;
 import com.group6.defakelogibackend.model.UserToGroup;
+import com.group6.defakelogibackend.model.UserToGroupDTO;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface GroupService {
 
     public List<Group> showAllGroups();
 
-    public List<UserToGroup> groupMembers(long groupId);
+    public List<UserToGroupDTO> groupMembers(long groupId);
 
     public List<Group> searchGroup(String groupname);
 
