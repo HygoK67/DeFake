@@ -92,7 +92,11 @@ public class GroupController {
         int isAgree = Integer.parseInt(requestBody.get("isAgree"));
         groupService.dealApply(groupLeaderId, userIdSent, groupId, isAgree);
         return Result.success();
+    }
 
+    @GetMapping("/info")
+    public Result info(@RequestParam String groupId) {
+        return Result.success(groupService.getGroupInfo(Long.parseLong(groupId)));
     }
 
 
