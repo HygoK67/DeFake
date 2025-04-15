@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
-import { updatePassword } from "@/api/user";
+import { useUserStoreHook } from "@/store/modules/user";
 import { useNav } from "@/layout/hooks/useNav";
 
 const { logout } = useNav();
@@ -38,9 +38,9 @@ const onSubmit = async (formEl: any) => {
     if (valid) {
       loading.value = true;
       try {
-        const response = await updatePassword({
+        const response = await useUserStoreHook().updatePassword({
           oldPassword: form.value.currentPassword,
-          newPassword: form.value.newPassword,
+          password: form.value.newPassword,
         });
         if (response.code === 0) {
           ElMessage.success("密码修改成功！请重新登录");
@@ -52,8 +52,7 @@ const onSubmit = async (formEl: any) => {
         // form.value.newPassword = "";
         // form.value.confirmPassword = "";
       } catch (error) {
-        ElMessage.error("请求失败，请检查网络或稍后重试！");
-        console.error(error);
+        ElMessage.error(error);
       } finally {
         loading.value = false;
       }

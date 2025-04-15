@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from "vue";
 import { FileWithMetadata, Metadata } from "@/types/document";
-import { uploadFiles } from "@/api/document";
+import { uploadAndProcessFile,uploadFiles } from "@/api/document";
 import { useRouter } from "vue-router"; // 添加这行导入
 
 defineOptions({

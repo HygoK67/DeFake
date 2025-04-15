@@ -72,7 +72,24 @@ public class UserController {
 
     @LoggedIn
     @GetMapping("/id")
-    public Result userId(@RequestParam String email){
+    public Result userId(@RequestParam String email) {
         return Result.success(userService.getUserId(email));
+    }
+
+    @LoggedIn
+    @GetMapping("/name")
+    public Result username(@RequestParam String userId) {
+        return Result.success(userService.getUsernameByUserId(Long.parseLong(userId)));
+    }
+
+    @LoggedIn
+    @PostMapping("/deal")
+    public Result deal(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
+        long userId = Long.parseLong(jwtService.getUserId(jwtToken));
+        long groupLeaderId = Long.parseLong(requestBody.get("groupLeaderId"));
+        long groupId = Long.parseLong(requestBody.get("groupId"));
+        int isAgree = Integer.parseInt(requestBody.get("isAgree"));
+        userService.dealInvite(userId, groupLeaderId, groupId, isAgree);
+        return Result.success();
     }
 }

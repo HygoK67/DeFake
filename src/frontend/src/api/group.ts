@@ -8,7 +8,7 @@ export type basicResult = {
 
 
 
-export const createGroup = (data: {groupname:string;}) => {
+export const createGroup = (data: {groupname:string;introduction:string; ddl:string}) => {
     return http.request<basicResult>(
       "post",
       "api/group/create",
@@ -32,3 +32,44 @@ export const getGroupId = (data: {groupname:string}) => {
       {data}
     );
   }
+
+
+export const getAllUserInGroup = (data: {groupId: string}) =>{
+  return http.request<basicResult>(
+    "get",
+    "api/group/members",
+    {data}
+  )
+}
+
+export const getAllGroup = () => {
+  return http.request<basicResult>(
+    "get",
+    "api/group/all",
+    {}
+  )
+}
+
+export const groupid2Groupname = (data: {groupId: string}) => {
+  return http.request<basicResult>(
+    "get",
+    "api/group/id2name",
+    {data}
+  )
+}
+
+export const getAllGroupByUserId = () => {
+  return http.request<basicResult>(
+    "get",
+    "api/group/list",
+    {}
+  )
+}
+
+export const getAllGroupMember = (data: {groupId: string}) => {
+  return http.request<basicResult>(
+    "get",
+    "api/group/members",
+    {data}
+  )
+}

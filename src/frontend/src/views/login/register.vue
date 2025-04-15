@@ -68,7 +68,6 @@ const sendCode = async () => {
   try {
     loading.value = true;
     const response = await getEmailCode({ email: registerForm.mail });
-    console.log(response);
     if (response.code === 0) {
       ElMessage.success("验证码已发送，请检查邮箱！");
       verificationSent.value = true;
@@ -115,6 +114,7 @@ const onRegister = async () => {
           router.push("/login");
         } else {
           ElMessage.error(response.message);
+          console.log(response);
         }
       } catch (error) {
         ElMessage.error("请求失败，请检查网络或稍后重试！");

@@ -1,6 +1,5 @@
 package com.group6.defakelogibackend.controller;
 
-import com.group6.defakelogibackend.annotation.Admin;
 import com.group6.defakelogibackend.annotation.LoggedIn;
 import com.group6.defakelogibackend.model.*;
 import com.group6.defakelogibackend.service.GroupService;
@@ -8,7 +7,6 @@ import com.group6.defakelogibackend.utils.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -74,12 +72,28 @@ public class GroupController {
     }
 
     @GetMapping("/list") // 获取所有和当前登录用户相关的组织
-    public Result getGroup(@RequestHeader String jwtToken) {
+    public Result getGroupByUserId(@RequestHeader String jwtToken) {
         long userId = Long.parseLong(jwtService.getUserId(jwtToken));
-        List<GroupDTO> groups = groupService.listGroupByUser(userId);
+        List<GroupDTO> groups = groupService.listGroupByUserId(userId);
         return Result.success(groups);
     }
 
+    @GetMapping("/all")
+    public Result getAllGroups() {
+        List<Group> allGroups = groupService.showAllGroups();
+        return Result.success(allGroups);
+    }
+
+    @PostMapping("/deal")
+    public Result deal(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
+        long groupLeaderId = Long.parseLong(jwtService.getUserId(jwtToken));
+        long userIdSent = Long.parseLong(requestBody.get("userIdSent"));
+        long groupId = Long.parseLong(requestBody.get("groupId"));
+        int isAgree = Integer.parseInt(requestBody.get("isAgree"));
+        groupService.dealApply(groupLeaderId, userIdSent, groupId, isAgree);
+        return Result.success();
+
+    }
 
 
 }
