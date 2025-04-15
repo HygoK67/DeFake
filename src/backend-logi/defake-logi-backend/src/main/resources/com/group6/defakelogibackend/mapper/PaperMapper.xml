@@ -12,8 +12,20 @@
             title,
             <if test="abstracT != null">abstract,</if>
             <if test="doi != null">doi,</if>
+            <if test="publishedAt != null">published_at,</if>
+            filePath,
+            <if test="pageNum != null">page_num,</if>
+            authors
         )
+        values
+        (
+            uploaderId,
+            title,
+            abstracT,
+            doi,
+            publishedAt,
+            filePath,
 
-
+        )
     </insert>
 </mapper>
