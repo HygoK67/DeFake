@@ -1,195 +1,3 @@
-<template>
-  <div class="organization-manage-container">
-    <el-card class="manage-card">
-      <template #header>
-        <div class="card-header">
-          <h2>组织管理界面</h2>
-        </div>
-      </template>
-
-      <el-tabs v-model="activeTab" @tab-click="handleTabChange">
-        <!-- 成员管理栏目 -->
-        <el-tab-pane label="成员管理" name="members">
-          <!-- 搜索和筛选区域 -->
-          <div class="filter-container">
-            <div class="filter-left">
-              <el-input
-                v-model="memberSearchKeyword"
-                placeholder="搜索成员名称"
-                clearable
-                class="search-input"
-              >
-                <template #prefix>
-                  <el-icon><search /></el-icon>
-                </template>
-              </el-input>
-            </div>
-
-            <div class="filter-right">
-              <el-button
-                type="primary"
-                @click="handleInviteUser"
-              >
-                邀请用户
-              </el-button>
-            </div>
-          </div>
-
-          <!-- 表格区域 -->
-          <el-table
-            v-loading="memberTableLoading"
-            :data="sortedMemberData"
-            border
-            stripe
-            style="width: 100%"
-          >
-            <el-table-column prop="username" label="成员名称" min-width="120" />
-            <el-table-column prop="email" label="邮箱" min-width="180" />
-            <el-table-column prop="role" label="角色" width="100">
-              <template #default="scope">
-                <el-tag
-                  :type="scope.row.role === '管理员' ? 'danger' : 'info'"
-                >
-                  {{ scope.row.role }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="status" label="状态" width="150">
-              <template #default="scope">
-                <el-tag
-                  :type="getMemberStatusType(scope.row.status)"
-                >
-                  {{ scope.row.status }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="220">
-              <template #default="scope">
-                <el-button
-                  v-if="scope.row.status === '申请加入组织中' && isCurrentUserAdmin"
-                  size="small"
-                  type="success"
-                  @click="handleApproveJoin(scope.row)"
-                >
-                  批准加入
-                </el-button>
-                <el-button
-                  v-if="scope.row.status === '申请加入组织中' && isCurrentUserAdmin"
-                  size="small"
-                  type="danger"
-                  @click="handleRejectJoin(scope.row)"
-                >
-                  拒绝申请
-                </el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-
-          <!-- 分页器 -->
-          <div class="pagination-container">
-            <el-pagination
-              background
-              layout="total, prev, pager, next"
-              :total="membersDataTotal"
-              :current-page="memberCurrentPage"
-              @current-change="handleMemberCurrentChange"
-            />
-          </div>
-        </el-tab-pane>
-
-        <!-- 结果管理栏目 -->
-        <el-tab-pane label="结果管理" name="results">
-          <!-- 搜索区域 -->
-          <div class="filter-container">
-            <div class="filter-left">
-              <el-input
-                v-model="searchKeyword"
-                placeholder="搜索文件名"
-                clearable
-                class="search-input"
-              >
-                <template #prefix>
-                  <el-icon><search /></el-icon>
-                </template>
-              </el-input>
-            </div>
-          </div>
-
-          <!-- 表格区域 -->
-          <el-table
-            v-loading="tableLoading"
-            :data="filteredResultsData"
-            border
-            stripe
-            style="width: 100%"
-          >
-            <el-table-column prop="fileName" label="文件名" min-width="180">
-              <template #default="scope">
-                <a href="javascript:void(0);" @click="handleViewDetails(scope.row)">{{ scope.row.fileName }}</a>
-              </template>
-            </el-table-column>
-            <el-table-column prop="fileType" label="文件类型" width="120" />
-            <el-table-column prop="uploader" label="上传者" width="100" />
-            <el-table-column prop="uploadTime" label="上传时间" width="170" />
-            <el-table-column prop="fileSize" label="文件大小" width="100" />
-            <el-table-column prop="status" label="状态" width="100">
-              <template #default="scope">
-                <el-tag :type="getStatusType(scope.row.status)">
-                  {{ scope.row.status }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="score" label="检测结果" width="100" />
-            <el-table-column label="操作" width="120">
-              <template #default="scope">
-                <el-button size="small" type="primary" @click="handleViewDetails(scope.row)">
-                  查看详情
-                </el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-
-          <!-- 分页器 -->
-          <div class="pagination-container">
-            <el-pagination
-              background
-              layout="total, prev, pager, next"
-              :total="resultsDataTotal"
-              :current-page="currentPage"
-              @current-change="handleCurrentChange"
-            />
-          </div>
-        </el-tab-pane>
-      </el-tabs>
-    </el-card>
-
-    <!-- 邀请用户弹窗 -->
-    <el-dialog v-model="inviteDialogVisible" title="邀请用户加入组织" width="500px">
-      <el-form :model="inviteForm" label-width="100px">
-        <el-form-item label="邮箱地址">
-          <el-input v-model="inviteForm.email" placeholder="请输入邮箱地址"></el-input>
-        </el-form-item>
-        <el-form-item label="邀请消息">
-          <el-input 
-            type="textarea" 
-            v-model="inviteForm.message" 
-            placeholder="请输入邀请消息"
-            :rows="4"
-          ></el-input>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="inviteDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitInvite" :loading="inviteLoading">
-            发送邀请
-          </el-button>
-        </span>
-      </template>
-    </el-dialog>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -525,6 +333,198 @@ function submitInvite(): void {
   }, 1500);
 }
 </script>
+
+<template>
+  <div class="organization-manage-container">
+    <el-card class="manage-card">
+      <template #header>
+        <div class="card-header">
+          <h2>组织管理界面</h2>
+        </div>
+      </template>
+
+      <el-tabs v-model="activeTab" @tab-click="handleTabChange">
+        <!-- 成员管理栏目 -->
+        <el-tab-pane label="成员管理" name="members">
+          <!-- 搜索和筛选区域 -->
+          <div class="filter-container">
+            <div class="filter-left">
+              <el-input
+                v-model="memberSearchKeyword"
+                placeholder="搜索成员名称"
+                clearable
+                class="search-input"
+              >
+                <template #prefix>
+                  <el-icon><search /></el-icon>
+                </template>
+              </el-input>
+            </div>
+
+            <div class="filter-right">
+              <el-button
+                type="primary"
+                @click="handleInviteUser"
+              >
+                邀请用户
+              </el-button>
+            </div>
+          </div>
+
+          <!-- 表格区域 -->
+          <el-table
+            v-loading="memberTableLoading"
+            :data="sortedMemberData"
+            border
+            stripe
+            style="width: 100%"
+          >
+            <el-table-column prop="username" label="成员名称" min-width="120" />
+            <el-table-column prop="email" label="邮箱" min-width="180" />
+            <el-table-column prop="role" label="角色" width="100">
+              <template #default="scope">
+                <el-tag
+                  :type="scope.row.role === '管理员' ? 'danger' : 'info'"
+                >
+                  {{ scope.row.role }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" width="150">
+              <template #default="scope">
+                <el-tag
+                  :type="getMemberStatusType(scope.row.status)"
+                >
+                  {{ scope.row.status }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="220">
+              <template #default="scope">
+                <el-button
+                  v-if="scope.row.status === '申请加入组织中' && isCurrentUserAdmin"
+                  size="small"
+                  type="success"
+                  @click="handleApproveJoin(scope.row)"
+                >
+                  批准加入
+                </el-button>
+                <el-button
+                  v-if="scope.row.status === '申请加入组织中' && isCurrentUserAdmin"
+                  size="small"
+                  type="danger"
+                  @click="handleRejectJoin(scope.row)"
+                >
+                  拒绝申请
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <!-- 分页器 -->
+          <div class="pagination-container">
+            <el-pagination
+              background
+              layout="total, prev, pager, next"
+              :total="membersDataTotal"
+              :current-page="memberCurrentPage"
+              @current-change="handleMemberCurrentChange"
+            />
+          </div>
+        </el-tab-pane>
+
+        <!-- 结果管理栏目 -->
+        <el-tab-pane label="结果管理" name="results">
+          <!-- 搜索区域 -->
+          <div class="filter-container">
+            <div class="filter-left">
+              <el-input
+                v-model="searchKeyword"
+                placeholder="搜索文件名"
+                clearable
+                class="search-input"
+              >
+                <template #prefix>
+                  <el-icon><search /></el-icon>
+                </template>
+              </el-input>
+            </div>
+          </div>
+
+          <!-- 表格区域 -->
+          <el-table
+            v-loading="tableLoading"
+            :data="filteredResultsData"
+            border
+            stripe
+            style="width: 100%"
+          >
+            <el-table-column prop="fileName" label="文件名" min-width="180">
+              <template #default="scope">
+                <a href="javascript:void(0);" @click="handleViewDetails(scope.row)">{{ scope.row.fileName }}</a>
+              </template>
+            </el-table-column>
+            <el-table-column prop="fileType" label="文件类型" width="120" />
+            <el-table-column prop="uploader" label="上传者" width="100" />
+            <el-table-column prop="uploadTime" label="上传时间" width="170" />
+            <el-table-column prop="fileSize" label="文件大小" width="100" />
+            <el-table-column prop="status" label="状态" width="100">
+              <template #default="scope">
+                <el-tag :type="getStatusType(scope.row.status)">
+                  {{ scope.row.status }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="score" label="检测结果" width="100" />
+            <el-table-column label="操作" width="120">
+              <template #default="scope">
+                <el-button size="small" type="primary" @click="handleViewDetails(scope.row)">
+                  查看详情
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <!-- 分页器 -->
+          <div class="pagination-container">
+            <el-pagination
+              background
+              layout="total, prev, pager, next"
+              :total="resultsDataTotal"
+              :current-page="currentPage"
+              @current-change="handleCurrentChange"
+            />
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
+
+    <!-- 邀请用户弹窗 -->
+    <el-dialog v-model="inviteDialogVisible" title="邀请用户加入组织" width="500px">
+      <el-form :model="inviteForm" label-width="100px">
+        <el-form-item label="邮箱地址">
+          <el-input v-model="inviteForm.email" placeholder="请输入邮箱地址"></el-input>
+        </el-form-item>
+        <el-form-item label="邀请消息">
+          <el-input 
+            type="textarea" 
+            v-model="inviteForm.message" 
+            placeholder="请输入邀请消息"
+            :rows="4"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="inviteDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitInvite" :loading="inviteLoading">
+            发送邀请
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
+</template>
 
 <style lang="scss" scoped>
 .organization-manage-container {
