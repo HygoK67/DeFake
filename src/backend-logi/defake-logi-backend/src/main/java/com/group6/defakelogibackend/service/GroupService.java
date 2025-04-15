@@ -25,4 +25,7 @@ public interface GroupService {
 
     public void dealApply(long groupLeaderId, long userIdSent, long groupId, int isAgree);
 
+    public Group getGroupInfo(long groupId);
+
+
 }

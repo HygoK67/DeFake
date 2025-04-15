@@ -176,7 +176,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         }
 
         if (userToGroupMapper.findUserToGroup(userIdSent, groupId) == null ||
-        userToGroupMapper.findUserToGroup(userIdSent, groupId).getStatus() != UserToGroup.Status.pending_apply){
+                userToGroupMapper.findUserToGroup(userIdSent, groupId).getStatus() != UserToGroup.Status.pending_apply) {
             throw new EntityMissingException("该用户没有发送申请!");
         }
 
@@ -192,7 +192,14 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
             userToGroupMapper.deleteUserToGroup(userIdSent, groupId);
             notificationMapper.createNotificationUser2User(groupLeaderId, userIdSent, groupId, "组织通知", groupname + "不允许您加入!");
         }
+    }
 
+    public Group getGroupInfo(long groupId) {
+        Group group = groupMapper.findGroupByGroupId(groupId);
+        if (group == null) {
+            throw new EntityMissingException("groupId 无效!");
+        }
+        return group;
     }
 
 }
