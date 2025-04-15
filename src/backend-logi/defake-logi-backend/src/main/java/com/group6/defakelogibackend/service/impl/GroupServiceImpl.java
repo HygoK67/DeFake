@@ -194,12 +194,30 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         }
     }
 
-    public Group getGroupInfo(long groupId) {
+    public GroupDTO getGroupInfo(long userId, long groupId) {
         Group group = groupMapper.findGroupByGroupId(groupId);
+        UserToGroup userToGroup = userToGroupMapper.findUserToGroup(userId, groupId);
+        GroupDTO groupDTO = new GroupDTO();
         if (group == null) {
             throw new EntityMissingException("groupId 无效!");
         }
-        return group;
+
+        if (userToGroup == null) {
+            groupDTO.setStatus(null);
+            groupDTO.setRole(null);
+        } else {
+            groupDTO.setStatus(userToGroup.getStatus());
+            groupDTO.setRole(userToGroup.getRole());
+        }
+
+        groupDTO.setGroupname(group.getGroupname());
+        groupDTO.setId(groupId);
+        groupDTO.setCreatedAt(group.getCreatedAt());
+        groupDTO.setUpdatedAt(group.getUpdatedAt());
+        groupDTO.setDdl(group.getDdl());
+        groupDTO.setIntroduction(group.getIntroduction());
+
+        return groupDTO;
     }
 
 }
