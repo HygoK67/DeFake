@@ -194,7 +194,6 @@
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
-import {getAllGroupMember} from '@/api/group';
 
 // 定义类型
 type TabType = 'members' | 'results';
@@ -333,34 +332,34 @@ const filteredResultsData = computed((): FileItem[] => {
 const membersDataTotal = computed((): number => filteredMemberData.value.length);
 const resultsDataTotal = computed((): number => filteredResultsData.value.length);
 
-async function fetchMembers(id:string) { // 根据 组织的 id 获取所有 members
-  memberTableLoading.value = true;
-  try {
-    
-    const response = await getAllGroupMember(id);
-    if (response.data.code === 0) {
-      // 假设您的 API 返回的数据结构包含 data 数组
-      const backendMembers = response.data.data || [];
+// async function fetchMembers(id:string) { // 根据 组织的 id 获取所有 members
+//   memberTableLoading.value = true;
+//   try {
+//     // 替换成您的实际 API 端点
+//     const response = await axios.get('/api/group/members');
+//     if (response.data.code === 0) {
+//       // 假设您的 API 返回的数据结构包含 data 数组
+//       const backendMembers = response.data.data || [];
       
-      // 将后端数据映射为前端所需的格式
-      membersData.value = backendMembers.map(item => ({
-        id: item.id,
-        username: item.username || `用户${item.userId}`,
-        email: item.email || `user${item.userId}@example.com`,
-        role: item.role === 'leader' ? '管理员' : '成员',
-        status: mapMemberStatus(item.status),
-        joinTime: item.createdAt
-      }));
-    } else {
-      ElMessage.error(response.data.message || '获取成员数据失败');
-    }
-  } catch (error) {
-    console.error('获取成员数据失败:', error);
-    ElMessage.error('获取成员数据失败，请检查网络连接');
-  } finally {
-    memberTableLoading.value = false;
-  }
-}
+//       // 将后端数据映射为前端所需的格式
+//       membersData.value = backendMembers.map(item => ({
+//         id: item.id,
+//         username: item.username || `用户${item.userId}`,
+//         email: item.email || `user${item.userId}@example.com`,
+//         role: item.role === 'leader' ? '管理员' : '成员',
+//         status: mapMemberStatus(item.status),
+//         joinTime: item.createdAt
+//       }));
+//     } else {
+//       ElMessage.error(response.data.message || '获取成员数据失败');
+//     }
+//   } catch (error) {
+//     console.error('获取成员数据失败:', error);
+//     ElMessage.error('获取成员数据失败，请检查网络连接');
+//   } finally {
+//     memberTableLoading.value = false;
+//   }
+// }
 
 onMounted((): void => {
   console.log('组织管理界面已加载');

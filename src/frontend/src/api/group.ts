@@ -65,3 +65,11 @@ export const getAllGroupByUserId = () => {
     {}
   )
 }
+
+export const getAllGroupMember = (data: {groupId: string}) => {
+  return http.request<basicResult>(
+    "get",
+    "api/group/members",
+    {data}
+  )
+}
