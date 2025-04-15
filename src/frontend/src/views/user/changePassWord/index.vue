@@ -52,8 +52,7 @@ const onSubmit = async (formEl: any) => {
         // form.value.newPassword = "";
         // form.value.confirmPassword = "";
       } catch (error) {
-        ElMessage.error("请求失败，请检查网络或稍后重试！");
-        console.error(error);
+        ElMessage.error(error);
       } finally {
         loading.value = false;
       }
