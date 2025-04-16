@@ -61,7 +61,7 @@ public class GroupController {
 
     @GetMapping("/members")
     public Result groupMembers(@RequestParam("groupId") String groupId) {
-        List<UserToGroup> list = groupService.groupMembers(Long.parseLong(groupId));
+        List<UserToGroupDTO> list = groupService.groupMembers(Long.parseLong(groupId));
         return Result.success(list);
     }
 
@@ -95,8 +95,9 @@ public class GroupController {
     }
 
     @GetMapping("/info")
-    public Result info(@RequestParam String groupId) {
-        return Result.success(groupService.getGroupInfo(Long.parseLong(groupId)));
+    public Result info(@RequestHeader String jwtToken, @RequestParam String groupId) {
+        Long userId = Long.parseLong(jwtService.getUserId(jwtToken));
+        return Result.success(groupService.getGroupInfo(userId, Long.parseLong(groupId)));
     }
 
 
