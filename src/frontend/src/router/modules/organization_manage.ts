@@ -14,7 +14,7 @@ export default {
     {
       path: "/organization_manage/management",
       name: "OrganizationManagement",
-      component: () => import("@/views/organization_manager/index.vue"),
+      component: () => import("@/views/organization/manage.vue"),
       meta: {
         title: "组织管理-测试",
         showLink: true,

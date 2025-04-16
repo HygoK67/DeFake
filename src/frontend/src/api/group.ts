@@ -1,5 +1,6 @@
 import { http } from "@/utils/http";
-// import { useUserStoreHook } from "@/store/modules/user";
+import { FileItem, MemberItem } from '@/types/organization';
+
 export type basicResult = {
   code: number;
   message: string;
@@ -33,6 +34,12 @@ export type getAllGroupResult = {
     updatedAt: null;
   }[];
 };
+
+export type getAllGroupMemberResult = {
+  code: number;
+  message: string;
+  data: MemberItem[];
+}
 
 export const createGroup = (data: { groupname: string; introduction: string; ddl: string }) => {
   return http.request<basicResult>(
@@ -93,9 +100,9 @@ export const getAllGroupByUserId = () => {
 }
 
 export const getAllGroupMember = (data: { groupId: string }) => {
-  return http.request<basicResult>(
+  return http.request<getAllGroupMemberResult>(
     "get",
     "api/group/members",
-    { data }
+    { params: data }
   )
 }
