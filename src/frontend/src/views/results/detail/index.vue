@@ -48,6 +48,42 @@ const sortImages = () => {
 const provideFeedback = () => {
   console.log("结果反馈");
 };
+
+// 人工审核相关
+const reviewDialogVisible = ref(false);
+const reviewForm = reactive({
+  reason: '',
+  contactInfo: '',
+  priority: 'normal'
+});
+const reviewRules = {
+  reason: [{ required: true, message: '请填写申请原因', trigger: 'blur' }]
+};
+const reviewFormRef = ref();
+
+// 打开人工审核申请窗口
+const openReviewDialog = () => {
+  reviewDialogVisible.value = true;
+};
+
+// 提交人工审核申请
+const submitReviewRequest = async () => {
+  if (!reviewFormRef.value) return;
+  
+  await reviewFormRef.value.validate((valid, fields) => {
+    if (valid) {
+      // TODO: 调用API提交审核申请
+      console.log('提交审核申请:', reviewForm);
+      ElMessage.success('审核申请已提交，我们将尽快处理');
+      reviewDialogVisible.value = false;
+      
+      // 重置表单
+      reviewForm.reason = '';
+      reviewForm.contactInfo = '';
+      reviewForm.priority = 'normal';
+    }
+  });
+};
 </script>
 
 <template>
@@ -64,6 +100,7 @@ const provideFeedback = () => {
         <el-button type="primary" @click="exportReport">导出报告</el-button>
         <el-button type="primary" @click="sortImages">图像排序</el-button>
         <el-button type="primary" @click="provideFeedback">结果反馈</el-button>
+        <el-button type="warning" @click="openReviewDialog">申请人工审核</el-button>
       </div>
     </div>
 
@@ -164,6 +201,51 @@ const provideFeedback = () => {
         </el-tab-pane>
       </el-tabs>
     </div>
+
+    <!-- 人工审核申请对话框 -->
+    <el-dialog
+      title="申请人工审核"
+      v-model="reviewDialogVisible"
+      width="500px"
+    >
+      <el-form 
+        ref="reviewFormRef"
+        :model="reviewForm"
+        :rules="reviewRules"
+        label-width="100px"
+      >
+        <el-form-item label="申请原因" prop="reason">
+          <el-input 
+            type="textarea" 
+            v-model="reviewForm.reason"
+            rows="4"
+            placeholder="请详细描述您申请人工审核的原因..."
+          ></el-input>
+        </el-form-item>
+        
+        <el-form-item label="联系方式" prop="contactInfo">
+          <el-input 
+            v-model="reviewForm.contactInfo"
+            placeholder="可选填写，便于我们与您联系"
+          ></el-input>
+        </el-form-item>
+        
+        <el-form-item label="紧急程度" prop="priority">
+          <el-radio-group v-model="reviewForm.priority">
+            <el-radio label="low">低</el-radio>
+            <el-radio label="normal">中</el-radio>
+            <el-radio label="high">高</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="reviewDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitReviewRequest">提交申请</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -264,5 +346,11 @@ const provideFeedback = () => {
       }
     }
   }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 </style>
