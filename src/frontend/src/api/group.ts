@@ -1,10 +1,12 @@
 import { http } from "@/utils/http";
 import { FileItem, MemberItem } from '@/types/organization';
+import { getIdByEmail } from "@/api/user";
+import { ca } from "element-plus/lib/locale/index.js";
 
 export type basicResult = {
   code: number;
   message: string;
-  data: null;
+  data: string | null;
 };
 
 export type getMyGroupResult = {
@@ -104,5 +106,40 @@ export const getAllGroupMember = (data: { groupId: string }) => {
     "get",
     "api/group/members",
     { params: data }
+  )
+}
+
+/** 邀请用户 */
+export const inviteMember = async (data: { groupId: string; email: string; title: string; content: string }) => {
+  var userIdRec: string;
+  try {
+    const res = await getIdByEmail({ email: data.email });
+    if (res.code === 0) {
+      userIdRec = String(res.data);
+    } else {
+      throw new Error(res.message);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  return http.request<basicResult>(
+    "post",
+    "api/group/invite",
+    {
+      data: {
+        ...data,
+        userIdRec,
+      }
+    }
+  )
+}
+
+/** 踢出用户 */
+export const kickMember = (data: { userIdRec: string; groupId: string; }) => {
+  return http.request<basicResult>(
+    "post",
+    "api/group/kick",
+    { data }
   )
 }

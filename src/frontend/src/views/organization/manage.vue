@@ -3,7 +3,8 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
 import { FileItem, MemberItem } from '@/types/organization'; // 假设你有一个类型定义文件
-import { getAllGroupMember } from '@/api/group';
+import { getAllGroupMember, inviteMember, kickMember } from '@/api/group';
+import { useRoute } from 'vue-router';
 
 type TabType = 'members' | 'results';
 const activeTab = ref<TabType>('members');
@@ -22,7 +23,7 @@ const fileFilter = ref<string>('all');
 const statusFiler = ref<string>('all');
 const idFilter = ref<number>(-1);
 const mannulInput = ref<boolean>(true);
-const groupId = "1"; // 假设组织ID为1
+const groupId = ref<number>(1);; // 假设组织ID为1
 
 const inviteDialogVisible = ref<boolean>(false);
 const inviteLoading = ref<boolean>(false);
@@ -33,152 +34,9 @@ const inviteForm = ref({
 
 
 // 成员数据
-const membersData = ref<MemberItem[]>([
-  {
-    userId: 4,
-    username: "张明",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 5,
-    username: "李华",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 6,
-    username: "王芳",
-    role: "普通成员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 4,
-    username: "张明",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 5,
-    username: "李华",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 6,
-    username: "王芳",
-    role: "普通成员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 4,
-    username: "张明",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 5,
-    username: "李华",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 6,
-    username: "王芳",
-    role: "普通成员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 4,
-    username: "张明",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 5,
-    username: "李华",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 6,
-    username: "王芳",
-    role: "普通成员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 4,
-    username: "张明",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 5,
-    username: "李华",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 6,
-    username: "王芳",
-    role: "普通成员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 11,
-    username: "张明",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 5,
-    username: "李华",
-    role: "管理员",
-    email: "2323@qq.com"
-  },
-  {
-    userId: 6,
-    username: "王芳",
-    role: "普通成员",
-    email: "2323@qq.com"
-  },
-]);
+const membersData = ref<MemberItem[]>([]);
 
-const resultsData = ref<FileItem[]>([
-  {
-    id: 6,
-    fileName: '科研论文A.pdf',
-    fileType: 'PDF文档',
-    uploader: '张明',
-    uploaderId: 11,
-    uploadTime: '2025-03-15 14:30:22',
-    fileSize: '2.7 MB',
-    status: '已完成',
-    score: '92%',
-  },
-  {
-    id: 7,
-    fileName: '会议摘要B.docx',
-    fileType: 'Word文档',
-    uploader: '李华',
-    uploaderId: 5,
-    uploadTime: '2025-03-14 09:45:10',
-    fileSize: '1.5 MB',
-    status: '已完成',
-    score: '12%',
-  },
-  {
-    id: 8,
-    fileName: '研究数据图像C.png',
-    fileType: '图像',
-    uploader: '王芳',
-    uploaderId: 6,
-    uploadTime: '2025-03-12 16:20:35',
-    fileSize: '3.8 MB',
-    status: '处理中',
-    score: '-',
-  }
-]);
+const resultsData = ref<FileItem[]>([]);
 
 function handleRoleFilter(command: string): void {
   roleFilter.value = command;
@@ -212,7 +70,7 @@ const filteredMemberData = computed((): MemberItem[] => {
 const sortedMemberData = computed((): MemberItem[] => {
   return [...filteredMemberData.value].sort((a, b) => {
     // 首先按角色排序（管理员优先）
-    if (a.role !== '管理员' && b.role === '管理员') return 1;
+    if (a.role !== 'leader' && b.role === 'leader') return 1;
     return -1;
   });
 });
@@ -327,8 +185,19 @@ function privateMsg(member: MemberItem): void {
 }
 
 // 踢出
-function removeFromGroup(member: MemberItem): void {
-
+async function removeFromGroup(member: MemberItem): Promise<void> {
+  // //todo 联调
+  // try {
+  //   const res = await kickMember({ userIdRec: String(member.userId), groupId: String(groupId.value) });
+  //   if (res.code === 0) {
+  //     ElMessage.success(`已踢出用户${member.username}`);
+  //   } else {
+  //     ElMessage.error(res.message);
+  //   }
+  // } catch (error) {
+  //   ElMessage.error('踢出成员失败');
+  // }
+  ElMessage.error('踢出成员失败');
 }
 
 // 邀请用户
@@ -340,14 +209,30 @@ function handleInviteUser(): void {
   };
 }
 
-// 提交邀请
-function submitInvite(): void {
+// 提交邀请 
+async function submitInvite(): Promise<void> {
   if (!inviteForm.value.email) {
-    ElMessage.warning('请输入用户id');
+    ElMessage.warning('请输入用户邮箱');
     return;
   }
-
   inviteLoading.value = true;
+  // // todo: 联调
+  // try {
+  //   const res = await inviteMember({
+  //     groupId: String(groupId.value),
+  //     email: inviteForm.value.email,
+  //     title: '邀请您加入组织',
+  //     content: inviteForm.value.message
+  //   })
+  //   if (res.code === 0) {
+  //     ElMessage.success('邀请已发送');
+  //   } else {
+  //     ElMessage.error(res.message);
+  //   }
+  //   inviteLoading.value = false;
+  // } catch (error) {
+  //   ElMessage.error("邀请用户失败")
+  // }
 
   // 模拟API调用
   setTimeout(() => {
@@ -376,6 +261,113 @@ onMounted(async (): Promise<any> => {
   // } catch (error) {
   //   ElMessage.error('获取成员数据失败');
   // }
+
+  groupId.value = Number(useRoute().params.id)
+
+  membersData.value = [
+    {
+      userId: 4,
+      username: "张明",
+      role: "leader",
+      email: "2323@qq.com"
+    },
+    {
+      userId: 5,
+      username: "李华",
+      role: "leader",
+      email: "2323@qq.com"
+    },
+    {
+      userId: 6,
+      username: "王芳",
+      role: "leader",
+      email: "2323@qq.com"
+    },
+    {
+      userId: 4,
+      username: "张明",
+      role: "leader",
+      email: "2323@qq.com"
+    },
+    {
+      userId: 5,
+      username: "李华",
+      role: "member",
+      email: "2323@qq.com"
+    },
+    {
+      userId: 6,
+      username: "王芳",
+      role: "member",
+      email: "2323@qq.com"
+    },
+    {
+      userId: 4,
+      username: "张明",
+      role: "member",
+      email: "2323@qq.com"
+    },
+    {
+      userId: 5,
+      username: "李华",
+      role: "member",
+      email: "2323@qq.com"
+    },
+    {
+      userId: 6,
+      username: "王芳",
+      role: "member",
+      email: "2323@qq.com"
+    },
+    {
+      userId: 4,
+      username: "张明",
+      role: "member",
+      email: "2323@qq.com"
+    },
+    {
+      userId: 11,
+      username: "张明",
+      role: "leader",
+      email: "2323@qq.com"
+    },
+  ]
+
+  resultsData.value = [
+    {
+      id: 6,
+      fileName: '科研论文A.pdf',
+      fileType: 'PDF文档',
+      uploader: '张明',
+      uploaderId: 11,
+      uploadTime: '2025-03-15 14:30:22',
+      fileSize: '2.7 MB',
+      status: '已完成',
+      score: '92%',
+    },
+    {
+      id: 7,
+      fileName: '会议摘要B.docx',
+      fileType: 'Word文档',
+      uploader: '李华',
+      uploaderId: 5,
+      uploadTime: '2025-03-14 09:45:10',
+      fileSize: '1.5 MB',
+      status: '已完成',
+      score: '12%',
+    },
+    {
+      id: 8,
+      fileName: '研究数据图像C.png',
+      fileType: '图像',
+      uploader: '王芳',
+      uploaderId: 6,
+      uploadTime: '2025-03-12 16:20:35',
+      fileSize: '3.8 MB',
+      status: '处理中',
+      score: '-',
+    }
+  ]
 });
 </script>
 
@@ -424,15 +416,15 @@ onMounted(async (): Promise<any> => {
                   <template #dropdown>
                     <el-dropdown-menu>
                       <el-dropdown-item command="all">全部</el-dropdown-item>
-                      <el-dropdown-item command="管理员">管理员</el-dropdown-item>
-                      <el-dropdown-item command="普通成员">普通成员</el-dropdown-item>
+                      <el-dropdown-item command="leader">管理员</el-dropdown-item>
+                      <el-dropdown-item command="member">普通成员</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
               </template>
               <template #default="scope">
-                <el-tag :type="scope.row.role === '管理员' ? 'danger' : 'primary'" disable-transitions>
-                  {{ scope.row.role }}
+                <el-tag :type="scope.row.role === 'leader' ? 'danger' : 'primary'" disable-transitions>
+                  {{ scope.row.role === 'leader' ? '管理员' : '普通成员' }}
                 </el-tag>
               </template>
             </el-table-column>

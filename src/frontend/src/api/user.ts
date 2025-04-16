@@ -9,6 +9,20 @@ export type LoginResult = {
   data: string
 };
 
+/** 修改个人信息  邮箱验证*/
+export type basicResult = {
+  code: number;
+  message: string;
+  data: null | number;
+};
+
+/** 邮箱获得id */
+export type getIdResult = {
+  code: number;
+  message: string;
+  data: number;
+};
+
 export type UserInfoResult = {
   code: number;
   message: string;
@@ -37,13 +51,6 @@ export type RefreshTokenResult = {
     /** `accessToken`的过期时间（格式'xxxx/xx/xx xx:xx:xx'） */
     expires: Date;
   };
-};
-
-/** 修改个人信息  邮箱验证*/
-export type basicResult = {
-  code: number;
-  message: string;
-  data: null;
 };
 
 /** 获取邮箱验证码 */
@@ -97,11 +104,11 @@ export const updateEmail = (data: { email: string }, verificationCode: string) =
   );
 }
 
-// /** 上传文件 */
-// export const uploadFile = (data) => {
-//   return http.request<LoginResult>(
-//     "post", // 请求方法
-//     "/api/file/upload", // 请求 URL
-//     { data }
-//   );
-// }
+/** 邮箱获得id */
+export const getIdByEmail = (data: { email: string }) => {
+  return http.request<getIdResult>(
+    "get",
+    "/api/user/id",
+    { params: data }
+  );
+}

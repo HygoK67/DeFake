@@ -40,12 +40,13 @@ export default {
       }
     },
     {
-      path: "/organization/list/:type",
-      name: "OrganizationList",
-      component: () => import("@/views/organization/list.vue"),
+      path: "/organization/management/:id",
+      name: "OrganizationManagement",
+      component: () => import("@/views/organization/manage.vue"),
       meta: {
-        title: "组织列表",
-        showLink: false // 不在导航菜单中显示
+        title: "组织管理",
+        showLink: true,
+        icon: "ri:file-search-line"
       }
     }
   ]
