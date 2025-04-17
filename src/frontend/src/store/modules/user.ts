@@ -8,15 +8,18 @@ import {
   storageLocal
 } from "../utils";
 import {
-  type LoginResult,
   type basicResult,
   getLoginWithoutInfo,
   getUserInfo,
   updateUserInfo,
-  updateEmail
+  updateEmail,
 } from "@/api/user";
+import { getAllNotification } from "@/api/notification";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { type DataInfo, removeToken, userKey, mySetToken } from "@/utils/auth";
+import { Notification } from "@/types/notification";
+import { ElMessage } from "element-plus";
+import { handleApply } from "@/api/group";
 
 export const useUserStore = defineStore({
   id: "pure-user",
@@ -29,6 +32,8 @@ export const useUserStore = defineStore({
     email: storageLocal().getItem<DataInfo>(userKey)?.email ?? "",
     // 手机号
     phone: storageLocal().getItem<DataInfo>(userKey)?.phone ?? "",
+    // 通知
+    notifications: storageLocal().getItem<DataInfo>(userKey)?.notifications ?? [],
     // // 页面级别权限
     // roles: storageLocal().getItem<DataInfo<number>>(userKey)?.roles ?? [],
     // // 按钮级别权限
@@ -40,11 +45,10 @@ export const useUserStore = defineStore({
     // loginDay: 7
   }),
   actions: {
-    /** 更新 storageLocal 中的用户信息 */
-    updateStorage(key: keyof userType, value: string) {
-      const userInfo: DataInfo = storageLocal().getItem<DataInfo>(userKey) || {} as DataInfo;
-      userInfo[key] = value; // 更新指定字段
-      storageLocal().setItem(userKey, userInfo); // 保存到 storageLocal
+    updateStorage<K extends keyof userType>(key: K, value: userType[K]) {
+      const userInfo: Partial<DataInfo> = storageLocal().getItem<DataInfo>(userKey) || {};
+      userInfo[key] = value;
+      storageLocal().setItem(userKey, userInfo);
     },
     /** 存储头像 */
     SET_AVATAR(avatar: string) {
@@ -66,13 +70,13 @@ export const useUserStore = defineStore({
       this.phone = phone;
       this.updateStorage("phone", phone);
     },
+    SET_NOTIFICATIONS(notifications: Notification[]) {
+      this.notifications = notifications;
+      this.updateStorage("notifications", notifications);
+    },
     // /** 存储角色 */
     // SET_ROLES(roles: Array<string>) {
     //   this.roles = roles;
-    // },
-    // /** 存储按钮级别权限 */
-    // SET_PERMS(permissions: Array<string>) {
-    //   this.permissions = permissions;
     // },
     // /** 存储是否勾选了登录页的免登录 */
     // SET_ISREMEMBERED(bool: boolean) {
@@ -84,28 +88,31 @@ export const useUserStore = defineStore({
     // },
     /** 登入 */
     async loginByUsername(data) {
-      return new Promise<LoginResult>(async (resolve, reject) => {
+      return new Promise<basicResult<string>>(async (resolve, reject) => {
         try {
-          // 调用登录接口
           const loginResponse = await getLoginWithoutInfo(data);
-          if (loginResponse?.code === 0) {
-            // 存储 Token
-            mySetToken(loginResponse.data);
 
-            // 调用获取用户信息接口
-            const userInfoResponse = await getUserInfo();
-            if (userInfoResponse?.code === 0) {
-              const userInfo = userInfoResponse.data;
-              // 更新状态管理中的用户信息
-              this.SET_AVATAR(userInfo.avatarPath ?? "");
-              this.SET_USERNAME(userInfo.username ?? "");
-              this.SET_EMAIL(userInfo.email ?? "");
-              this.SET_PHONE(userInfo.phone ?? "");
-              // this.SET_ROLES(userInfo.userRole ? [userInfo.userRole] : []);
-              // this.SET_PERMS([]); // 如果有权限信息，可以在此设置
-            } else {
-              console.log("获取用户信息失败", userInfoResponse)
+          if (loginResponse?.code === 0) {
+            mySetToken(loginResponse.data);
+            // 获取用户信息
+            try {
+              const userInfoResponse = await getUserInfo();
+              if (userInfoResponse?.code === 0) {
+                const userInfo = userInfoResponse.data;
+                this.SET_AVATAR(userInfo.avatarPath ?? "");
+                this.SET_USERNAME(userInfo.username ?? "");
+                this.SET_EMAIL(userInfo.email ?? "");
+                this.SET_PHONE(userInfo.phone ?? "");
+                // this.SET_ROLES(userInfo.userRole ? [userInfo.userRole] : []);
+              } else {
+                ElMessage.error(userInfoResponse.message)
+              }
+            } catch (error) {
+              ElMessage.error("获取用户信息出错");
+              console.error(error);
             }
+            // 获取通知
+            this.getAndStoreNotification();
             resolve(loginResponse);
           } else {
             reject(new Error(loginResponse?.message || "登录失败"));
@@ -116,9 +123,23 @@ export const useUserStore = defineStore({
         }
       });
     },
+    async getAndStoreNotification() {
+      try {
+        const notificationResponse = await getAllNotification({ condition: null });
+        if (notificationResponse?.code === 0) {
+          this.SET_NOTIFICATIONS(notificationResponse.data ?? []);
+        } else {
+          ElMessage.error("获取通知失败");
+          console.error(notificationResponse?.message);
+        }
+      } catch (error) {
+        ElMessage.error("获取通知出错");
+        console.error(error);
+      }
+    },
     /** 更新个人信息 */
     async updateUserInfo(data: { phone: string, username: string, email: string, verifyCode: string }, msg: string) {
-      return new Promise<basicResult>(async (resolve, reject) => {
+      return new Promise<basicResult<null>>(async (resolve, reject) => {
         try {
           if (msg === "phone") {
             const response = await updateUserInfo({ phone: data.phone });
@@ -156,7 +177,7 @@ export const useUserStore = defineStore({
       });
     },
     async updatePassword(data: { oldPassword: string, password: string }) {
-      return new Promise<basicResult>(async (resolve, reject) => {
+      return new Promise<basicResult<null>>(async (resolve, reject) => {
         try {
           const response = await updateUserInfo({ password: data.password, oldPassword: data.oldPassword });
           if (response?.code === 0) {
@@ -172,7 +193,7 @@ export const useUserStore = defineStore({
     },
     /** 更新头像 */
     async updateAvatar(data) {
-      return new Promise<basicResult>(async (resolve, reject) => {
+      return new Promise<basicResult<null>>(async (resolve, reject) => {
         try {
           const response = await updateUserInfo({ avatarPath: data });
           if (response?.code === 0) {
@@ -180,6 +201,21 @@ export const useUserStore = defineStore({
             resolve(response);
           } else {
             reject(new Error(response?.message || "更新失败"));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    async handleApplyNoti(data: { groupId: string; userIdSent: string; isAgree: string }) {
+      return new Promise<basicResult<null>>(async (resolve, reject) => {
+        try {
+          const response = await handleApply(data);
+          if (response?.code === 0) {
+            this.getAndStoreNotification();
+            resolve(response);
+          } else {
+            reject(new Error(response?.message || "处理申请失败"));
           }
         } catch (error) {
           reject(error);

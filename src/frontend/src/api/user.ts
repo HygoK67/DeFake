@@ -1,12 +1,10 @@
 import { http } from "@/utils/http";
 import { useUserStoreHook } from "@/store/modules/user";
 
-
-/** 登录 上传文件 */
-export type LoginResult = {
+export type basicResult<T> = {
   code: number;
   message: string;
-  data: string
+  data: T;
 };
 
 export type UserInfoResult = {
@@ -39,16 +37,9 @@ export type RefreshTokenResult = {
   };
 };
 
-/** 修改个人信息  邮箱验证*/
-export type basicResult = {
-  code: number;
-  message: string;
-  data: null;
-};
-
 /** 获取邮箱验证码 */
 export const getEmailCode = (data: { email: string }) => {
-  return http.request<basicResult>(
+  return http.request<basicResult<null>>(
     "get", // 请求方法
     "/api/user/sendEmailCode", // 请求 URL
     { params: data }
@@ -57,7 +48,7 @@ export const getEmailCode = (data: { email: string }) => {
 
 /** 注册 */
 export const registerUser = (data: { username: string; phone: string; password: string; email: string }, verificationCode: string) => {
-  return http.request<basicResult>(
+  return http.request<basicResult<null>>(
     "post", // 请求方法
     "/api/user/register", // 请求 URL
     {
@@ -69,7 +60,7 @@ export const registerUser = (data: { username: string; phone: string; password: 
 
 /** 登录 */
 export const getLoginWithoutInfo = (data?: object) => {
-  return http.request<LoginResult>("post", "/api/user/login", { data });
+  return http.request<basicResult<string>>("post", "/api/user/login", { data });
 };
 
 /** 获取用户信息 */
@@ -79,7 +70,7 @@ export const getUserInfo = () => {
 
 /**修改个人信息 */
 export const updateUserInfo = (data) => {
-  return http.request<basicResult>(
+  return http.request<basicResult<null>>(
     "put", // 请求方法
     "/api/user/info", // 请求 URL
     { data }
@@ -87,7 +78,7 @@ export const updateUserInfo = (data) => {
 };
 
 export const updateEmail = (data: { email: string }, verificationCode: string) => {
-  return http.request<basicResult>(
+  return http.request<basicResult<null>>(
     "put", // 请求方法
     "/api/user/info", // 请求 URL
     {
@@ -97,11 +88,11 @@ export const updateEmail = (data: { email: string }, verificationCode: string) =
   );
 }
 
-// /** 上传文件 */
-// export const uploadFile = (data) => {
-//   return http.request<LoginResult>(
-//     "post", // 请求方法
-//     "/api/file/upload", // 请求 URL
-//     { data }
-//   );
-// }
+/** 邮箱获得id */
+export const getIdByEmail = (data: { email: string }) => {
+  return http.request<basicResult<number>>(
+    "get",
+    "/api/user/id",
+    { params: data }
+  );
+}

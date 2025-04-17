@@ -52,16 +52,16 @@ public class GroupController {
 
     @PostMapping("/kick")
     public Result kickGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
-        long userId_sent = Long.parseLong(jwtService.getUserId(jwtToken));
-        Long userId_rec = Long.parseLong(requestBody.get("userId_rec"));
+        long userIdSent = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userIdRec = Long.parseLong(requestBody.get("userIdRec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
-        groupService.kickGroup(userId_sent, userId_rec, groupId);
+        groupService.kickGroup(userIdSent, userIdRec, groupId);
         return Result.success("踢出成功");
     }
 
     @GetMapping("/members")
     public Result groupMembers(@RequestParam("groupId") String groupId) {
-        List<UserToGroup> list = groupService.groupMembers(Long.parseLong(groupId));
+        List<UserToGroupDTO> list = groupService.groupMembers(Long.parseLong(groupId));
         return Result.success(list);
     }
 
@@ -92,7 +92,12 @@ public class GroupController {
         int isAgree = Integer.parseInt(requestBody.get("isAgree"));
         groupService.dealApply(groupLeaderId, userIdSent, groupId, isAgree);
         return Result.success();
+    }
 
+    @GetMapping("/info")
+    public Result info(@RequestHeader String jwtToken, @RequestParam String groupId) {
+        Long userId = Long.parseLong(jwtService.getUserId(jwtToken));
+        return Result.success(groupService.getGroupInfo(userId, Long.parseLong(groupId)));
     }
 
 

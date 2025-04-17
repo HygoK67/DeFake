@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getAllGroup } from "@/api/group";
+import { getAllGroup, getAllGroupByUserId } from "@/api/group";
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -11,11 +11,9 @@ const route = useRoute();
 const router = useRouter();
 const loading = ref(false);
 const searchKeyword = ref("");
-const listType = ref(route.params.type);
-
-// 计算标题
+const listType = computed(() => route.query.type);
 const pageTitle = computed(() => {
-  return listType.value === "personal" ? "个人活动" : "当前开放活动";
+    return listType.value === "personal" ? "个人活动" : "当前开放活动";
 });
 
 // 组织列表
@@ -24,127 +22,48 @@ const organizations = ref([]);
 // 获取组织列表
 onMounted(() => {
   loading.value = true;
-  // 这里请求所有的组织,放到 organizations
   
-  // organization
-   
-
-  // getAllGroupByUserId()
-  //   .then((res) => {
-  //     organizations.value = res.data;
-  //     loading.value = false;
-  //   })
-  //   .catch((err) => {
-  //     console.error(err);
-  //     loading.value = false;
-  //   });
-
-  // 模拟API请求
-  setTimeout(() => {
-    if (listType.value === "personal") {
-      // 个人活动列表
-      organizations.value = [
-        {
-          id: 1,
-          name: "ABC大学2024年毕业设计",
-          organization: "ABC大学",
-          status: "已加入",
-          date: "2024-03-01"
-        },
-        {
-          id: 2,
-          name: "CDE会议2025年投稿",
-          organization: "CDE学会",
-          status: "已加入",
-          date: "2024-02-15"
-        },
-        {
-          id: 3,
-          name: "FGH期刊2025年度投稿",
-          organization: "FGH出版社",
-          status: "申请中",
-          date: "2024-01-20"
-        },
-        {
-          id: 4,
-          name: "IJK研究所项目申报",
-          organization: "IJK研究院",
-          status: "申请中",
-          date: "2024-01-10"
-        },
-        // 添加更多数据
-        {
-          id: 9,
-          name: "LMN大学学术交流会",
-          organization: "LMN大学",
-          status: "已加入",
-          date: "2023-12-05"
-        },
-        {
-          id: 10,
-          name: "OPQ研究院合作项目",
-          organization: "OPQ研究院",
-          status: "已加入",
-          date: "2023-11-20"
-        }
-      ];
-    } else {
-      // Active活动列表
-      organizations.value = [
-        {
-          id: 5,
-          name: "AAA大学2024年毕业设计",
-          organization: "AAA大学",
-          status: "未加入",
-          date: "2024-03-10"
-        },
-        {
-          id: 6,
-          name: "AAB大学2024年毕业设计",
-          organization: "AAB大学",
-          status: "未加入",
-          date: "2024-03-05"
-        },
-        {
-          id: 7,
-          name: "AAC大学2024年毕业设计",
-          organization: "AAC大学",
-          status: "未加入",
-          date: "2024-03-02"
-        },
-        {
-          id: 8,
-          name: "AAD大学2024年毕业设计",
-          organization: "AAD大学",
-          status: "未加入",
-          date: "2024-02-28"
-        },
-        // 添加更多数据
-        {
-          id: 11,
-          name: "RST会议论文征集",
-          organization: "RST学会",
-          status: "未加入",
-          date: "2024-02-20"
-        },
-        {
-          id: 12,
-          name: "UVW期刊特刊征稿",
-          organization: "UVW出版社",
-          status: "未加入",
-          date: "2024-02-15"
-        },
-        {
-          id: 13,
-          name: "XYZ科研竞赛",
-          organization: "XYZ基金会",
-          status: "未加入",
-          date: "2024-02-10"
-        }
-      ];
-    }
-    loading.value = false;
-  }, 800);
+  if (listType.value === "personal") {
+    // 获取用户已加入或申请的活动
+    getAllGroupByUserId()
+      .then((res) => {
+        // 转换API返回的数据格式以匹配表格需要的格式
+        organizations.value = res.data.map(item => ({
+          id: item.id,
+          name: item.groupname,
+          organization: item.groupname,
+            status: item.status === 'in'
+            ? (item.role === 'leader' ? '管理员' : '已加入')
+            : item.status === 'pending_apply'
+                ? '申请中'
+                : '未加入',
+          date: item.createdAt.split('T')[0] // 格式化日期
+        }));
+        loading.value = false;
+      })
+      .catch((err) => {
+        console.error(err);
+        loading.value = false;
+      });
+  } else {
+    // 获取所有开放活动
+    getAllGroup()
+      .then((res) => {
+        // 转换API返回的数据格式以匹配表格需要的格式
+        organizations.value = res.data.map(item => ({
+          id: item.id,
+          name: item.groupname,
+          organization: item.groupname,
+          status: '未加入', // 默认为未加入
+          date: item.createdAt.split('T')[0] // 格式化日期
+        }));
+        loading.value = false;
+      })
+      .catch((err) => {
+        console.error(err);
+        loading.value = false;
+      });
+  }
 });
 
 // 处理申请加入
@@ -166,6 +85,57 @@ const goBack = () => {
 const searchOrganizations = () => {
   console.log(`搜索关键词: ${searchKeyword.value}`);
   // 实际搜索逻辑
+  if (!searchKeyword.value) {
+    return;
+  }
+  
+  loading.value = true;
+  // 这里可以调用后端API进行搜索，或者前端过滤
+  // 前端过滤示例：
+  const keyword = searchKeyword.value.toLowerCase();
+  
+  if (listType.value === "personal") {
+    getAllGroupByUserId()
+      .then((res) => {
+        const filteredData = res.data.filter(item => 
+          item.groupname.toLowerCase().includes(keyword)
+        ).map(item => ({
+          id: item.id,
+          name: item.groupname,
+          organization: item.groupname,
+          status: item.status === 'in' ? '已加入' : 
+                  item.status === 'pending_apply' ? '申请中' : '未加入',
+          date: item.createdAt.split('T')[0]
+        }));
+        
+        organizations.value = filteredData;
+        loading.value = false;
+      })
+      .catch((err) => {
+        console.error(err);
+        loading.value = false;
+      });
+  } else {
+    getAllGroup()
+      .then((res) => {
+        const filteredData = res.data.filter(item => 
+          item.groupname.toLowerCase().includes(keyword)
+        ).map(item => ({
+          id: item.id,
+          name: item.groupname,
+          organization: item.groupname,
+          status: '未加入',
+          date: item.createdAt.split('T')[0]
+        }));
+        
+        organizations.value = filteredData;
+        loading.value = false;
+      })
+      .catch((err) => {
+        console.error(err);
+        loading.value = false;
+      });
+  }
 };
 </script>
 
@@ -186,6 +156,7 @@ const searchOrganizations = () => {
         v-model="searchKeyword"
         placeholder="输入组织名称、活动名称搜索..."
         class="search-input"
+        @keyup.enter="searchOrganizations"
       >
         <template #prefix>
           <el-icon><search /></el-icon>
@@ -212,15 +183,15 @@ const searchOrganizations = () => {
         <el-table-column prop="date" label="创建日期" width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
-            <!-- <el-tag 
+            <el-tag 
               :type="scope.row.status === '已加入' 
                 ? 'success' 
                 : scope.row.status === '申请中' 
                   ? 'info' 
-                  : 'default'"
+                  : 'warning'"
             >
               {{ scope.row.status }}
-            </el-tag> -->
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">

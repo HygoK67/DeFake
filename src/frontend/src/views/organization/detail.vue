@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import { getGroupInfo, getAllGroupByUserId } from "@/api/group";
 
 defineOptions({
   name: "OrganizationDetail"
@@ -8,69 +10,118 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const organizationId = ref(route.params.id);
+const groupId = ref(String(route.params.id));
 const loading = ref(false);
 
-const group = reactive({
-  id:
-  groupname: 
-  introduction:
-  ddl:
-})
-
-
-// 组织信息 - 简化版
-// const organization = reactive({
-//   id: organizationId.value,
-//   name: "",
-//   organization: "",
-//   manager: "",
-//   submissionStartDate: "",
-//   submissionEndDate: ""
-// });
-
-// 组织状态
-const memberStatus = ref("未加入"); // "已加入", "已提交"
-
-// 获取组织详情
-onMounted(() => {
-  loading.value = true;
-
-  // 模拟API请求
-  setTimeout(() => {
-    // 根据ID加载不同的数据
-    if (organizationId.value === "1") {
-      organization.name = "ABC大学2024年毕业设计";
-      organization.organization = "ABC大学";
-      organization.manager = "王一";
-      organization.submissionStartDate = "2024-03-15";
-      organization.submissionEndDate = "2024-05-31";
-      memberStatus.value = "已加入";
-    } else if (organizationId.value === "3") {
-      organization.name = "FGH期刊2025年度投稿";
-      organization.organization = "FGH出版社";
-      organization.manager = "王二";
-      organization.submissionStartDate = "2024-04-01";
-      organization.submissionEndDate = "2024-12-31";
-      memberStatus.value = "王三";
-    } else {
-      // 默认数据
-      organization.name = `组织${organizationId.value}`;
-      organization.organization = `测试组织${organizationId.value}`;
-      organization.manager = "管理员";
-      organization.submissionStartDate = "2024-03-01";
-      organization.submissionEndDate = "2024-06-30";
-      memberStatus.value = "未加入";
-    }
-
-    loading.value = false;
-  }, 800);
+// Organization information structure
+const organization = reactive({
+  id: Number(groupId.value),
+  groupname: "",
+  introduction: "",
+  ddl: "",
+  createdAt: ""
 });
 
-// 提交报告
-// const submitReport = () => {
-//   router.push(`/report/submit/${organizationId.value}`);
-// };
+// Member status with default value
+const memberStatus = ref("未加入");
+
+// 获取组织成员状态
+const mapStatusToDisplay = (status: string, role: string | null): string => {
+  if (status === 'in') {
+    return role === 'leader' ? '管理员' : '已加入';
+  }
+  if (status === 'pending_apply') {
+    return '申请中';
+  }
+  return '未加入';
+};
+
+// Get the tag type based on status
+const getTagType = (status: string): string => {
+  switch (status) {
+    case '管理员': return 'warning';
+    case '已加入': return 'success';
+    case '申请中': return 'info';
+    case '未加入': return 'primary';
+    default: return 'info';
+  }
+};
+
+// Separate function to load organization data to enable reuse
+const loadOrganizationData = async () => {
+  loading.value = true;
+
+  try {
+    // Get organization info
+    const response = await getGroupInfo({ groupId: groupId.value });
+
+    if (response.code === 0 && response.data) {
+      // Update organization data
+      const data = response.data;
+      organization.id = data.id;
+      organization.groupname = data.groupname;
+      organization.introduction = data.introduction || "暂无简介";
+      organization.ddl = data.ddl;
+      organization.createdAt = data.createdAt ? data.createdAt.split('T')[0] : 'N/A';
+
+      const userGroupsResponse = await getAllGroupByUserId();
+
+      if (userGroupsResponse.code === 0 && userGroupsResponse.data) {
+        const userGroup = userGroupsResponse.data.find(group => group.id === Number(groupId.value));
+        if (userGroup) {
+          memberStatus.value = mapStatusToDisplay(userGroup.status, userGroup.role);
+        } else {
+          memberStatus.value = '未加入';
+        }
+      }
+    } else {
+      ElMessage.error(response.message || "获取组织信息失败");
+    }
+  } catch (error) {
+    console.error("获取组织详情失败:", error);
+    ElMessage.error("获取组织详情失败，请检查网络连接");
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Watch for changes to the route param and reload data
+watch(
+  () => route.params.id,
+  (newId, oldId) => {
+    if (newId !== oldId) {
+      groupId.value = String(newId);
+      loadOrganizationData();
+    }
+  }
+);
+
+// Load data on component mount
+onMounted(loadOrganizationData);
+
+// Handle application to join
+const handleJoinRequest = () => {
+  router.push(`/organization/apply/${groupId.value}`);
+};
+
+const jump2OrganizationManagement = () => {
+  router.push({
+    name: 'OrganizationManagement', // 使用路由名称而非路径
+    params: { id: groupId.value }
+  });
+}
+
+// Handle submission of reports
+const submitReport = () => {
+  // This would typically navigate to a report submission page
+  ElMessage.info(`组织 ${organization.groupname} 的报告提交功能尚未实现`);
+  // Example: router.push(`/report/submit/${groupId.value}`);
+};
+
+// Return to organization list
+const goBack = () => {
+  router.go(-1);
+};
 </script>
 
 <template>
@@ -78,7 +129,11 @@ onMounted(() => {
     <el-card v-loading="loading">
       <template #header>
         <div class="card-header">
-          <span class="page-title">{{ organization.name }}</span>
+          <el-page-header @back="goBack">
+            <template #content>
+              <span class="page-title">{{ organization.groupname }}</span>
+            </template>
+          </el-page-header>
         </div>
       </template>
 
@@ -88,33 +143,50 @@ onMounted(() => {
           <h3>基本信息</h3>
           <div class="info-item">
             <span class="label">活动名称:</span>
-            <span>{{ organization.name }}</span>
+            <span>{{ organization.groupname }}</span>
           </div>
           <div class="info-item">
-            <span class="label">负责人:</span>
-            <span>{{ organization.manager }}</span>
+            <span class="label">创建日期:</span>
+            <span>{{ organization.createdAt }}</span>
           </div>
         </div>
 
         <div class="info-section">
-          <h3>投稿信息</h3>
-          <div class="info-item">
-            <span class="label">投稿开始日期:</span>
-            <span>{{ organization.submissionStartDate }}</span>
+          <h3>组织介绍</h3>
+          <div class="info-item description">
+            <p>{{ organization.introduction }}</p>
           </div>
+        </div>
+
+        <div class="info-section">
+          <h3>截止日期</h3>
           <div class="info-item">
-            <span class="label">投稿截止日期:</span>
-            <span class="deadline">{{ organization.submissionEndDate }}</span>
+            <span class="label">提交截止日期:</span>
+            <span class="deadline">{{ organization.ddl }}</span>
           </div>
           <div class="info-item">
             <span class="label">状态:</span>
-            <el-tag type="success">{{ memberStatus }}</el-tag>
+            <el-tag :type="getTagType(memberStatus)">{{ memberStatus }}</el-tag>
           </div>
         </div>
 
         <!-- 操作按钮 -->
         <div class="action-buttons">
-          <el-button type="primary" @click="submitReport">提交报告</el-button>
+          <el-button v-if="memberStatus === '已加入'" type="primary" @click="submitReport">
+            提交报告
+          </el-button>
+
+          <el-button v-if="memberStatus === '未加入'" type="primary" @click="handleJoinRequest">
+            申请加入
+          </el-button>
+
+          <el-button v-if="memberStatus === '管理员'" type="warning" @click="jump2OrganizationManagement">
+            管理组织
+          </el-button>
+
+          <el-button v-if="memberStatus === '申请中'" type="info" disabled>
+            申请处理中
+          </el-button>
         </div>
       </div>
     </el-card>
@@ -150,6 +222,16 @@ onMounted(() => {
       .info-item {
         margin-bottom: 12px;
         display: flex;
+
+        &.description {
+          display: block;
+
+          p {
+            line-height: 1.6;
+            color: #606266;
+            margin: 0;
+          }
+        }
 
         .label {
           color: #606266;

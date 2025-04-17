@@ -6,14 +6,13 @@ import com.group6.defakelogibackend.mapper.GroupMapper;
 import com.group6.defakelogibackend.mapper.NotificationMapper;
 import com.group6.defakelogibackend.mapper.UserMapper;
 import com.group6.defakelogibackend.mapper.UserToGroupMapper;
-import com.group6.defakelogibackend.model.Group;
-import com.group6.defakelogibackend.model.GroupDTO;
-import com.group6.defakelogibackend.model.UserToGroup;
+import com.group6.defakelogibackend.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -127,8 +126,23 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
 
     @Override
     @Transactional
-    public List<UserToGroup> groupMembers(long groupId) {
-        return groupMapper.findGroupMembersByGroupId(groupId);
+    public List<UserToGroupDTO> groupMembers(long groupId) {
+        List<UserToGroup> userToGroups = groupMapper.findGroupMembersByGroupId(groupId);
+        List<UserToGroupDTO> userToGroupDTOS = new LinkedList<>();
+        for (UserToGroup userToGroup : userToGroups) {
+            UserToGroupDTO userToGroupDTO = new UserToGroupDTO();
+            userToGroupDTO.setId(userToGroup.getId());
+            long userId = userToGroup.getUserId();
+            userToGroupDTO.setUserId(userId);
+            User user = userMapper.findUserById(userId);
+            userToGroupDTO.setUsername(user.getUsername());
+            userToGroupDTO.setGroupId(userToGroup.getGroupId());
+            userToGroupDTO.setCreatedAt(userToGroup.getCreatedAt());
+            userToGroupDTO.setStatus(userToGroup.getStatus());
+            userToGroupDTO.setRole(userToGroup.getRole());
+            userToGroupDTOS.add(userToGroupDTO);
+        }
+        return userToGroupDTOS;
     }
 
     @Override
@@ -176,7 +190,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         }
 
         if (userToGroupMapper.findUserToGroup(userIdSent, groupId) == null ||
-        userToGroupMapper.findUserToGroup(userIdSent, groupId).getStatus() != UserToGroup.Status.pending_apply){
+                userToGroupMapper.findUserToGroup(userIdSent, groupId).getStatus() != UserToGroup.Status.pending_apply) {
             throw new EntityMissingException("该用户没有发送申请!");
         }
 
@@ -192,7 +206,32 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
             userToGroupMapper.deleteUserToGroup(userIdSent, groupId);
             notificationMapper.createNotificationUser2User(groupLeaderId, userIdSent, groupId, "组织通知", groupname + "不允许您加入!");
         }
+    }
 
+    public GroupDTO getGroupInfo(long userId, long groupId) {
+        Group group = groupMapper.findGroupByGroupId(groupId);
+        UserToGroup userToGroup = userToGroupMapper.findUserToGroup(userId, groupId);
+        GroupDTO groupDTO = new GroupDTO();
+        if (group == null) {
+            throw new EntityMissingException("groupId 无效!");
+        }
+
+        if (userToGroup == null) {
+            groupDTO.setStatus(null);
+            groupDTO.setRole(null);
+        } else {
+            groupDTO.setStatus(userToGroup.getStatus());
+            groupDTO.setRole(userToGroup.getRole());
+        }
+
+        groupDTO.setGroupname(group.getGroupname());
+        groupDTO.setId(groupId);
+        groupDTO.setCreatedAt(group.getCreatedAt());
+        groupDTO.setUpdatedAt(group.getUpdatedAt());
+        groupDTO.setDdl(group.getDdl());
+        groupDTO.setIntroduction(group.getIntroduction());
+
+        return groupDTO;
     }
 
 }
