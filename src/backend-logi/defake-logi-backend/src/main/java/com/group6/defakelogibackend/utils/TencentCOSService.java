@@ -9,6 +9,7 @@ import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.region.Region;
 import jakarta.annotation.PostConstruct;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +49,19 @@ public class TencentCOSService {
         String key = UUID.randomUUID() + extensionName;
         File tmpFile = new File(System.getProperty("java.io.tmpdir") + "/" + key);
         file.transferTo(tmpFile);
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketId, key, tmpFile);
+        PutObjectResult result = cosClient.putObject(putObjectRequest);
+        String itemURL = "https://" + bucketId + ".cos." + regionName + ".myqcloud.com/" + key;
+        return itemURL;
+    }
+
+    public String upload(File file) throws IOException {
+        String fileName = file.getName();
+        int index = fileName.lastIndexOf(".");
+        String extensionName = index == -1 ? "" : "." + fileName.substring(index + 1);
+        String key = UUID.randomUUID() + extensionName;
+        File tmpFile = new File(System.getProperty("java.io.tmpdir") + "/" + key);
+        FileUtils.copyFile(file, tmpFile);
         PutObjectRequest putObjectRequest = new PutObjectRequest(bucketId, key, tmpFile);
         PutObjectResult result = cosClient.putObject(putObjectRequest);
         String itemURL = "https://" + bucketId + ".cos." + regionName + ".myqcloud.com/" + key;

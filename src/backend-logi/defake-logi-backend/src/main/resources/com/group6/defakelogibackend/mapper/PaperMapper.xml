@@ -4,8 +4,7 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.group6.defakelogibackend.mapper.PaperMapper">
 
-
-    <insert id="addPaper">
+    <insert id="addPaper" keyProperty="id" useGeneratedKeys="true">
         insert into papers
         (
             uploader_id,
@@ -13,19 +12,26 @@
             <if test="abstracT != null">abstract,</if>
             <if test="doi != null">doi,</if>
             <if test="publishedAt != null">published_at,</if>
-            filePath,
+            file_path,
             <if test="pageNum != null">page_num,</if>
             authors
         )
         values
         (
-            uploaderId,
-            title,
-            abstracT,
-            doi,
-            publishedAt,
-            filePath,
-
+            #{uploaderId},
+            #{title},
+            <if test="abstracT != null">#{abstracT},</if>
+            <if test="doi != null">#{doi},</if>
+            <if test="publishedAt != null">#{publishedAt},</if>
+            #{filePath},
+            <if test="pageNum != null">#{pageNum},</if>
+            #{authors}
         )
     </insert>
+
+    <select id="getPaperById" resultType="com.group6.defakelogibackend.model.Paper">
+        select * from papers where id = #{id}
+    </select>
+
+
 </mapper>

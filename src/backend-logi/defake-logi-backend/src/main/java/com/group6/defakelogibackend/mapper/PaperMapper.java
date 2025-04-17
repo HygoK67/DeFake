@@ -8,6 +8,7 @@ public interface PaperMapper {
 
     public int addPaper(Paper paper);
 
+    public Paper getPaperById(long id);
 
 
 }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.group6.defakelogibackend.mapper.FigureMapper">
+
+    <insert id="addFigure" useGeneratedKeys="true" keyProperty="id">
+        insert into figures
+        (
+            <if test="paperId != null">paper_id,</if>
+            uploader_id,
+            file_path,
+            thumbnail
+        )
+        values
+        (
+            <if test="paperId != null">#{paperId},</if>
+            #{uploaderId},
+            #{filePath},
+            #{thumbnail}
+        )
+    </insert>
+
+    <select id="getFiguresByPaperId" resultType="com.group6.defakelogibackend.model.Figure">
+        select * from figures where
+            paper_id = #{paperId}
+    </select>
+    <select id="getFigureById" resultType="com.group6.defakelogibackend.model.Figure">
+        select * from figures where
+            id = #{id}
+    </select>
+</mapper>
