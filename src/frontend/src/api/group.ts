@@ -95,7 +95,7 @@ export type getGroupInfoResult = {
 }
 
 export const getGroupInfo = (data: { groupId: string }) => {
-  return http.request<basicResult<null>>(
+  return http.request<getGroupInfoResult>(
     "get",
     "api/group/info",
     { params: data }

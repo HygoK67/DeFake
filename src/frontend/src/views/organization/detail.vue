@@ -14,14 +14,20 @@ const groupId = ref(String(route.params.id));
 const loading = ref(false);
 
 // Organization information structure
-const organization = reactive({
-  id: Number(groupId.value),
+interface OrganizationData {
+  id: number | null; // Use null for initial state before loading if appropriate
+  groupname: string;
+  introduction: string;
+  ddl: string;
+  createdAt: string;
+}
+const organization = reactive<OrganizationData>({
+  id: Number(groupId.value), // Initialize with ID from route
   groupname: "",
-  introduction: "",
+  introduction: "加载中...", // Provide initial placeholder
   ddl: "",
   createdAt: ""
 });
-
 // Member status with default value
 const memberStatus = ref("未加入");
 
@@ -37,7 +43,7 @@ const mapStatusToDisplay = (status: string, role: string | null): string => {
 };
 
 // Get the tag type based on status
-const getTagType = (status: string): string => {
+const getTagType = (status: string): 'success' | 'warning' | 'info' | 'primary' | 'danger' => {
   switch (status) {
     case '管理员': return 'warning';
     case '已加入': return 'success';
@@ -46,6 +52,8 @@ const getTagType = (status: string): string => {
     default: return 'info';
   }
 };
+
+
 
 // Separate function to load organization data to enable reuse
 const loadOrganizationData = async () => {
