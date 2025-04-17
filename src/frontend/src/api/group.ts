@@ -1,13 +1,7 @@
 import { http } from "@/utils/http";
 import { getIdByEmail } from "@/api/user";
-import { ca } from "element-plus/lib/locale/index.js";
 import { FileItem, MemberItem, Group } from '@/types/organization';
-
-export type basicResult = {
-  code: number;
-  message: string;
-  data: string | null;
-};
+import { basicResult } from "@/api/user";
 
 export type getMyGroupResult = {
   code: number;
@@ -43,8 +37,19 @@ export type getAllGroupMemberResult = {
   data: MemberItem[];
 }
 
+export type getGroupIdByIdResult = {
+  code: number;
+  message: string;
+  data: {
+    id: number;
+    groupname: string;
+    createdAt: string;
+    updatedAt: null;
+  }
+}
+
 export const createGroup = (data: { groupname: string; introduction: string; ddl: string }) => {
-  return http.request<basicResult>(
+  return http.request<basicResult<null>>(
     "post",
     "api/group/create",
     { data }
@@ -52,7 +57,7 @@ export const createGroup = (data: { groupname: string; introduction: string; ddl
 }
 
 export const applyGroup = (data: { groupId: string; title: string; content: string }) => {
-  return http.request<basicResult>(
+  return http.request<basicResult<null>>(
     "post",
     "api/group/apply",
     { data }
@@ -61,20 +66,11 @@ export const applyGroup = (data: { groupId: string; title: string; content: stri
 
 
 export const getGroupId = (data: { groupname: string }) => {
-  return http.request<basicResult>(
+  return http.request<getGroupIdByIdResult>(
     "get",
     "api/group/search",
     { data }
   );
-}
-
-
-export const getAllUserInGroup = (data: { groupId: string }) => {
-  return http.request<basicResult>(
-    "get",
-    "api/group/members",
-    { data }
-  )
 }
 
 export const getAllGroup = () => {
@@ -99,10 +95,10 @@ export type getGroupInfoResult = {
 }
 
 export const getGroupInfo = (data: { groupId: string }) => {
-  return http.request<basicResult>(
+  return http.request<basicResult<null>>(
     "get",
     "api/group/info",
-    { params:data }
+    { params: data }
   )
 }
 
@@ -136,7 +132,7 @@ export const inviteMember = async (data: { groupId: string; email: string; title
     console.error(error);
   }
 
-  return http.request<basicResult>(
+  return http.request<basicResult<string>>(
     "post",
     "api/group/invite",
     {
@@ -150,9 +146,18 @@ export const inviteMember = async (data: { groupId: string; email: string; title
 
 /** 踢出用户 */
 export const kickMember = (data: { userIdRec: string; groupId: string; }) => {
-  return http.request<basicResult>(
+  return http.request<basicResult<string>>(
     "post",
     "api/group/kick",
+    { data }
+  )
+}
+
+/** 处理申请 */
+export const handleApply = (data: { groupId: string; userIdSent: string; isAgree: string }) => {
+  return http.request<basicResult<null>>(
+    "post",
+    "api/group/deal",
     { data }
   )
 }

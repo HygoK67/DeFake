@@ -1,4 +1,5 @@
 import type { RouteRecordName } from "vue-router";
+import type { Notification } from "@/types/notification";
 
 export type cacheType = {
   mode: string;
@@ -41,6 +42,7 @@ export type userType = {
   username?: string;
   email?: string;
   phone?: string;
+  notifications?: Array<Notification>;
   // roles?: Array<string>;
   // permissions?: Array<string>;
   // isRemembered?: boolean;
