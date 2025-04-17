@@ -45,7 +45,7 @@ export default {
       component: () => import("@/views/organization/manage.vue"),
       meta: {
         title: "组织管理",
-        showLink: true,
+        showLink: false,
         icon: "ri:file-search-line"
       },
     },

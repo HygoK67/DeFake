@@ -4,9 +4,10 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
 import { FileItem, MemberItem } from '@/types/organization'; // 假设你有一个类型定义文件
 import { getAllGroupMember, inviteMember, kickMember } from '@/api/group';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 type TabType = 'members' | 'results';
+const router = useRouter();
 const activeTab = ref<TabType>('members');
 const searchKeyword = ref<string>('');
 const memberSearchKeyword = ref<string>('');
@@ -167,10 +168,8 @@ function parseFileSize(size: string): number {
 
 // 查看检测详情
 function handleViewDetails(row: FileItem): void {
-  ElMessage.info(`查看检测详情: ${row.fileName}`);
-  // 实际项目中可以跳转到详情页面
-  // router.push(`/result/detail/${row.id}`);
-}
+  router.push(`/result/detail/${row.id}`);
+};
 
 function handleUploaderClick(row: FileItem): void {
   activeTab.value = 'members';

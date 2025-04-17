@@ -50,11 +50,11 @@ const getTagType = (status: string): string => {
 // Separate function to load organization data to enable reuse
 const loadOrganizationData = async () => {
   loading.value = true;
-  
+
   try {
     // Get organization info
     const response = await getGroupInfo({ groupId: groupId.value });
-    
+
     if (response.code === 0 && response.data) {
       // Update organization data
       const data = response.data;
@@ -63,12 +63,11 @@ const loadOrganizationData = async () => {
       organization.introduction = data.introduction || "暂无简介";
       organization.ddl = data.ddl;
       organization.createdAt = data.createdAt ? data.createdAt.split('T')[0] : 'N/A';
-      
+
       const userGroupsResponse = await getAllGroupByUserId();
-      
+
       if (userGroupsResponse.code === 0 && userGroupsResponse.data) {
         const userGroup = userGroupsResponse.data.find(group => group.id === Number(groupId.value));
-        
         if (userGroup) {
           memberStatus.value = mapStatusToDisplay(userGroup.status, userGroup.role);
         } else {
@@ -104,6 +103,13 @@ onMounted(loadOrganizationData);
 const handleJoinRequest = () => {
   router.push(`/organization/apply/${groupId.value}`);
 };
+
+const jump2OrganizationManagement = () => {
+  router.push({
+    name: 'OrganizationManagement', // 使用路由名称而非路径
+    params: { id: groupId.value }
+  });
+}
 
 // Handle submission of reports
 const submitReport = () => {
@@ -166,31 +172,19 @@ const goBack = () => {
 
         <!-- 操作按钮 -->
         <div class="action-buttons">
-          <el-button 
-            v-if="memberStatus === '已加入'"
-            type="primary" 
-            @click="submitReport">
+          <el-button v-if="memberStatus === '已加入'" type="primary" @click="submitReport">
             提交报告
           </el-button>
-          
-          <el-button 
-            v-if="memberStatus === '未加入'"
-            type="primary" 
-            @click="handleJoinRequest">
+
+          <el-button v-if="memberStatus === '未加入'" type="primary" @click="handleJoinRequest">
             申请加入
           </el-button>
 
-          <el-button 
-            v-if="memberStatus === '管理员'"
-            type="warning" 
-            @click="jump2OrganizationManagement">
+          <el-button v-if="memberStatus === '管理员'" type="warning" @click="jump2OrganizationManagement">
             管理组织
           </el-button>
-          
-          <el-button 
-            v-if="memberStatus === '申请中'"
-            type="info" 
-            disabled>
+
+          <el-button v-if="memberStatus === '申请中'" type="info" disabled>
             申请处理中
           </el-button>
         </div>
@@ -231,7 +225,7 @@ const goBack = () => {
 
         &.description {
           display: block;
-          
+
           p {
             line-height: 1.6;
             color: #606266;
