@@ -1,7 +1,7 @@
 import { http } from "@/utils/http";
-import { FileItem, MemberItem } from '@/types/organization';
 import { getIdByEmail } from "@/api/user";
 import { ca } from "element-plus/lib/locale/index.js";
+import { FileItem, MemberItem, Group } from '@/types/organization';
 
 export type basicResult = {
   code: number;
@@ -85,11 +85,24 @@ export const getAllGroup = () => {
   )
 }
 
-export const groupid2Groupname = (data: { groupId: string }) => {
+export type getGroupInfoResult = {
+  code: number;
+  message: string;
+  data: {
+    id: number;
+    groupname: string;
+    createdAt: string;
+    updatedAt: null;
+    introduction: string | null;
+    ddl: string;
+  };
+}
+
+export const getGroupInfo = (data: { groupId: string }) => {
   return http.request<basicResult>(
     "get",
-    "api/group/id2name",
-    { data }
+    "api/group/info",
+    { params:data }
   )
 }
 

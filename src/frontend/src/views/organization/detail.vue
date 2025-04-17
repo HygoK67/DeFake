@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
-import { getAllGroup } from "@/api/group"; // Import the API function
+import { getGroupInfo, getAllGroupByUserId } from "@/api/group";
 
 defineOptions({
   name: "OrganizationDetail"
@@ -10,11 +10,22 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const groupId = ref(route.params.id);
+const groupId = ref(String(route.params.id));
 const loading = ref(false);
 
+// Organization information structure
+const organization = reactive({
+  id: Number(groupId.value),
+  groupname: "",
+  introduction: "",
+  ddl: "",
+  createdAt: ""
+});
 
+// Member status with default value
+const memberStatus = ref("未加入");
 
+// 获取组织成员状态
 const mapStatusToDisplay = (status: string, role: string | null): string => {
   if (status === 'in') {
     return role === 'leader' ? '管理员' : '已加入';
@@ -28,7 +39,7 @@ const mapStatusToDisplay = (status: string, role: string | null): string => {
 // Get the tag type based on status
 const getTagType = (status: string): string => {
   switch (status) {
-    case '管理员': return 'danger';
+    case '管理员': return 'warning';
     case '已加入': return 'success';
     case '申请中': return 'info';
     case '未加入': return 'primary';
@@ -36,30 +47,69 @@ const getTagType = (status: string): string => {
   }
 };
 
-// Get organization details
-onMounted(async () => {
+// Separate function to load organization data to enable reuse
+const loadOrganizationData = async () => {
   loading.value = true;
   
   try {
-    // response = await getGroupInfo TODO @
+    // Get organization info
+    const response = await getGroupInfo({ groupId: groupId.value });
+    
+    if (response.code === 0 && response.data) {
+      // Update organization data
+      const data = response.data;
+      organization.id = data.id;
+      organization.groupname = data.groupname;
+      organization.introduction = data.introduction || "暂无简介";
+      organization.ddl = data.ddl;
+      organization.createdAt = data.createdAt ? data.createdAt.split('T')[0] : 'N/A';
+      
+      const userGroupsResponse = await getAllGroupByUserId();
+      
+      if (userGroupsResponse.code === 0 && userGroupsResponse.data) {
+        const userGroup = userGroupsResponse.data.find(group => group.id === Number(groupId.value));
+        
+        if (userGroup) {
+          memberStatus.value = mapStatusToDisplay(userGroup.status, userGroup.role);
+        } else {
+          memberStatus.value = '未加入';
+        }
+      }
+    } else {
+      ElMessage.error(response.message || "获取组织信息失败");
+    }
   } catch (error) {
     console.error("获取组织详情失败:", error);
     ElMessage.error("获取组织详情失败，请检查网络连接");
   } finally {
     loading.value = false;
   }
-});
+};
+
+// Watch for changes to the route param and reload data
+watch(
+  () => route.params.id,
+  (newId, oldId) => {
+    if (newId !== oldId) {
+      groupId.value = String(newId);
+      loadOrganizationData();
+    }
+  }
+);
+
+// Load data on component mount
+onMounted(loadOrganizationData);
 
 // Handle application to join
 const handleJoinRequest = () => {
-  router.push(`/organization/apply/${organizationId.value}`);
+  router.push(`/organization/apply/${groupId.value}`);
 };
 
 // Handle submission of reports
 const submitReport = () => {
   // This would typically navigate to a report submission page
   ElMessage.info(`组织 ${organization.groupname} 的报告提交功能尚未实现`);
-  // Example: router.push(`/report/submit/${organizationId.value}`);
+  // Example: router.push(`/report/submit/${groupId.value}`);
 };
 
 // Return to organization list
@@ -128,6 +178,13 @@ const goBack = () => {
             type="primary" 
             @click="handleJoinRequest">
             申请加入
+          </el-button>
+
+          <el-button 
+            v-if="memberStatus === '管理员'"
+            type="warning" 
+            @click="jump2OrganizationManagement">
+            管理组织
           </el-button>
           
           <el-button 

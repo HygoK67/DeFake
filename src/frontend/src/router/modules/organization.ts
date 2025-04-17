@@ -47,6 +47,16 @@ export default {
         title: "组织管理",
         showLink: true,
         icon: "ri:file-search-line"
+      },
+    },
+    {
+      path: "/organization/list",
+      name: "OrganizationList",
+      component: () => import("@/views/organization/list.vue"),
+      meta: {
+        title: "组织列表",
+        icon: "ri:list-check",
+        showLink: false
       }
     }
   ]

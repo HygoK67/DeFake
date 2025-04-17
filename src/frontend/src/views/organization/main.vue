@@ -42,13 +42,12 @@ async function fetchPreviews() {
   await fetchActivePreview();   // 再获取开放活动，进行过滤
 }
 
-// 获取个人活动预览
 async function fetchPersonalPreview() {
   personalLoading.value = true;
   personalPreviewList.value = [];
   personalGroupIds.value.clear();
   try {
-    console.log("正在获取个人活动预览...");
+    console.log("正在获取个人组织预览...");
     const res = await getAllGroupByUserId();
     const mappedData = res.data.map((item: Group) => {
       personalGroupIds.value.add(item.id); // 记录ID
@@ -128,7 +127,7 @@ const getStatusTagType = (status: string) => {
     case '已加入': return 'success';
     case '申请中': return 'info';
     case '未加入': return 'primary'; // 未加入用 primary 按钮样式匹配
-    default: return 'info';
+    default: return 'warning';
   }
 };
 
@@ -139,6 +138,8 @@ const handlePersonalCardClick = (orgId: number) => {
 
 // 查看组织详情 (两个列表的卡片都可触发)
 const viewOrganizationDetail = (orgId: number) => {
+  console.log(`点击: ${orgId}`);
+  
   router.push(`/organization/detail/${orgId}`);
 };
 
@@ -249,7 +250,7 @@ async function submitCreateOrganization(): Promise<void> {
           :image-size="80"></el-empty>
 
         <div v-if="!personalLoading && personalPreviewList.length > 0" class="view-more">
-          <router-link to="/organization/list/personal">查看全部个人活动 ></router-link>
+          <router-link to="/organization/list?type=personal">查看全部个人活动 ></router-link>
         </div>
       </el-card>
 
@@ -278,7 +279,7 @@ async function submitCreateOrganization(): Promise<void> {
           :image-size="80"></el-empty>
 
         <div v-if="!activeLoading && activePreviewList.length > 0" class="view-more">
-          <router-link to="/organization/list/active">查看全部开放活动 ></router-link>
+          <router-link to="/organization/list?type=active">查看全部开放活动 ></router-link>
         </div>
       </el-card>
     </div>
