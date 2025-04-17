@@ -52,10 +52,10 @@ public class GroupController {
 
     @PostMapping("/kick")
     public Result kickGroup(@RequestHeader String jwtToken, @RequestBody Map<String, String> requestBody) {
-        long userId_sent = Long.parseLong(jwtService.getUserId(jwtToken));
-        Long userId_rec = Long.parseLong(requestBody.get("userId_rec"));
+        long userIdSent = Long.parseLong(jwtService.getUserId(jwtToken));
+        Long userIdRec = Long.parseLong(requestBody.get("userIdRec"));
         Long groupId = Long.parseLong(requestBody.get("groupId"));
-        groupService.kickGroup(userId_sent, userId_rec, groupId);
+        groupService.kickGroup(userIdSent, userIdRec, groupId);
         return Result.success("踢出成功");
     }
 
