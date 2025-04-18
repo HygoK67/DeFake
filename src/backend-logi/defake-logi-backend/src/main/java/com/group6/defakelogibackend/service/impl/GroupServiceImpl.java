@@ -136,6 +136,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
             userToGroupDTO.setUserId(userId);
             User user = userMapper.findUserById(userId);
             userToGroupDTO.setUsername(user.getUsername());
+            userToGroupDTO.setEmail(user.getEmail());
             userToGroupDTO.setGroupId(userToGroup.getGroupId());
             userToGroupDTO.setCreatedAt(userToGroup.getCreatedAt());
             userToGroupDTO.setStatus(userToGroup.getStatus());

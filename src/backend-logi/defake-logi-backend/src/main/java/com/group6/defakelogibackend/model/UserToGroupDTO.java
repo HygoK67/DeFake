@@ -13,6 +13,7 @@ public class UserToGroupDTO {
     private long id;
     private long userId;
     private String username;
+    private String email;
     private long groupId;
     private LocalDateTime createdAt;
     private UserToGroup.Status status;
