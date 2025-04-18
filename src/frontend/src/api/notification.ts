@@ -1,5 +1,15 @@
 import { http } from "@/utils/http";
-import { Notification } from "@/types/notification";
+export interface Notification {
+  id: number;
+  templateId: number;
+  userIdSent: number;
+  userIdRec: number;
+  groupId: number;
+  title: string;
+  content: string;
+  sentAt: string;
+  readAt: string | null;
+}
 
 export interface GetAllNotificationResult {
   code: number;
@@ -22,7 +32,7 @@ export const getAllNotification = (data: { condition: string | null }) => {
       "/api/notification/filter",
       {
         params: {
-          condition: "send_at_desc"
+          condition: "sent_at_asc"
         }
       }
     )

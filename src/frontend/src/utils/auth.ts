@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 import { useUserStoreHook } from "@/store/modules/user";
 import { storageLocal, isString, isIncludeAllChildren } from "@pureadmin/utils";
-import { Notification } from "@/types/notification";
+import type { TabItem } from "@/layout/components/lay-notice/data";
 
 export interface DataInfo {
   /** token */
@@ -16,7 +16,7 @@ export interface DataInfo {
   phone?: string;
   // /** 当前登录用户的角色 */
   roles?: Array<string>;
-  notifications?: Array<Notification>;
+  notifications?: Array<TabItem>;
 }
 
 export const userKey = "user-info";

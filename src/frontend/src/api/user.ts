@@ -96,3 +96,12 @@ export const getIdByEmail = (data: { email: string }) => {
     { params: data }
   );
 }
+
+/** 用户处理邀请 */
+export const handleInvite = (data: { groupLeaderId: string; groupId: string; isAgree: string }) => {
+  return http.request<basicResult<null>>(
+    "post",
+    "/api/user/deal",
+    { data }
+  );
+}

@@ -17,9 +17,10 @@ import {
 import { getAllNotification } from "@/api/notification";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { type DataInfo, removeToken, userKey, mySetToken } from "@/utils/auth";
-import { Notification } from "@/types/notification";
+import type { TabItem, ListItem } from "@/layout/components/lay-notice/data";
 import { ElMessage } from "element-plus";
 import { handleApply } from "@/api/group";
+import { Notification } from "@/api/notification";
 
 export const useUserStore = defineStore({
   id: "pure-user",
@@ -70,7 +71,7 @@ export const useUserStore = defineStore({
       this.phone = phone;
       this.updateStorage("phone", phone);
     },
-    SET_NOTIFICATIONS(notifications: Notification[]) {
+    SET_NOTIFICATIONS(notifications: TabItem[]) {
       this.notifications = notifications;
       this.updateStorage("notifications", notifications);
     },
@@ -91,7 +92,6 @@ export const useUserStore = defineStore({
       return new Promise<basicResult<string>>(async (resolve, reject) => {
         try {
           const loginResponse = await getLoginWithoutInfo(data);
-
           if (loginResponse?.code === 0) {
             mySetToken(loginResponse.data);
             // 获取用户信息
@@ -127,7 +127,99 @@ export const useUserStore = defineStore({
       try {
         const notificationResponse = await getAllNotification({ condition: null });
         if (notificationResponse?.code === 0) {
-          this.SET_NOTIFICATIONS(notificationResponse.data ?? []);
+          const allNoticeData = notificationResponse.data;
+          const groupNotice: ListItem[] = allNoticeData
+            .filter((item: Notification) => (item.templateId <= 2))
+            .map((item: Notification): ListItem => {
+              let status: any;
+              let extra: string;
+
+              switch (item.templateId) {
+                case 1: //邀请加入组织
+                  status = "primary";
+                  extra = "等待确认";
+                  break;
+                case 2:
+                  status = "danger";
+                  extra = "移出组织";
+                  break;
+                default:
+                  status = null;
+                  extra = null;
+                  break;
+              }
+              return {
+                templateId: item.templateId,
+                userIdSent: item.userIdSent,
+                groupId: item.groupId,
+                title: item.title,
+                datetime: item.sentAt,
+                type: "1",
+                description: item.content,
+                ...(item.readAt !== null && { readAt: item.readAt }),
+                ...(extra !== null && { extra: extra }),
+                ...(status !== null && { status: status })
+              }
+            })
+          groupNotice.sort((a, b) => {
+            const aIsRead = a.readAt != null;
+            const bIsRead = b.readAt != null;
+            if (aIsRead !== bIsRead) {
+              return Number(aIsRead) - Number(bIsRead); // (0 - 1 = -1 -> a first), (1 - 0 = 1 -> b first)
+            }
+            const dateA = a.datetime ? new Date(a.datetime).getTime() : 0;
+            const dateB = b.datetime ? new Date(b.datetime).getTime() : 0;
+
+            if (isNaN(dateA) && isNaN(dateB)) return 0; // Both invalid, treat as equal
+            if (isNaN(dateA)) return 1; // Invalid date A should likely come after valid date B
+            if (isNaN(dateB)) return -1; // Invalid date B should likely come after valid date A
+            return dateB - dateA;
+          });
+
+          const otherNotice: ListItem[] = allNoticeData
+            .filter((item: Notification) => (item.templateId > 2))
+            .map((item: Notification): ListItem => {
+              return {
+                templateId: item.templateId,
+                userIdSent: item.userIdSent,
+                groupId: item.groupId,
+                title: item.title,
+                datetime: item.sentAt,
+                type: "2",
+                description: item.content,
+                ...(item.readAt !== null && { readAt: item.readAt }),
+              }
+            })
+          otherNotice.sort((a, b) => {
+            const aIsRead = a.readAt != null;
+            const bIsRead = b.readAt != null;
+            if (aIsRead !== bIsRead) {
+              return Number(aIsRead) - Number(bIsRead); // (0 - 1 = -1 -> a first), (1 - 0 = 1 -> b first)
+            }
+            const dateA = a.datetime ? new Date(a.datetime).getTime() : 0;
+            const dateB = b.datetime ? new Date(b.datetime).getTime() : 0;
+
+            if (isNaN(dateA) && isNaN(dateB)) return 0; // Both invalid, treat as equal
+            if (isNaN(dateA)) return 1; // Invalid date A should likely come after valid date B
+            if (isNaN(dateB)) return -1; // Invalid date B should likely come after valid date A
+            return dateB - dateA;
+          });
+          const NoticeData: TabItem[] = [
+            {
+              key: "1",
+              name: "组织消息",
+              list: groupNotice,
+              emptyText: "暂无组织消息",
+            },
+            {
+              key: "2",
+              name: "通知",
+              list: otherNotice,
+              emptyText: "暂无通知",
+            }
+          ]
+          console.log("NoticeData", NoticeData)
+          this.SET_NOTIFICATIONS(NoticeData ?? []);
         } else {
           ElMessage.error("获取通知失败");
           console.error(notificationResponse?.message);
@@ -137,6 +229,7 @@ export const useUserStore = defineStore({
         console.error(error);
       }
     },
+
     /** 更新个人信息 */
     async updateUserInfo(data: { phone: string, username: string, email: string, verifyCode: string }, msg: string) {
       return new Promise<basicResult<null>>(async (resolve, reject) => {
@@ -201,21 +294,6 @@ export const useUserStore = defineStore({
             resolve(response);
           } else {
             reject(new Error(response?.message || "更新失败"));
-          }
-        } catch (error) {
-          reject(error);
-        }
-      });
-    },
-    async handleApplyNoti(data: { groupId: string; userIdSent: string; isAgree: string }) {
-      return new Promise<basicResult<null>>(async (resolve, reject) => {
-        try {
-          const response = await handleApply(data);
-          if (response?.code === 0) {
-            this.getAndStoreNotification();
-            resolve(response);
-          } else {
-            reject(new Error(response?.message || "处理申请失败"));
           }
         } catch (error) {
           reject(error);

@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
 import { FileItem, MemberItem } from '@/types/organization'; // 假设你有一个类型定义文件
-import { getAllGroupMember, inviteMember, kickMember } from '@/api/group';
+import { getAllGroupMember, handleApply, inviteMember, kickMember } from '@/api/group';
 import { useRoute, useRouter } from 'vue-router';
 
 type TabType = 'members' | 'results';
@@ -24,7 +24,8 @@ const fileFilter = ref<string>('all');
 const statusFiler = ref<string>('all');
 const idFilter = ref<number>(-1);
 const mannulInput = ref<boolean>(true);
-const groupId = ref<number>(1);; // 假设组织ID为1
+const pending = "pending"
+var groupId = -1;
 
 const inviteDialogVisible = ref<boolean>(false);
 const inviteLoading = ref<boolean>(false);
@@ -32,6 +33,11 @@ const inviteForm = ref({
   email: '',
   message: '诚挚邀请您加入我们的组织。'
 });
+
+//处理申请
+const applicationsDialogVisible = ref<boolean>(false);
+const applicationsLoading = ref<boolean>(false);
+const processingApplicationId = ref<number | null>(null);
 
 
 // 成员数据
@@ -46,6 +52,7 @@ function handleRoleFilter(command: string): void {
 // 成员关键词搜索
 function filterMemberData(data: MemberItem[]): MemberItem[] {
   let filtered = [...data];
+  filtered = filtered.filter(item => item.status !== pending)
   if (memberSearchKeyword.value) {
     const keyword = memberSearchKeyword.value;
     filtered = filtered.filter(item =>
@@ -91,6 +98,10 @@ function handleStatusFilter(command: string): void {
   statusFiler.value = command;
 }
 
+const pendingApplications = computed((): MemberItem[] => {
+  return membersData.value.filter(member => member.status === pending);
+});
+
 // 结果关键词搜索
 function filterResultData(data: FileItem[]): FileItem[] {
   let filtered = [...data];
@@ -121,6 +132,82 @@ const paginatedResultsData = computed(() => {
   const end = start + pageSize;
   return filteredResultsData.value.slice(start, end);
 });
+
+function handleViewApplications(): void {
+  // fetchData(); // todo
+  applicationsDialogVisible.value = true;
+}
+
+// 接受申请
+async function handleAcceptApplication(applicant: MemberItem): Promise<void> {
+  await ElMessageBox.confirm(
+    `确定要接受用户 "${applicant.username}" 的加入申请吗?`,
+    '确认操作',
+    {
+      confirmButtonText: '接受',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(async () => {
+    processingApplicationId.value = applicant.userId;
+    try {
+      const res = await handleApply({
+        groupId: String(applicant.groupId),
+        userIdSent: String(applicant.userId),
+        isAgree: "",
+      })
+      if (res.code === 0) {
+        ElMessage.success(`已接受用户 "${applicant.username}" 的申请`);
+        fetchData();
+      } else {
+        ElMessage.error(res.message || '接受申请失败');
+      }
+    } catch (error) {
+      console.error("Accept application error:", error);
+      ElMessage.error('处理申请时发生错误');
+    } finally {
+      processingApplicationId.value = null;
+    }
+  }).catch(() => {
+    ElMessage.info('操作已取消');
+  });
+}
+
+// 拒绝申请
+async function handleRejectApplication(applicant: MemberItem): Promise<void> {
+  await ElMessageBox.confirm(
+    `确定要拒绝用户 "${applicant.username}" 的加入申请吗?`,
+    '确认操作',
+    {
+      confirmButtonText: '拒绝',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(async () => {
+    processingApplicationId.value = applicant.userId; // 设置按钮loading状态
+    try {
+      const res = await handleApply({
+        groupId: String(applicant.groupId),
+        userIdSent: String(applicant.userId),
+        isAgree: "",
+      })
+      if (res.code === 0) {
+        ElMessage.success(`已拒绝用户 "${applicant.username}" 的申请`);
+        fetchData();
+      } else {
+        ElMessage.error(res.message || '拒绝申请失败');
+      }
+    } catch (error) {
+      console.error("Reject application error:", error);
+      ElMessage.error('处理申请时发生错误');
+    } finally {
+      processingApplicationId.value = null;
+    }
+  }).catch(() => {
+    ElMessage.info('操作已取消');
+  });
+}
+
 
 // 处理标签页切换
 function handleTabChange(): void {
@@ -248,88 +335,33 @@ watch(memberSearchKeyword, () => {
   mannulInput.value = true;
 });
 
-onMounted(async (): Promise<any> => {
-  // todo：与后端联调 
-  // try { 
-  //   const res = await getAllGroupMember({ groupId });
-  //   if (res.code === 0) {
-  //     membersData.value = res.data;
-  //   } else {
-  //     ElMessage.error(res.message);
-  //   }
-  // } catch (error) {
-  //   ElMessage.error('获取成员数据失败');
-  // }
+async function fetchData() {
+  memberTableLoading.value = true;
+  try {
+    const res = await getAllGroupMember({ groupId: String(groupId) });
+    if (res.code === 0) {
+      membersData.value = res.data;
+    } else {
+      ElMessage.error(res.message);
+    }
+  } catch (error) {
+    ElMessage.error('获取成员数据失败');
+  } finally {
+    memberTableLoading.value = false;
+  }
+}
 
-  groupId.value = Number(useRoute().params.id)
+onMounted(async (): Promise<any> => {
+  groupId = Number(useRoute().params.id)
+  // todo：与后端联调 
+  fetchData();
 
   membersData.value = [
-    {
-      userId: 4,
-      username: "张明",
-      role: "leader",
-      email: "2323@qq.com"
-    },
-    {
-      userId: 5,
-      username: "李华",
-      role: "leader",
-      email: "2323@qq.com"
-    },
-    {
-      userId: 6,
-      username: "王芳",
-      role: "leader",
-      email: "2323@qq.com"
-    },
-    {
-      userId: 4,
-      username: "张明",
-      role: "leader",
-      email: "2323@qq.com"
-    },
-    {
-      userId: 5,
-      username: "李华",
-      role: "member",
-      email: "2323@qq.com"
-    },
-    {
-      userId: 6,
-      username: "王芳",
-      role: "member",
-      email: "2323@qq.com"
-    },
-    {
-      userId: 4,
-      username: "张明",
-      role: "member",
-      email: "2323@qq.com"
-    },
-    {
-      userId: 5,
-      username: "李华",
-      role: "member",
-      email: "2323@qq.com"
-    },
-    {
-      userId: 6,
-      username: "王芳",
-      role: "member",
-      email: "2323@qq.com"
-    },
-    {
-      userId: 4,
-      username: "张明",
-      role: "member",
-      email: "2323@qq.com"
-    },
-    {
-      userId: 11,
-      username: "张明",
-      role: "leader",
-      email: "2323@qq.com"
-    },
+    { userId: 101, username: "申请者A", email: "applicantA@test.com", role: 'member', status: 'pending' },
+    { userId: 102, username: "申请者B", email: "applicantB@test.com", role: 'member', status: 'pending' },
+    { userId: 4, username: "张明", role: "leader", email: "2323@qq.com", status: 'leader' }, // 假设 leader 也有 status
+    { userId: 5, username: "李华", role: "member", email: "2323@qq.com", status: 'member' },
+    { userId: 6, username: "王芳", role: "member", email: "2323@qq.com", status: 'member' },
   ]
 
   resultsData.value = [
@@ -395,6 +427,12 @@ onMounted(async (): Promise<any> => {
             </div>
 
             <div class="filter-right">
+              <el-badge :value="pendingApplications.length" :hidden="pendingApplications.length === 0" class="item"
+                style="margin-right: 10px;">
+                <el-button type="warning" @click="handleViewApplications">
+                  用户申请
+                </el-button>
+              </el-badge>
               <el-button type="primary" @click="handleInviteUser">
                 邀请用户
               </el-button>
@@ -531,7 +569,7 @@ onMounted(async (): Promise<any> => {
     </el-card>
 
     <!-- 邀请用户弹窗 -->
-    <el-dialog v-model="inviteDialogVisible" title="邀请用户加入组织" width="500px">
+    <el-dialog v-model="inviteDialogVisible" title="邀请用户加入组织" width="700px">
       <el-form :model="inviteForm" label-width="100px">
         <el-form-item label="邮箱地址">
           <el-input v-model="inviteForm.email" placeholder="请输入邮箱地址"></el-input>
@@ -546,6 +584,31 @@ onMounted(async (): Promise<any> => {
           <el-button type="primary" @click="submitInvite" :loading="inviteLoading">
             发送邀请
           </el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 处理申请弹窗 -->
+    <el-dialog v-model="applicationsDialogVisible" title="待处理的申请" width="700px">
+      <el-table :data="pendingApplications" v-loading="applicationsLoading" border stripe>
+        <el-table-column prop="username" label="申请人" width="150" />
+        <el-table-column prop="email" label="邮箱" min-width="200" />
+        <el-table-column label="操作" width="200">
+          <template #default="scope">
+            <el-button size="small" type="success" :loading="processingApplicationId === scope.row.userId"
+              @click="handleAcceptApplication(scope.row)">
+              接受
+            </el-button>
+            <el-button size="small" type="danger" :loading="processingApplicationId === scope.row.userId"
+              @click="handleRejectApplication(scope.row)">
+              拒绝
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="applicationsDialogVisible = false">关闭</el-button>
         </span>
       </template>
     </el-dialog>
@@ -599,7 +662,19 @@ onMounted(async (): Promise<any> => {
 
     .filter-right {
       display: flex;
+      align-items: center;
       gap: 10px;
+
+      .item {
+        position: relative;
+        z-index: 1;
+
+        :deep(.el-badge__content) {
+          z-index: 10; // 或 2, 10, 根据需要调整，确保比遮挡它的元素高
+          top: 9px;
+          right: 12px;
+        }
+      }
     }
   }
 

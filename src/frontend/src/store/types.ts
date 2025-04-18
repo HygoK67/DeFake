@@ -1,5 +1,5 @@
 import type { RouteRecordName } from "vue-router";
-import type { Notification } from "@/types/notification";
+import type { TabItem } from "@/layout/components/lay-notice/data";
 
 export type cacheType = {
   mode: string;
@@ -42,7 +42,7 @@ export type userType = {
   username?: string;
   email?: string;
   phone?: string;
-  notifications?: Array<Notification>;
+  notifications?: Array<TabItem>;
   // roles?: Array<string>;
   // permissions?: Array<string>;
   // isRemembered?: boolean;
