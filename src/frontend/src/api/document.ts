@@ -1,84 +1,69 @@
 import { http } from "@/utils/http";
 import type { FileWithMetadata } from "@/types/document";
+import { basicResult } from "@/api/user";
 
-/**
- * 上传文件（第一步）
- * @param fileData 文件对象
- * @returns 上传结果，包含文件URL
- */
-export const uploadFiles = (fileData: FileWithMetadata) => {
+// 上传文件
+export const uploadFile = async (file: File) => {
   const formData = new FormData();
+  formData.append('files', file);
 
-  formData.append(`files`, fileData.file);
-
-  return http.post<any, { code: string; message: string; data: any[] }>(
-    "/api/file/upload",
-    {
-      data: formData as unknown as { code: string; message: string; data: any[] },
-      headers: {
-        "Content-Type": undefined
-      },
-      timeout: 30000
+  const response = await http.post<any, { code: string; message: string; data: any[] }>('/api/file/upload', formData, {
+    headers: {
     }
-  );
+  });
+
+  return response.data.url;
 };
 
-/**
- * 提交文件元数据（第二步）
- * @param fileUrl 已上传文件的URL
- * @param metadata 文件的元数据
- * @returns 提取出的图片列表
- */
-export const submitFileMetadata = (fileUrl: string, metadata: any) => {
-  return http.post<any, { code: string; message: string; data: any[] }>(
-    "/api/file/process", // 根据实际API路径调整
-    {
-      fileUrl,
-      metadata
-    },
-    {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }
+// 上传图片
+export const uploadFigure = async (data: { filePath: string }) => {
+  const response = await http.request<basicResult<null>>(
+    "post",
+    "api/figure",
+    { data }
   );
+  return response.data;
 };
 
-/**
- * 提交用户选择的图片
- * @param selectedImages 用户选择的图片列表
- * @returns 提交结果
- */
-export const submitSelectedImages = (selectedImages: any[]) => {
-  return http.post<any, { code: string; message: string; data: { images: any[] } }>(
-    "/api/file/submit-selection",
-    { data: { images: selectedImages } }, // 确保包装在data属性中
-    {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }
-  );
+// 获取图片
+export const getFigure = async (figureId: number) => {
+  const response = await http.get<{ code: string; message: string; data: any }, { figureId: number }>('/api/figure', {
+    params: { figureId }
+  });
+  return response.data.filePath;
 };
 
-/**
- * 一次性完成文件上传和元数据提交（组合步骤）
- * @param fileData 文件对象
- * @param metadata 文件的元数据
- * @returns 处理结果，包含提取出的图片列表
- */
-export const uploadAndProcessFile = async (fileData: FileWithMetadata) => {
-  try {
-    const uploadResult = await uploadFiles(fileData);
-    if (uploadResult.data) {
-      const fileUrl = uploadResult.data;
-      const processResult = await submitFileMetadata(fileUrl, fileData.metadata);
-      return processResult;
-    } else {
-      throw new Error("文件上传失败: " + uploadResult.message);
-    }
-  } catch (error) {
-    console.error("文件上传和处理失败:", error);
-    throw error;
-  }
+// 上传论文
+export const uploadPaper = async (data: {
+  title: string,
+  authorList: string[],
+  abstracT: string,
+  doi: string,
+  publishAt: string,
+  filePath: string
+}) => {
+  const response = await http.request<basicResult<null>>(
+    "post",
+    "api/paper",
+    { data }
+  );
+  return response.data;
+};
+
+
+// 获取论文信息
+export const getPaper = async (paperId: number) => {
+  const response = await http.get<{ code: string; message: string; data: any }, { paperId: number }>('/api/paper', {
+    params: { paperId }
+  });
+  return response.data;
+};
+
+
+// 获取论文的所有图片
+export const getPaperFigures = async (paperId: number) => {
+  const response = await http.get<{ code: string; message: string; data: any[] }, { paperId: number }>('/api/paper/figures', {
+    params: { paperId }
+  });
+  return response.data;
 };

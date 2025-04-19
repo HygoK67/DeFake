@@ -156,24 +156,19 @@ class PureHttp {
   }
 
   /** 单独抽离的`post`工具函数 */
-  public post<T, P>(
-    url: string,
-    params?: AxiosRequestConfig<P>,
-    config?: PureHttpRequestConfig
-  ): Promise<T> {
-    // 检查是否是文件上传（FormData）
-    if (params?.data instanceof FormData) {
-      // 对于FormData，删除Content-Type让浏览器自动设置带boundary的multipart/form-data
+  public post<T, P>(url: string, params?: AxiosRequestConfig<P> | FormData, config?: PureHttpRequestConfig): Promise<T> {
+    // 如果 params 是 FormData 类型
+    if (params instanceof FormData) {
       const uploadConfig = {
         ...config,
         headers: {
           ...(config?.headers || {}),
-          "Content-Type": undefined // 让Axios自动设置正确的Content-Type
+          "Content-Type": undefined // 让 Axios 自动设置正确的 Content-Type
         }
       };
-      return this.request<T>("post", url, params, uploadConfig);
+      return this.request<T>("post", url, { data: params }, uploadConfig);
     }
-    return this.request<T>("post", url, params, config);
+    return this.request<T>("post", url, params as AxiosRequestConfig<P>, config);
   }
 
   /** 单独抽离的`get`工具函数 */

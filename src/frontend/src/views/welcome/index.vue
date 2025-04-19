@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from "vue";
 import { FileWithMetadata, Metadata } from "@/types/document";
-import { uploadAndProcessFile,uploadFiles } from "@/api/document";
-import { useRouter } from "vue-router"; // 添加这行导入
+import { uploadFile, uploadFigure, getFigure, uploadPaper, getPaperFigures } from "@/api/document";
+import { useRouter } from "vue-router";
 
 defineOptions({
   name: "ForensicsDetection"
@@ -29,14 +29,24 @@ const validationError = ref<string | null>(null);
 // 当前编辑的元数据
 const currentMetadata = reactive<Metadata>({
   title: "",
-  author: "",
-  institution: "",
-  publishDate: "",
-  keywords: "",
-  description: ""
+  authorList: [],
+  abstracT: "",
+  doi: "",
+  publishAt: ""
 });
 
+// 作者输入字段(用于UI展示)
+const authorInput = ref("");
+
 const metadataStorage = ref<WeakMap<File, Metadata>>(new WeakMap());
+
+// 处理作者输入转换为数组
+const processAuthorList = () => {
+  return authorInput.value
+    .split(',')
+    .map(author => author.trim())
+    .filter(author => author.length > 0);
+};
 
 // 处理文件拖放
 const handleDragOver = (e: DragEvent) => {
@@ -63,6 +73,8 @@ const handleFileChange = (e: Event) => {
   const input = e.target as HTMLInputElement;
   if (input.files) {
     handleFiles(input.files);
+    // 重置input值，确保相同文件可以再次选择
+    input.value = '';
   }
 };
 
@@ -75,11 +87,10 @@ const handleFiles = (files: FileList) => {
         file,
         metadata: {
           title: "",
-          author: "",
-          institution: "",
-          publishDate: "",
-          keywords: "",
-          description: ""
+          authorList: [],
+          abstracT: "",
+          doi: "",
+          publishAt: ""
         }
       };
       fileList.value.push(fileWithMetadata);
@@ -104,32 +115,42 @@ const selectFile = (fileWithMetadata: FileWithMetadata) => {
   if (savedMetadata) {
     fileWithMetadata.metadata = { ...savedMetadata };
     Object.assign(currentMetadata, savedMetadata);
+    // 从作者列表获取逗号分隔的字符串用于输入框显示
+    authorInput.value = savedMetadata.authorList.join(', ');
   } else {
     Object.assign(currentMetadata, fileWithMetadata.metadata);
+    authorInput.value = '';
   }
 };
 
 // 验证元数据是否完整
 const validateMetadata = (metadata: Metadata): boolean => {
+  // 如果是图像文件，不需要验证元数据
+  if (selectedFile.value && isImageFile(selectedFile.value.file.name)) {
+    return true;
+  }
+  
   if (!metadata.title.trim()) return false;
-  if (!metadata.author.trim()) return false;
-  if (!metadata.institution.trim()) return false;
-  if (!metadata.publishDate.trim()) return false;
-  if (!metadata.keywords.trim()) return false;
-  if (!metadata.description.trim()) return false;
+  if (!metadata.authorList || metadata.authorList.length === 0) return false;
+  if (!metadata.abstracT.trim()) return false;
+  if (!metadata.doi.trim()) return false;
+  if (!metadata.publishAt.trim()) return false;
   return true;
 };
 
 // 获取未完成元数据的文件
 const getFilesWithIncompleteMetadata = (): FileWithMetadata[] => {
   return fileList.value.filter(
-    fileItem => !validateMetadata(fileItem.metadata)
+    fileItem => !isImageFile(fileItem.file.name) && !validateMetadata(fileItem.metadata)
   );
 };
 
 // 保存元数据
 const saveMetadata = () => {
   if (!selectedFile.value) return;
+
+  // 处理作者列表
+  currentMetadata.authorList = processAuthorList();
 
   if (!validateMetadata(currentMetadata)) {
     validationError.value = "请完整填写所有元数据字段";
@@ -145,10 +166,37 @@ const saveMetadata = () => {
 // 获取router实例
 const router = useRouter();
 
+// 判断是否为图片文件
+const isImageFile = (filename: string): boolean => {
+  const extension = filename.split(".").pop()?.toLowerCase();
+  return ['jpg', 'jpeg', 'png'].includes(extension || '');
+};
+
+// 判断当前选中文件是否为图像文件
+const isSelectedFileImage = computed(() => {
+  return selectedFile.value && isImageFile(selectedFile.value.file.name);
+});
+
+// 文件是否需要元数据
+const fileNeedsMetadata = (filename: string): boolean => {
+  return !isImageFile(filename);
+};
+
+// 文件是否有完整元数据或不需要元数据
+const fileHasValidMetadata = (fileItem: FileWithMetadata): boolean => {
+  // 图片文件不需要元数据
+  if (isImageFile(fileItem.file.name)) {
+    return true;
+  }
+  // 非图片文件需要验证元数据完整性
+  return validateMetadata(fileItem.metadata);
+};
+
 // 上传并检测文件
 const uploadAndDetect = async () => {
   if (fileList.value.length === 0) return;
 
+  // 只检查需要元数据的文件
   const incompleteFiles = getFilesWithIncompleteMetadata();
   if (incompleteFiles.length > 0) {
     alert(
@@ -172,23 +220,60 @@ const uploadAndDetect = async () => {
     
     for (let i = 0; i < fileList.value.length; i++) {
       const fileWithMeta = fileList.value[i];
+      const file = fileWithMeta.file;
       
       const fileStartProgress = 5 + Math.floor((i / totalFiles) * 90);
       const fileEndProgress = 5 + Math.floor(((i + 1) / totalFiles) * 90);
       uploadProgress.value = fileStartProgress;
       
-      const singleFileResult = await uploadFiles(fileWithMeta);
-      console.log(`文件 ${i+1}/${totalFiles} 上传结果:`, singleFileResult);
-      
-      if (singleFileResult.data && Array.isArray(singleFileResult.data)) {
-        // 添加文件来源信息到每张图片
-        const imagesWithSource = singleFileResult.data.map(img => ({
-          ...img,
-          sourceFile: fileWithMeta.file.name,
-          sourceType: getFileType(fileWithMeta.file.name)
-        }));
+      // 根据不同文件类型执行不同的上传流程
+      if (isImageFile(file.name)) {
+        // 图片文件上传流程
+        // 1. 上传文件获取URL
+        const fileUrl = await uploadFile(file);
         
-        allExtractedImages.push(...imagesWithSource);
+        // 2. 上传图片信息获取图片ID
+        const figureResult = await uploadFigure({ filePath: fileUrl });
+        if (figureResult.code === '200' && figureResult.data) {
+          const figureId = figureResult.data;
+          
+          // 3. 获取图片URL
+          const imageUrl = await getFigure(figureId);
+          
+          allExtractedImages.push({
+            id: figureId,
+            filePath: imageUrl,
+            sourceFile: file.name,
+            sourceType: "图像"
+          });
+        }
+      } else {
+        // 论文文件上传流程
+        // 1. 上传文件获取URL
+        const fileUrl = await uploadFile(file);
+        
+        // 2. 上传论文信息
+        const paperData = {
+          ...fileWithMeta.metadata,
+          filePath: fileUrl
+        };
+        
+        const paperResult = await uploadPaper(paperData);
+        if (paperResult.code === '200' && paperResult.data) {
+          const paperId = paperResult.data;
+          
+          // 3. 获取论文关联图片
+          const figures = await getPaperFigures(paperId);
+          
+          // 添加文件来源信息到每张图片
+          const imagesWithSource = figures.map(figure => ({
+            ...figure,
+            sourceFile: file.name,
+            sourceType: getFileType(file.name)
+          }));
+          
+          allExtractedImages.push(...imagesWithSource);
+        }
       }
       
       uploadProgress.value = fileEndProgress;
@@ -322,7 +407,7 @@ const fileHasCompleteMetadata = computed(() => {
 
             <div v-for="(fileItem, index) in fileList" :key="index" class="file-item" :class="{
               'file-selected': selectedFile === fileItem,
-              'file-incomplete': !validateMetadata(fileItem.metadata)
+              'file-incomplete': fileNeedsMetadata(fileItem.file.name) && !validateMetadata(fileItem.metadata)
             }" @click="selectFile(fileItem)">
               <div class="file-icon">{{ getFileIcon(fileItem.file.name) }}</div>
               <div class="file-info">
@@ -334,8 +419,10 @@ const fileHasCompleteMetadata = computed(() => {
                   <span class="file-size">{{
                     formatFileSize(fileItem.file.size)
                   }}</span>
-                  <!-- 显示文件元数据状态的标记 -->
-                  <span v-if="validateMetadata(fileItem.metadata)" class="has-metadata">元数据完整</span>
+                  
+                  <!-- 修改元数据状态标记 -->
+                  <span v-if="isImageFile(fileItem.file.name)" class="no-metadata-needed">无需元数据</span>
+                  <span v-else-if="validateMetadata(fileItem.metadata)" class="has-metadata">元数据完整</span>
                   <span v-else class="missing-metadata">缺少元数据</span>
                 </div>
               </div>
@@ -367,11 +454,13 @@ const fileHasCompleteMetadata = computed(() => {
         </div>
       </section>
 
-      <!-- 右侧元数据区域 -->
-      <section class="metadata-section">
-        <h2 class="section-title">文件元数据（所有字段必填）</h2>
+      <!-- 右侧元数据区域 - 根据文件类型条件显示 -->
+      <section v-if="selectedFile" class="metadata-section">
+        <h2 class="section-title">
+          {{ isSelectedFileImage ? '图像预览' : '文件元数据（所有字段必填）' }}
+        </h2>
 
-        <div v-if="selectedFile" class="metadata-content">
+        <div class="metadata-content">
           <div class="selected-file-info">
             <div class="file-icon large">
               {{ getFileIcon(selectedFile.file.name) }}
@@ -385,7 +474,14 @@ const fileHasCompleteMetadata = computed(() => {
             </div>
           </div>
 
-          <form class="metadata-form" @submit.prevent="saveMetadata">
+          <!-- 图像文件显示预览 -->
+          <div v-if="isSelectedFileImage" class="image-preview">
+            <img v-if="selectedFile.file" :src="URL.createObjectURL(selectedFile.file)" alt="图像预览" />
+            <p class="image-note">图像文件无需填写元数据</p>
+          </div>
+
+          <!-- 非图像文件显示元数据编辑表单 -->
+          <form v-else class="metadata-form" @submit.prevent="saveMetadata">
             <div v-if="validationError" class="validation-error">
               {{ validationError }}
             </div>
@@ -397,33 +493,27 @@ const fileHasCompleteMetadata = computed(() => {
             </div>
 
             <div class="form-group">
-              <label for="author">作者 <span class="required">*</span></label>
-              <input id="author" v-model="currentMetadata.author" type="text" placeholder="输入作者姓名"
-                :class="{ 'field-error': !currentMetadata.author.trim() }" />
+              <label for="author">作者 (用逗号分隔) <span class="required">*</span></label>
+              <input id="author" v-model="authorInput" type="text" placeholder="作者1, 作者2..."
+                :class="{ 'field-error': !authorInput.trim() }" />
             </div>
 
             <div class="form-group">
-              <label for="institution">机构 <span class="required">*</span></label>
-              <input id="institution" v-model="currentMetadata.institution" type="text" placeholder="输入作者所属机构"
-                :class="{ 'field-error': !currentMetadata.institution.trim() }" />
+              <label for="abstract">摘要 <span class="required">*</span></label>
+              <textarea id="abstract" v-model="currentMetadata.abstracT" placeholder="输入文档摘要" rows="4"
+                :class="{ 'field-error': !currentMetadata.abstracT.trim() }" />
             </div>
 
             <div class="form-group">
-              <label for="publishDate">发布日期 <span class="required">*</span></label>
-              <input id="publishDate" v-model="currentMetadata.publishDate" type="date"
-                :class="{ 'field-error': !currentMetadata.publishDate.trim() }" />
+              <label for="doi">DOI <span class="required">*</span></label>
+              <input id="doi" v-model="currentMetadata.doi" type="text" placeholder="输入DOI"
+                :class="{ 'field-error': !currentMetadata.doi.trim() }" />
             </div>
 
             <div class="form-group">
-              <label for="keywords">关键词 <span class="required">*</span></label>
-              <input id="keywords" v-model="currentMetadata.keywords" type="text" placeholder="用逗号分隔关键词"
-                :class="{ 'field-error': !currentMetadata.keywords.trim() }" />
-            </div>
-
-            <div class="form-group">
-              <label for="description">文档描述 <span class="required">*</span></label>
-              <textarea id="description" v-model="currentMetadata.description" placeholder="简要描述文档内容" rows="4"
-                :class="{ 'field-error': !currentMetadata.description.trim() }" />
+              <label for="publishAt">发布日期 <span class="required">*</span></label>
+              <input id="publishAt" v-model="currentMetadata.publishAt" type="date"
+                :class="{ 'field-error': !currentMetadata.publishAt.trim() }" />
             </div>
 
             <div class="form-actions">
@@ -431,10 +521,14 @@ const fileHasCompleteMetadata = computed(() => {
             </div>
           </form>
         </div>
+      </section>
 
-        <div v-else class="empty-metadata">
+      <!-- 未选择文件时的右侧区域 -->
+      <section v-else class="metadata-section">
+        <h2 class="section-title">文件元数据</h2>
+        <div class="empty-metadata">
           <div class="empty-icon">📝</div>
-          <p class="empty-text">请从左侧选择一个文件<br />添加元数据信息</p>
+          <p class="empty-text">请从左侧选择一个文件</p>
         </div>
       </section>
     </main>
@@ -948,5 +1042,40 @@ const fileHasCompleteMetadata = computed(() => {
   font-size: 0.9rem;
   font-weight: 500;
   border-left: 4px solid #f44336;
+}
+
+/* 新增图像预览样式 */
+.image-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-note {
+  margin-top: 1rem;
+  color: #1976d2;
+  font-style: italic;
+  background-color: #e3f2fd;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+/* 添加无需元数据的样式 */
+.no-metadata-needed {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+  padding: 0.15rem 0.5rem;
+  border-radius: 100px;
+  font-weight: 500;
 }
 </style>

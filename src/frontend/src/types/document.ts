@@ -3,11 +3,10 @@
  */
 export interface Metadata {
   title: string;
-  author: string;
-  institution: string;
-  publishDate: string;
-  keywords: string;
-  description: string;
+  authorList: string[];
+  abstracT: string;
+  doi: string;
+  publishAt: string;
 }
 
 /**
