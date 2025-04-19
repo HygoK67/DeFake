@@ -209,6 +209,8 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
             throw new EntityMissingException("该 groupLeaderId 不是当前组织的管理员!");
         }
 
+        System.out.println(userId);
+        System.out.println(groupId);
         if (userToGroupMapper.findUserToGroup(userId, groupId) == null ||
                 userToGroupMapper.findUserToGroup(userId, groupId).getStatus() != UserToGroup.Status.pending_invite) {
             throw new EntityMissingException("该用户没有收到组织的邀请!");
@@ -218,10 +220,10 @@ public class UserServiceImpl implements com.group6.defakelogibackend.service.Use
         String groupname = group.getGroupname();
         if (isAgree != 0) {
             userToGroupMapper.updateUserToGroupStatus(userId, groupId);
-            notificationMapper.createNotificationUser2User(userId, groupLeaderId, groupId, "组织管理", "您邀请的用户 " + username + " 同意加入 " + groupname);
+            notificationMapper.createNotificationUser2User(3, userId, groupLeaderId, groupId, "组织管理", "您邀请的用户 " + username + " 同意加入 " + groupname);
         } else {
             userToGroupMapper.deleteUserToGroup(userId, groupId);
-            notificationMapper.createNotificationUser2User(userId, groupLeaderId, groupId, "组织管理", "您邀请的用户 " + username + " 拒绝加入 " + groupname);
+            notificationMapper.createNotificationUser2User(3, userId, groupLeaderId, groupId, "组织管理", "您邀请的用户 " + username + " 拒绝加入 " + groupname);
         }
     }
 }

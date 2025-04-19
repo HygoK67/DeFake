@@ -84,7 +84,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         }
 
         userToGroupMapper.addUserToGroup(userIdRec, groupId, "pending_invite", "member");
-        notificationMapper.createNotificationUser2User(userIdSent, userIdRec, groupId, title, content);
+        notificationMapper.createNotificationUser2User(1, userIdSent, userIdRec, groupId, title, content);
         return true;
     }
 
@@ -114,7 +114,7 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         userToGroupMapper.deleteUserToGroup(userIdRec, groupId);
         String title = group.getGroupname() + " 组织通知";
         String content = "您已不再是 " + group.getGroupname() + " 中的成员。";
-        notificationMapper.createNotificationUser2User(userIdSent, userIdRec, groupId, title, content);
+        notificationMapper.createNotificationUser2User(2, userIdSent, userIdRec, groupId, title, content);
         return true;
     }
 
@@ -200,12 +200,12 @@ public class GroupServiceImpl implements com.group6.defakelogibackend.service.Gr
         // 组织管理员同意用户申请
         if (isAgree != 0) {
             userToGroupMapper.updateUserToGroupStatus(userIdSent, groupId);
-            notificationMapper.createNotificationUser2User(groupLeaderId, userIdSent, groupId, "组织通知", "您成功加入" + groupname + "!");
+            notificationMapper.createNotificationUser2User(3, groupLeaderId, userIdSent, groupId, "组织通知", "您成功加入" + groupname + "!");
         }
         // 组织管理员拒绝用户申请
         else {
             userToGroupMapper.deleteUserToGroup(userIdSent, groupId);
-            notificationMapper.createNotificationUser2User(groupLeaderId, userIdSent, groupId, "组织通知", groupname + "不允许您加入!");
+            notificationMapper.createNotificationUser2User(3, groupLeaderId, userIdSent, groupId, "组织通知", groupname + "不允许您加入!");
         }
     }
 
